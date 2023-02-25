@@ -17,7 +17,7 @@ return new class extends Migration {
             function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->string('name');
-                $table->string('method', 50)->index();
+                $table->string('method', 50)->unique();
                 $table->string('description', 250)->nullable();
                 $table->json('configs')->nullable();
                 $table->timestamps();
