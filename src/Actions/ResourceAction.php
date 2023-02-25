@@ -16,8 +16,8 @@ class ResourceAction extends Action
     public function registerResources()
     {
         $this->hookAction->addAdminMenu(
-            trans('membership::content.membership'),
-            'membership',
+            trans('subscription::content.subscription'),
+            'subscription',
             [
                 'icon' => 'fa fa-users',
                 'position' => 30,
@@ -28,12 +28,12 @@ class ResourceAction extends Action
             'plans',
             null,
             [
-                'label' => trans('membership::content.plans'),
+                'label' => trans('subscription::content.plans'),
                 'repository' => PlanRepository::class,
                 'datatable' => PackageDatatable::class,
                 'menu' => [
                     'icon' => 'fa fa-list-ul',
-                    'parent' => 'membership',
+                    'parent' => 'subscription',
                     'position' => 20,
                 ],
                 'fields' => [
@@ -41,7 +41,7 @@ class ResourceAction extends Action
                         'label' => trans('cms::app.name'),
                     ],
                     'price' => [
-                        'label' => trans('membership::content.price'),
+                        'label' => trans('subscription::content.price'),
                     ]
                 ],
                 'validator' => [
@@ -55,10 +55,10 @@ class ResourceAction extends Action
             'payment-methods',
             null,
             [
-                'label' => trans('membership::content.payment_methods'),
+                'label' => trans('subscription::content.payment_methods'),
                 'menu' => [
                     'icon' => 'fa fa-cart',
-                    'parent' => 'membership',
+                    'parent' => 'subscription',
                     'position' => 20,
                 ],
                 'fields' => [
@@ -66,7 +66,7 @@ class ResourceAction extends Action
                         'label' => trans('cms::app.name'),
                     ],
                     'method' => [
-                        'label' => trans('membership::content.method'),
+                        'label' => trans('subscription::content.method'),
                         'type' => 'select',
                         'data' => [
                             'id' => 'select-payment-method',

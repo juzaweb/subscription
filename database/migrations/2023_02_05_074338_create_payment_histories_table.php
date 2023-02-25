@@ -10,12 +10,12 @@ return new class extends Migration {
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create(
             'subscription_payment_histories',
             function (Blueprint $table) {
-                $table->bigIncrements('id');
+                $table->uuid('id')->primary();
                 $table->string('method', 50);
                 $table->unsignedBigInteger('user_subscription_id');
                 $table->unsignedBigInteger('user_id')->index();
@@ -34,7 +34,7 @@ return new class extends Migration {
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('subscription_payment_histories');
     }

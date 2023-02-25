@@ -13,16 +13,18 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create(
-            'subscription_plans',
+            'subscription_plan_payment_methods',
             function (Blueprint $table) {
                 $table->bigIncrements('id');
-                $table->string('name');
-                $table->string('description', 250)->nullable();
-                $table->float('price')->index()->default(0);
-                $table->boolean('is_free')->default(false)->index();
-                $table->boolean('enable_trial')->default(false)->index();
-                $table->string('status', 50)->index()->default('draft');
-                $table->timestamps();
+                $table->string('plan_key', 150)->unique();
+                $table->string('method', 50)->index();
+                $table->unsignedBigInteger('plan_id');
+
+                $table->foreign('plan_id')
+                    ->references('id')
+                    ->on('plans')
+                    ->onDelete('cascade');
+                $table->unique(['method', 'plan_id']);
             }
         );
     }
@@ -34,6 +36,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('subscription_packages');
+        Schema::dropIfExists('subscription_plan_payment_methods');
     }
 };

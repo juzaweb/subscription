@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name' => 'Name',
+    'subscription' => 'Subscription',
     'plans' => 'Plans',
     'method' => 'Method',
     'payment_methods' => 'Payment Methods',

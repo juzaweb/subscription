@@ -20,8 +20,6 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 {
     protected string $name = 'paypal';
 
-    protected string $label = 'Paypal';
-
     public function createPlan(ModelPlan $plan): string
     {
         $plan = new Plan();
@@ -69,7 +67,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $plan->getId();
     }
 
-    public function redirect() {
+    public function redirect()
+    {
         $agreement = new Agreement();
         $agreement->setName('Stream3s Monthly Subscription Agreement')
             ->setDescription('Stream3s Premium Plan')
@@ -96,7 +95,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         }
     }
 
-    public function return(Request $request){
+    public function return(Request $request)
+    {
         if (isset($_GET['token'])) {
             $token = $request->token;
             if (UserSubscription::where('token', '=', $token)->exists()) {
@@ -141,9 +141,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
                 $subscriber->save();
 
                 event(new PaymentSuccess($result));
-
-            }
-            catch (\PayPal\Exception\PayPalConnectionException $ex) {
+            } catch (\PayPal\Exception\PayPalConnectionException $ex) {
                 $message = trans('app.cancel_paypal');
                 $error = true;
 
@@ -157,8 +155,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
                 return redirect()->route('client.upgrade');
             }
-        }
-        else {
+        } else {
             $message = trans('app.cancel_paypal');
             $error = true;
         }
@@ -174,7 +171,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return redirect()->route('client.upgrade');
     }
 
-    public function cancel() {
+    public function cancel()
+    {
         if (\Auth::check()) {
             return redirect()->route('client.upgrade');
         }
@@ -182,7 +180,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return redirect()->route('frontend.home');
     }
 
-    public function webhook(Request $request) {
+    public function webhook(Request $request)
+    {
         $resource = $request->input('resource');
         $agreement = UserSubscription::where('agreement_id', '=', @$resource['billing_agreement_id'])->first(['user_id']);
         \Log::info('Paypal Notify: ' . json_encode($request->all()));
@@ -200,14 +199,15 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
         if (strtotime($user->premium_enddate) > time()) {
             $expiration_date = date("Y-m-d 23:59:59", strtotime("+1 month", strtotime($user->premium_enddate)));
-        }
-        else {
+        } else {
             $expiration_date = date("Y-m-d 23:59:59", strtotime("+1 month"));
         }
 
-        $user->update([
+        $user->update(
+            [
             'premium_enddate' => $expiration_date,
-        ]);
+            ]
+        );
 
         $subscriber = new PaymentHistory();
         $subscriber->method = 'paypal';

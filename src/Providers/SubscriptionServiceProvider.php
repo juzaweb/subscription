@@ -9,9 +9,11 @@ use Juzaweb\CMS\Support\ServiceProvider;
 use Juzaweb\Subscription\Actions\MethodDefaultAction;
 use Juzaweb\Subscription\Actions\ResourceAction;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager as PaymentMethodManagerContrast;
+use Juzaweb\Subscription\Contrasts\Subscription as SubscriptionContrast;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 use Juzaweb\Subscription\Repositories\PlanRepositoryEloquent;
 use Juzaweb\Subscription\Support\PaymentMethodManager;
+use Juzaweb\Subscription\Support\Subscription;
 
 class SubscriptionServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,11 @@ class SubscriptionServiceProvider extends ServiceProvider
         $this->app->singleton(
             PaymentMethodManagerContrast::class,
             fn ($app) => new PaymentMethodManager($app[HookActionContract::class], $app[GlobalDataContract::class])
+        );
+
+        $this->app->singleton(
+            SubscriptionContrast::class,
+            fn ($app) => new Subscription()
         );
     }
 }
