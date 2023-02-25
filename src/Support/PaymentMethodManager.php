@@ -2,7 +2,6 @@
 
 namespace Juzaweb\Subscription\Support;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Juzaweb\CMS\Contracts\GlobalDataContract;
 use Juzaweb\CMS\Contracts\HookActionContract;
@@ -19,20 +18,20 @@ class PaymentMethodManager implements PaymentMethodManagerContrast
     /**
      * @throws Throwable
      */
-    public function register(string $method, array $args = []): void
+    public function register(string|PaymentMethod $method): void
     {
-        $defaults = [
-            'key' => $method,
-            'label' => null,
-            'class' => null,
+        if (!$method instanceof PaymentMethod) {
+            $method = app($method);
+        }
+
+        $args = [
+            'key' => $method->getName(),
+            'label' => $method->getLabel(),
+            'class' => get_class($method),
             'configs' => [],
         ];
 
-        throw_unless(Arr::get($args, 'class'), new \Exception('Class helper Payment Method is required.'));
-
-        $args = array_merge($defaults, $args);
-
-        $this->globalData->set("subscription_methods.{$method}", new Collection($args));
+        $this->globalData->set("subscription_methods.{$args['key']}", new Collection($args));
     }
 
     public function find(string $method): PaymentMethod

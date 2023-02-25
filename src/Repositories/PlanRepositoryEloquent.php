@@ -3,7 +3,7 @@
 namespace Juzaweb\Subscription\Repositories;
 
 use Juzaweb\CMS\Repositories\BaseRepositoryEloquent;
-use Juzaweb\Membership\Models\Package;
+use Juzaweb\Subscription\Models\Plan;
 
 class PlanRepositoryEloquent extends BaseRepositoryEloquent implements PlanRepository
 {
@@ -20,6 +20,6 @@ class PlanRepositoryEloquent extends BaseRepositoryEloquent implements PlanRepos
 
     public function model(): string
     {
-        return Package::class;
+        return Plan::class;
     }
 }

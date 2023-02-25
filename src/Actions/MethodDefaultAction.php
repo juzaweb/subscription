@@ -20,12 +20,6 @@ class MethodDefaultAction extends Action
 
     public function initActions()
     {
-        $this->paymentMethodManager->register(
-            'paypal',
-            [
-                'label' => 'Paypal',
-                'class' => Paypal::class
-            ]
-        );
+        $this->paymentMethodManager->register(Paypal::class);
     }
 }

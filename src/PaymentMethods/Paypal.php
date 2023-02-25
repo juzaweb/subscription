@@ -2,15 +2,31 @@
 
 namespace Juzaweb\Subscription\PaymentMethods;
 
+use Illuminate\Http\Request;
+use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
+use Juzaweb\Subscription\Models\Plan as ModelPlan;
+use PayPal\Api\Agreement;
+use PayPal\Api\Currency;
+use PayPal\Api\MerchantPreferences;
+use PayPal\Api\Patch;
+use PayPal\Api\PatchRequest;
+use PayPal\Api\Payer;
+use PayPal\Api\PaymentDefinition;
+use PayPal\Api\Plan;
+use PayPal\Common\PayPalModel;
 
-class Paypal implements PaymentMethod
+class Paypal extends PaymentMethodAbstract implements PaymentMethod
 {
-    public function createPlan()
+    protected string $name = 'paypal';
+
+    protected string $label = 'Paypal';
+
+    public function createPlan(ModelPlan $plan): string
     {
         $plan = new Plan();
-        $plan->setName('Stream3s Monthly Billing')
-            ->setDescription('Monthly Subscription to the Stream3s')
+        $plan->setName($plan->name)
+            ->setDescription($plan->description)
             ->setType('infinite');
 
         $paymentDefinition = new PaymentDefinition();
@@ -19,10 +35,14 @@ class Paypal implements PaymentMethod
             ->setFrequency('Month')
             ->setFrequencyInterval('1')
             ->setCycles('0')
-            ->setAmount(new Currency([
-                'value' => 59,
-                'currency' => 'USD'
-            ]));
+            ->setAmount(
+                new Currency(
+                    [
+                        'value' => 59,
+                        'currency' => 'USD'
+                    ]
+                )
+            );
 
         $merchantPreferences = new MerchantPreferences();
         $merchantPreferences->setReturnUrl(route('paypal.return'))
@@ -34,35 +54,167 @@ class Paypal implements PaymentMethod
         $plan->setPaymentDefinitions(array($paymentDefinition));
         $plan->setMerchantPreferences($merchantPreferences);
 
+        $createdPlan = $plan->create($this->apiContext);
+
+        $patch = new Patch();
+        $value = new PayPalModel('{"state":"ACTIVE"}');
+        $patch->setOp('replace')
+            ->setPath('/')
+            ->setValue($value);
+        $patchRequest = new PatchRequest();
+        $patchRequest->addPatch($patch);
+        $createdPlan->update($patchRequest, $this->apiContext);
+        $plan = Plan::get($createdPlan->getId(), $this->apiContext);
+
+        return $plan->getId();
+    }
+
+    public function redirect() {
+        $agreement = new Agreement();
+        $agreement->setName('Stream3s Monthly Subscription Agreement')
+            ->setDescription('Stream3s Premium Plan')
+            ->setStartDate(\Carbon\Carbon::now()->addMinutes(5)->toIso8601String());
+
+        $plan = new Plan();
+        $plan->setId($this->plan_id);
+        $agreement->setPlan($plan);
+
+        $payer = new Payer();
+        $payer->setPaymentMethod('paypal');
+        $agreement->setPayer($payer);
+
         try {
-            $createdPlan = $plan->create($this->apiContext);
-
-            try {
-                $patch = new Patch();
-                $value = new PayPalModel('{"state":"ACTIVE"}');
-                $patch->setOp('replace')
-                    ->setPath('/')
-                    ->setValue($value);
-                $patchRequest = new PatchRequest();
-                $patchRequest->addPatch($patch);
-                $createdPlan->update($patchRequest, $this->apiContext);
-                $plan = Plan::get($createdPlan->getId(), $this->apiContext);
-
-                echo 'Plan ID:' . $plan->getId();
-            } catch (\PayPal\Exception\PayPalConnectionException $ex) {
-                echo $ex->getCode();
-                echo $ex->getData();
-                die($ex);
-            } catch (\Exception $ex) {
-                die($ex);
-            }
+            $agreement = $agreement->create($this->apiContext);
+            $approvalUrl = $agreement->getApprovalLink();
+            return redirect()->to($approvalUrl);
         } catch (\PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            die($ex);
+            \Log::error($ex->getMessage());
+            die();
         } catch (\Exception $ex) {
-            die($ex);
+            \Log::error($ex->getMessage());
+            die();
+        }
+    }
+
+    public function return(Request $request){
+        if (isset($_GET['token'])) {
+            $token = $request->token;
+            if (UserSubscription::where('token', '=', $token)->exists()) {
+                return redirect()->route('client.upgrade');
+            }
+
+            $agreement = new \PayPal\Api\Agreement();
+
+            $error = false;
+            try {
+                $result = $agreement->execute($token, $this->apiContext);
+                $message = trans('app.payment_success');
+
+                if ($result->state != 'Active') {
+                    $message = 'Payment not active';
+                    $error = true;
+                }
+
+                if ($error) {
+                    $session = [
+                        'status' => ($error) ? 'warning' : 'success',
+                        'message' => $message,
+                    ];
+
+                    \Log::error('paypalReturn - ' . $message);
+
+                    session()->put('message', json_encode($session));
+                    session()->save();
+
+                    return redirect()->route('client.upgrade');
+                }
+
+                $subscriber = new UserSubscription();
+                $subscriber->user_id = \Auth::id();
+                $subscriber->role = 'subscriber';
+                $subscriber->method = 'paypal';
+                $subscriber->token = $token;
+                $subscriber->payer_id = $result->payer->payer_info->payer_id;
+                $subscriber->payer_email = $result->payer->payer_info->email;
+                $subscriber->agreement_id = $result->id;
+                $subscriber->amount = $result->plan->payment_definitions[0]->amount->value;
+                $subscriber->save();
+
+                event(new PaymentSuccess($result));
+
+            }
+            catch (\PayPal\Exception\PayPalConnectionException $ex) {
+                $message = trans('app.cancel_paypal');
+                $error = true;
+
+                $session = [
+                    'status' => ($error) ? 'warning' : 'success',
+                    'message' => $message,
+                ];
+
+                session()->put('message', json_encode($session));
+                session()->save();
+
+                return redirect()->route('client.upgrade');
+            }
+        }
+        else {
+            $message = trans('app.cancel_paypal');
+            $error = true;
         }
 
+        $session = [
+            'status' => ($error) ? 'warning' : 'success',
+            'message' => $message,
+        ];
+
+        session()->put('message', json_encode($session));
+        session()->save();
+
+        return redirect()->route('client.upgrade');
+    }
+
+    public function cancel() {
+        if (\Auth::check()) {
+            return redirect()->route('client.upgrade');
+        }
+
+        return redirect()->route('frontend.home');
+    }
+
+    public function webhook(Request $request) {
+        $resource = $request->input('resource');
+        $agreement = UserSubscription::where('agreement_id', '=', @$resource['billing_agreement_id'])->first(['user_id']);
+        \Log::info('Paypal Notify: ' . json_encode($request->all()));
+
+        if (empty($agreement)) {
+            \Log::error('Not available agreement: postNotify ' . json_encode($request->all()));
+            return response('Webhook Handled', 200);
+        }
+
+        $user = User::find($agreement->user_id);
+        if (empty($user)) {
+            \Log::error('Empty user. ' . json_encode($request->all()));
+            return response('Webhook Handled', 200);
+        }
+
+        if (strtotime($user->premium_enddate) > time()) {
+            $expiration_date = date("Y-m-d 23:59:59", strtotime("+1 month", strtotime($user->premium_enddate)));
+        }
+        else {
+            $expiration_date = date("Y-m-d 23:59:59", strtotime("+1 month"));
+        }
+
+        $user->update([
+            'premium_enddate' => $expiration_date,
+        ]);
+
+        $subscriber = new PaymentHistory();
+        $subscriber->method = 'paypal';
+        $subscriber->user_id = $user->id;
+        $subscriber->agreement_id = $resource['billing_agreement_id'];
+        $subscriber->save();
+
+        return response('Webhook Handled', 200);
     }
 }

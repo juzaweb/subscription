@@ -18,6 +18,7 @@ return new class extends Migration {
                 $table->bigIncrements('id');
                 $table->string('name');
                 $table->string('method');
+                $table->string('description', 250)->nullable();
                 $table->json('configs')->nullable();
                 $table->timestamps();
             }
@@ -29,7 +30,7 @@ return new class extends Migration {
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('subscription_payment_methods');
     }

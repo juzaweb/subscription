@@ -10,9 +10,8 @@ interface PaymentMethodManager
      * setting a default key and label, as well as any additional configs passed as an argument.
      *
      * @param string $method Method name
-     * @param array $args Optional. Method configs
      *
      * @return void
      */
-    public function register(string $method, array $args = []): void;
+    public function register(string $method): void;
 }
