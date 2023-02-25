@@ -2,11 +2,6 @@
 
 namespace Juzaweb\Subscription\Http\Controllers\Frontend;
 
-use App\Events\PaymentSuccess;
-use App\Http\Controllers\Controller;
-use App\Models\PaymentHistory;
-use App\Models\UserSubscription;
-use App\User;
 use Illuminate\Http\Request;
 use PayPal\Api\Agreement;
 use PayPal\Api\Currency;

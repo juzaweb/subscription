@@ -8,8 +8,9 @@
             ]
         },
         "juzaweb": {
-            "name": "juzaweb/subscription",
-            "domain": "jusu",
+            "name": "Subscription",
+            "description": "Subscription payment support",
+            "domain": "subscription",
             "cms_min": "3.3",
             "version": "1.0"
         }
@@ -17,6 +18,10 @@
     "autoload": {
         "psr-4": {
             "Juzaweb\\Subscription\\": "src/"
-        }
+        },
+        "files": ["src/Helpers/helpers.php"]
+    },
+    "require": {
+        "paypal/rest-api-sdk-php": "^1.14"
     }
 }

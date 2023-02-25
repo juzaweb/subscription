@@ -2,13 +2,26 @@
 
 namespace Juzaweb\Subscription\Providers;
 
+use Juzaweb\CMS\Contracts\GlobalDataContract;
+use Juzaweb\CMS\Contracts\HookActionContract;
+use Juzaweb\CMS\Facades\ActionRegister;
 use Juzaweb\CMS\Support\ServiceProvider;
+use Juzaweb\Subscription\Actions\MethodDefaultAction;
+use Juzaweb\Subscription\Actions\ResourceAction;
+use Juzaweb\Subscription\Contrasts\PaymentMethodManager as PaymentMethodManagerContrast;
+use Juzaweb\Subscription\Repositories\PlanRepository;
+use Juzaweb\Subscription\Repositories\PlanRepositoryEloquent;
+use Juzaweb\Subscription\Support\PaymentMethodManager;
 
 class SubscriptionServiceProvider extends ServiceProvider
 {
+    public array $bindings = [
+        PlanRepository::class => PlanRepositoryEloquent::class,
+    ];
+
     public function boot()
     {
-        //
+        ActionRegister::register([MethodDefaultAction::class, ResourceAction::class]);
     }
 
     /**
@@ -16,18 +29,11 @@ class SubscriptionServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
-        //
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [];
+        $this->app->singleton(
+            PaymentMethodManagerContrast::class,
+            fn ($app) => new PaymentMethodManager($app[HookActionContract::class], $app[GlobalDataContract::class])
+        );
     }
 }
