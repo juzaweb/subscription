@@ -6,17 +6,29 @@ use Juzaweb\Subscription\Models\Plan as ModelPlan;
 
 interface PaymentMethod
 {
+    /**
+     * @return string
+     */
     public function getName(): string;
 
+    /**
+     * @return string
+     */
     public function getLabel(): string;
 
+    /**
+     * @return array
+     */
     public function getConfigs(): array;
+
+    public function isRedirect(): bool;
+
+    public function getRedirectUrl(): string;
 
     /**
      * Create a plan
      *
-     * @param ModelPlan $plan
      * @return string - identity plan id
      */
-    public function createPlan(ModelPlan $plan): string;
+    public function createPlan(): string;
 }

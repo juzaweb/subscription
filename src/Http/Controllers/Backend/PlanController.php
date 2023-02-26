@@ -43,6 +43,6 @@ class PlanController extends BackendController
             throw $e;
         }
 
-        return $this->success(trans('created_plan_success'));
+        return $this->success(trans('subscription::content.created_plan_success'));
     }
 }

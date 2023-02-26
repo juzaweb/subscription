@@ -4,7 +4,7 @@ namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
-use Juzaweb\Subscription\PaymentMethods\Paypal;
+use Juzaweb\Subscription\Support\PaymentMethods\Paypal;
 
 class MethodDefaultAction extends Action
 {

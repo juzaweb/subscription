@@ -1,8 +1,14 @@
 <?php
 
-namespace Juzaweb\Subscription\Http\Controllers\Frontend;
+namespace Juzaweb\Subscription\Support\PaymentMethods;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
+use Juzaweb\Subscription\Contrasts\PaymentMethod;
+use Juzaweb\Subscription\Exceptions\PaymentMethodException;
+use Juzaweb\Subscription\Models\PaymentHistory;
+use Juzaweb\Subscription\Models\UserSubscription;
 use PayPal\Api\Agreement;
 use PayPal\Api\Currency;
 use PayPal\Api\MerchantPreferences;
@@ -13,36 +19,20 @@ use PayPal\Api\PaymentDefinition;
 use PayPal\Api\Plan;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Common\PayPalModel;
+use PayPal\Exception\PayPalConnectionException;
 use PayPal\Rest\ApiContext;
 
-class PaypalController extends Controller
+class Paypal extends PaymentMethodAbstract implements PaymentMethod
 {
-    private $apiContext;
-    private $client_id;
-    private $secret;
-    private $plan_id;
+    protected string $name = 'paypal';
 
-    public function __construct()
+    protected ApiContext $apiContext;
+
+    public function createPlan(): string
     {
-        if(config('paypal.settings.mode') == 'live'){
-            $this->client_id = config('paypal.live_client_id');
-            $this->secret = config('paypal.live_secret');
-            $this->plan_id = config('paypal.live_plan');
-        } else {
-            $this->client_id = config('paypal.sandbox_client_id');
-            $this->secret = config('paypal.sandbox_secret');
-            $this->plan_id = config('paypal.sandbox_plan');
-        }
-
-        // Set the Paypal API Context/Credentials
-        $this->apiContext = new ApiContext(new OAuthTokenCredential($this->client_id, $this->secret));
-        $this->apiContext->setConfig(config('paypal.settings'));
-    }
-
-    public function createPlan(){
         $plan = new Plan();
-        $plan->setName('Stream3s Monthly Billing')
-            ->setDescription('Monthly Subscription to the Stream3s')
+        $plan->setName($this->plan->name)
+            ->setDescription($this->plan->description)
             ->setType('infinite');
 
         $paymentDefinition = new PaymentDefinition();
@@ -51,10 +41,14 @@ class PaypalController extends Controller
             ->setFrequency('Month')
             ->setFrequencyInterval('1')
             ->setCycles('0')
-            ->setAmount(new Currency([
-                'value' => 59,
-                'currency' => 'USD'
-            ]));
+            ->setAmount(
+                new Currency(
+                    [
+                        'value' => $this->plan->price,
+                        'currency' => 'USD'
+                    ]
+                )
+            );
 
         $merchantPreferences = new MerchantPreferences();
         $merchantPreferences->setReturnUrl(route('paypal.return'))
@@ -66,46 +60,39 @@ class PaypalController extends Controller
         $plan->setPaymentDefinitions(array($paymentDefinition));
         $plan->setMerchantPreferences($merchantPreferences);
 
-        try {
-            $createdPlan = $plan->create($this->apiContext);
+        $createdPlan = $plan->create($this->getApiContext());
 
-            try {
-                $patch = new Patch();
-                $value = new PayPalModel('{"state":"ACTIVE"}');
-                $patch->setOp('replace')
-                    ->setPath('/')
-                    ->setValue($value);
-                $patchRequest = new PatchRequest();
-                $patchRequest->addPatch($patch);
-                $createdPlan->update($patchRequest, $this->apiContext);
-                $plan = Plan::get($createdPlan->getId(), $this->apiContext);
+        $patch = new Patch();
+        $value = new PayPalModel('{"state":"ACTIVE"}');
+        $patch->setOp('replace')
+            ->setPath('/')
+            ->setValue($value);
 
-                echo 'Plan ID:' . $plan->getId();
-            } catch (\PayPal\Exception\PayPalConnectionException $ex) {
-                echo $ex->getCode();
-                echo $ex->getData();
-                die($ex);
-            } catch (\Exception $ex) {
-                die($ex);
-            }
-        } catch (\PayPal\Exception\PayPalConnectionException $ex) {
-            echo $ex->getCode();
-            echo $ex->getData();
-            die($ex);
-        } catch (\Exception $ex) {
-            die($ex);
-        }
+        $patchRequest = new PatchRequest();
+        $patchRequest->addPatch($patch);
+        $createdPlan->update($patchRequest, $this->apiContext);
 
+        $plan = Plan::get($createdPlan->getId(), $this->apiContext);
+
+        return $plan->getId();
     }
 
-    public function paypalRedirect() {
+    public function isRedirect(): bool
+    {
+        return true;
+    }
+
+    public function getRedirectUrl(): string
+    {
         $agreement = new Agreement();
         $agreement->setName('Stream3s Monthly Subscription Agreement')
             ->setDescription('Stream3s Premium Plan')
-            ->setStartDate(\Carbon\Carbon::now()->addMinutes(5)->toIso8601String());
+            ->setStartDate(
+                Carbon::now()->addMinutes(2)->toIso8601String()
+            );
 
         $plan = new Plan();
-        $plan->setId($this->plan_id);
+        $plan->setId($this->plan->planPaymentMethods()->where(['method_id' => $plan]));
         $agreement->setPlan($plan);
 
         $payer = new Payer();
@@ -113,19 +100,17 @@ class PaypalController extends Controller
         $agreement->setPayer($payer);
 
         try {
-            $agreement = $agreement->create($this->apiContext);
-            $approvalUrl = $agreement->getApprovalLink();
-            return redirect()->to($approvalUrl);
-        } catch (\PayPal\Exception\PayPalConnectionException $ex) {
-            \Log::error($ex->getMessage());
-            die();
-        } catch (\Exception $ex) {
-            \Log::error($ex->getMessage());
-            die();
+            $agreement = $agreement->create($this->getApiContext());
+            return $agreement->getApprovalLink();
+        } catch (PayPalConnectionException $e) {
+            throw new PaymentMethodException($e);
+        } catch (\Exception $e) {
+            throw $e;
         }
     }
 
-    public function paypalReturn(Request $request){
+    public function return(Request $request)
+    {
         if (isset($_GET['token'])) {
             $token = $request->token;
             if (UserSubscription::where('token', '=', $token)->exists()) {
@@ -170,9 +155,7 @@ class PaypalController extends Controller
                 $subscriber->save();
 
                 event(new PaymentSuccess($result));
-
-            }
-            catch (\PayPal\Exception\PayPalConnectionException $ex) {
+            } catch (PayPalConnectionException $ex) {
                 $message = trans('app.cancel_paypal');
                 $error = true;
 
@@ -186,8 +169,7 @@ class PaypalController extends Controller
 
                 return redirect()->route('client.upgrade');
             }
-        }
-        else {
+        } else {
             $message = trans('app.cancel_paypal');
             $error = true;
         }
@@ -203,7 +185,8 @@ class PaypalController extends Controller
         return redirect()->route('client.upgrade');
     }
 
-    public function paypalCancel() {
+    public function cancel()
+    {
         if (\Auth::check()) {
             return redirect()->route('client.upgrade');
         }
@@ -211,7 +194,8 @@ class PaypalController extends Controller
         return redirect()->route('frontend.home');
     }
 
-    public function postNotify(Request $request) {
+    public function webhook(Request $request)
+    {
         $resource = $request->input('resource');
         $agreement = UserSubscription::where('agreement_id', '=', @$resource['billing_agreement_id'])->first(['user_id']);
         \Log::info('Paypal Notify: ' . json_encode($request->all()));
@@ -229,14 +213,15 @@ class PaypalController extends Controller
 
         if (strtotime($user->premium_enddate) > time()) {
             $expiration_date = date("Y-m-d 23:59:59", strtotime("+1 month", strtotime($user->premium_enddate)));
-        }
-        else {
+        } else {
             $expiration_date = date("Y-m-d 23:59:59", strtotime("+1 month"));
         }
 
-        $user->update([
-            'premium_enddate' => $expiration_date,
-        ]);
+        $user->update(
+            [
+                'premium_enddate' => $expiration_date,
+            ]
+        );
 
         $subscriber = new PaymentHistory();
         $subscriber->method = 'paypal';
@@ -245,5 +230,52 @@ class PaypalController extends Controller
         $subscriber->save();
 
         return response('Webhook Handled', 200);
+    }
+
+    protected function getApiContext(): ApiContext
+    {
+        if (isset($this->apiContext)) {
+            return $this->apiContext;
+        }
+
+        $this->apiContext = new ApiContext(
+            new OAuthTokenCredential($this->client_id, $this->secret)
+        );
+        $this->apiContext->setConfig($this->getPaypalSettings());
+
+        return $this->apiContext;
+    }
+
+    protected function getPaypalSettings(): array
+    {
+        return [
+            /**
+             * Payment Mode
+             *
+             * Available options are 'sandbox' or 'live'
+             */
+            'mode' => env('PAYPAL_MODE', 'sandbox'),
+
+            // Specify the max connection attempt (3000 = 3 seconds)
+            'http.ConnectionTimeOut' => 3000,
+
+            // Specify whether we want to store logs
+            'log.LogEnabled' => true,
+
+            // Specigy the location for our PayPal logs
+            'log.FileName' => storage_path('/logs/paypal.log'),
+
+            /**
+             * Log Level
+             *
+             * Available options: 'DEBUG', 'INFO', 'WARN' or 'ERROR'
+             *
+             * Logging is most verbose in the DEBUG level and decreases
+             * as you proceed towards ERROR. WARN or ERROR would be a
+             * recommended option for live environments.
+             *
+             */
+            'log.LogLevel' => 'DEBUG'
+        ];
     }
 }
