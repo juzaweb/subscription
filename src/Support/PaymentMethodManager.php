@@ -33,7 +33,7 @@ class PaymentMethodManager implements PaymentMethodManagerContrast
             'key' => $method->getName(),
             'label' => $method->getLabel(),
             'class' => get_class($method),
-            'configs' => [],
+            'configs' => $method->getConfigs(),
         ];
 
         $this->globalData->set("subscription_methods.{$args['key']}", new Collection($args));

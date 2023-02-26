@@ -23,7 +23,7 @@ return new class extends Migration {
 
                 $table->foreign('user_subscription_id')
                     ->references('id')
-                    ->on('membership_user_subscriptions')
+                    ->on('subscription_user_subscriptions')
                     ->onDelete('cascade');
             }
         );

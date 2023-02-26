@@ -6,6 +6,7 @@ use Juzaweb\CMS\Contracts\GlobalDataContract;
 use Juzaweb\CMS\Contracts\HookActionContract;
 use Juzaweb\CMS\Facades\ActionRegister;
 use Juzaweb\CMS\Support\ServiceProvider;
+use Juzaweb\Subscription\Actions\AjaxAction;
 use Juzaweb\Subscription\Actions\MethodDefaultAction;
 use Juzaweb\Subscription\Actions\ResourceAction;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager as PaymentMethodManagerContrast;
@@ -26,7 +27,7 @@ class SubscriptionServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        ActionRegister::register([MethodDefaultAction::class, ResourceAction::class]);
+        ActionRegister::register([MethodDefaultAction::class, ResourceAction::class, AjaxAction::class]);
     }
 
     /**
@@ -43,7 +44,7 @@ class SubscriptionServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             SubscriptionContrast::class,
-            fn ($app) => new Subscription()
+            Subscription::class
         );
     }
 }

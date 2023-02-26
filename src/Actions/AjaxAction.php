@@ -23,7 +23,7 @@ class AjaxAction extends Action
         $this->hookAction->registerAdminAjax(
             'subscription.payment-config',
             [
-                'callback' => [PaymentMethodController::class, 'updatePlan'],
+                'callback' => [PaymentMethodController::class, 'getConfigs'],
             ]
         );
 

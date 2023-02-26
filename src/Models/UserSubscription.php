@@ -36,7 +36,7 @@ use Juzaweb\CMS\Models\Model;
  */
 class UserSubscription extends Model
 {
-    protected $table = 'membership_user_subscriptions';
+    protected $table = 'subscription_user_subscriptions';
 
     protected $fillable = [
         'agreement_id',

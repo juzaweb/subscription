@@ -2,6 +2,8 @@
 
 namespace Juzaweb\Subscription\Support;
 
+use Juzaweb\CMS\Contracts\GlobalDataContract;
+use Juzaweb\CMS\Contracts\HookActionContract;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\Subscription as SubscriptionContrasts;
 use Juzaweb\Subscription\Events\CreatePlanSuccess;
@@ -16,8 +18,41 @@ class Subscription implements SubscriptionContrasts
     public function __construct(
         protected PaymentMethodManager    $paymentMethodManager,
         protected PlanRepository          $planRepository,
-        protected PaymentMethodRepository $paymentMethodRepository
+        protected PaymentMethodRepository $paymentMethodRepository,
+        protected GlobalDataContract      $globalData,
+        protected HookActionContract      $hookAction
     ) {
+    }
+
+    public function registerModule(string $key, array $args = [])
+    {
+        $this->registerModulePlan($key, $args);
+
+        $this->registerModulePaymentMethod($key, $args);
+    }
+
+    public function registerModulePlan(string $key, array $args = [])
+    {
+        $this->hookAction->addAdminMenu(
+            trans('subscription::content.plans'),
+            "subscription.{$key}.plans",
+            $args['menu'] ?? [
+            'icon' => 'fa fa-users',
+            'position' => 30,
+            ]
+        );
+    }
+
+    public function registerModulePaymentMethod(string $key, array $args = [])
+    {
+        $this->hookAction->addAdminMenu(
+            trans('subscription::content.payment_methods'),
+            "subscription.{$key}.payment-methods",
+            $args['menu'] ?? [
+                'icon' => 'fa fa-users',
+                'position' => 30,
+            ]
+        );
     }
 
     public function createPlanMethod(Plan $plan, int $method): Plan

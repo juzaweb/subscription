@@ -29,4 +29,6 @@ interface Subscription
      *
      */
     public function updatePlanMethod(Plan $plan, int $method): Plan;
+
+    public function registerModule(string $key, array $args = []);
 }

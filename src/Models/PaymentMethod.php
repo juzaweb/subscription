@@ -3,6 +3,7 @@
 namespace Juzaweb\Subscription\Models;
 
 use Juzaweb\CMS\Models\Model;
+use Juzaweb\CMS\Traits\ResourceModel;
 
 /**
  * Juzaweb\Subscription\Models\PaymentMethod
@@ -26,12 +27,15 @@ use Juzaweb\CMS\Models\Model;
  */
 class PaymentMethod extends Model
 {
-    protected $table = 'membership_payment_methods';
+    use ResourceModel;
+
+    protected $table = 'subscription_payment_methods';
 
     protected $fillable = [
         'configs',
         'method',
         'name',
+        'module',
     ];
 
     protected $casts = [

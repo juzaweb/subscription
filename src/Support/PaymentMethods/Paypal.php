@@ -236,7 +236,14 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
     {
         return [
             'mode' => [
+                'type' => 'select',
                 'label' => 'Payment Mode',
+                'data' => [
+                    'options' => [
+                        'sandbox' => 'Sandbox',
+                        'live' => 'Live',
+                    ]
+                ]
             ],
             'sandbox_client_id' => [
                 'label' => 'Sandbox Client ID',

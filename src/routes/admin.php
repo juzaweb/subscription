@@ -11,4 +11,7 @@
 |
 */
 
+use Juzaweb\Subscription\Http\Controllers\Backend\PaymentMethodController;
 
+Route::jwResource('subscription/{module}/plans', PaymentMethodController::class);
+Route::jwResource('subscription/{module}/payment-methods', PaymentMethodController::class);

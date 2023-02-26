@@ -35,6 +35,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('subscription_packages');
+        Schema::dropIfExists('subscription_plans');
     }
 };

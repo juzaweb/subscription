@@ -11,8 +11,9 @@
 namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
-use Juzaweb\Membership\Http\Datatables\PackageDatatable;
 use Juzaweb\Subscription\Facades\PaymentMethod;
+use Juzaweb\Subscription\Http\Datatables\PackageDatatable;
+use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 
 class ResourceAction extends Action
@@ -21,23 +22,16 @@ class ResourceAction extends Action
     {
         $this->addAction(Action::INIT_ACTION, [$this, 'registerResources']);
 
-        $this->addAction(
+        $this->addAction(Action::BACKEND_INIT, [$this, 'enqueueStyles']);
+
+        /*$this->addAction(
             action_replace(Action::RESOURCE_FORM_LEFT_ACTION, ['name' => 'payment-methods']),
             [$this, 'formPaymentMethod']
-        );
+        );*/
     }
 
     public function registerResources()
     {
-        $this->hookAction->addAdminMenu(
-            trans('subscription::content.subscription'),
-            'subscription',
-            [
-                'icon' => 'fa fa-users',
-                'position' => 30,
-            ]
-        );
-
         $this->hookAction->registerResource(
             'plans',
             null,
@@ -45,11 +39,7 @@ class ResourceAction extends Action
                 'label' => trans('subscription::content.plans'),
                 'repository' => PlanRepository::class,
                 'datatable' => PackageDatatable::class,
-                'menu' => [
-                    'icon' => 'fa fa-list-ul',
-                    'parent' => 'subscription',
-                    'position' => 20,
-                ],
+                'menu' => null,
                 'fields' => [
                     'name' => [
                         'label' => trans('cms::app.name'),
@@ -70,11 +60,8 @@ class ResourceAction extends Action
             null,
             [
                 'label' => trans('subscription::content.payment_methods'),
-                'menu' => [
-                    'icon' => 'fa fa-cart',
-                    'parent' => 'subscription',
-                    'position' => 20,
-                ],
+                'repository' => PaymentMethodRepository::class,
+                'menu' => null,
                 'fields' => [
                     'name' => [
                         'label' => trans('cms::app.name'),
@@ -103,6 +90,14 @@ class ResourceAction extends Action
                 'subscription::payment_method.form',
                 compact('model', 'methods', 'methodOptions')
             )->render()
+        );
+    }
+
+    public function enqueueStyles()
+    {
+        $this->hookAction->enqueueScript(
+            'subs-js',
+            plugin_asset('js/admin-script.js', 'juzaweb/subscription')
         );
     }
 }
