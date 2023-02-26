@@ -1,9 +1,18 @@
 <?php
+/**
+ * JUZAWEB CMS - Laravel CMS for Your Project
+ *
+ * @package    juzaweb/juzacms
+ * @author     The Anh Dang
+ * @link       https://juzaweb.com
+ * @license    GNU V2
+ */
 
 namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
 use Juzaweb\Membership\Http\Datatables\PackageDatatable;
+use Juzaweb\Subscription\Facades\PaymentMethod;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 
 class ResourceAction extends Action
@@ -11,6 +20,11 @@ class ResourceAction extends Action
     public function handle(): void
     {
         $this->addAction(Action::INIT_ACTION, [$this, 'registerResources']);
+
+        $this->addAction(
+            action_replace(Action::RESOURCE_FORM_LEFT_ACTION, ['name' => 'payment-methods']),
+            [$this, 'formPaymentMethod']
+        );
     }
 
     public function registerResources()
@@ -65,19 +79,30 @@ class ResourceAction extends Action
                     'name' => [
                         'label' => trans('cms::app.name'),
                     ],
-                    'method' => [
-                        'label' => trans('subscription::content.method'),
-                        'type' => 'select',
-                        'data' => [
-                            'id' => 'select-payment-method',
-                        ]
-                    ],
+                    'description' => [
+                        'type' => 'textarea',
+                        'label' => trans('cms::app.description'),
+                    ]
                 ],
                 'validator' => [
                     'name' => ['required', 'string', 'max:100'],
                     'method' => ['required', 'string', 'max:100'],
                 ],
             ]
+        );
+    }
+
+    public function formPaymentMethod($model)
+    {
+        $methods = PaymentMethod::all();
+
+        $methodOptions = $methods->mapWithKeys(fn ($item) => [$item['key'] => $item['label']])->toArray();
+
+        echo e_html(
+            view(
+                'subscription::payment_method.form',
+                compact('model', 'methods', 'methodOptions')
+            )->render()
         );
     }
 }

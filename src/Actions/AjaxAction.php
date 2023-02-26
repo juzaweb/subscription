@@ -3,6 +3,7 @@
 namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
+use Juzaweb\Subscription\Http\Controllers\Backend\PaymentMethodController;
 use Juzaweb\Subscription\Http\Controllers\Backend\PlanController;
 
 class AjaxAction extends Action
@@ -20,16 +21,17 @@ class AjaxAction extends Action
     public function addAdminAjax()
     {
         $this->hookAction->registerAdminAjax(
-            'subscription.create-plan',
+            'subscription.payment-config',
             [
-                'callback' => [PlanController::class, 'createPlan']
+                'callback' => [PaymentMethodController::class, 'updatePlan'],
             ]
         );
 
         $this->hookAction->registerAdminAjax(
             'subscription.update-plan',
             [
-                'callback' => [PlanController::class, 'updatePlan']
+                'callback' => [PlanController::class, 'updatePlan'],
+                'method' => 'post',
             ]
         );
     }

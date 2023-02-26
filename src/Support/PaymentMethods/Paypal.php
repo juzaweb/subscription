@@ -232,6 +232,27 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return response('Webhook Handled', 200);
     }
 
+    public function getConfigs(): array
+    {
+        return [
+            'mode' => [
+                'label' => 'Payment Mode',
+            ],
+            'sandbox_client_id' => [
+                'label' => 'Sandbox Client ID',
+            ],
+            'sandbox_secret' => [
+                'label' => 'Sandbox Secret',
+            ],
+            'live_client_id' => [
+                'label' => 'Live Client ID',
+            ],
+            'live_secret' => [
+                'label' => 'Live Secret',
+            ],
+        ];
+    }
+
     protected function getApiContext(): ApiContext
     {
         if (isset($this->apiContext)) {

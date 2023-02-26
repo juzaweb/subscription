@@ -15,6 +15,11 @@ class PaymentMethodManager implements PaymentMethodManagerContrast
     {
     }
 
+    public function all(): Collection
+    {
+        return collect($this->globalData->get("subscription_methods"));
+    }
+
     /**
      * @throws Throwable
      */

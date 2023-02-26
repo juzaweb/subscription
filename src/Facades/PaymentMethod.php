@@ -2,9 +2,13 @@
 
 namespace Juzaweb\Subscription\Facades;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
-use Juzaweb\Subscription\Contrasts\PaymentMethod as PaymentMethodContract;
+use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 
+/**
+ * @method static Collection all()
+ */
 class PaymentMethod extends Facade
 {
     /**
@@ -14,6 +18,6 @@ class PaymentMethod extends Facade
      */
     protected static function getFacadeAccessor(): string
     {
-        return PaymentMethodContract::class;
+        return PaymentMethodManager::class;
     }
 }
