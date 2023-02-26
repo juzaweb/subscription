@@ -16,7 +16,8 @@ return new class extends Migration {
             'subscription_plan_payment_methods',
             function (Blueprint $table) {
                 $table->bigIncrements('id');
-                $table->string('payment_plan_id', 150)->unique();
+                $table->string('payment_plan_id', 150)->unique()
+                    ->comment('Plan id of payment service');
                 $table->string('method', 50)->index();
                 $table->unsignedBigInteger('plan_id');
                 $table->unsignedBigInteger('method_id');
@@ -25,11 +26,13 @@ return new class extends Migration {
                     ->references('id')
                     ->on('subscription_plans')
                     ->onDelete('cascade');
+
                 $table->foreign('method_id')
                     ->references('id')
                     ->on('subscription_payment_methods')
                     ->onDelete('cascade');
-                $table->unique(['method_id', 'plan_id']);
+
+                $table->unique(['method_id', 'plan_id'], 'sppm_method_id_plan_id_unique');
             }
         );
     }

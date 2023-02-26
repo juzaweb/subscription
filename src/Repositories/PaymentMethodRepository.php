@@ -7,9 +7,9 @@ use Juzaweb\CMS\Repositories\BaseRepository;
 /**
  * Interface PlanRepository.
  *
- * @method \Juzaweb\Subscription\Models\Plan find($id, $columns = ['*']);
+ * @method \Juzaweb\Subscription\Models\PaymentMethod find($id, $columns = ['*']);
  */
-interface PlanRepository extends BaseRepository
+interface PaymentMethodRepository extends BaseRepository
 {
     //
 }

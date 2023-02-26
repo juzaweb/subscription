@@ -10,7 +10,7 @@ return new class extends Migration {
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create(
             'subscription_user_subscriptions',
@@ -19,9 +19,9 @@ return new class extends Migration {
                 $table->string('token', 100)->unique();
                 $table->string('role', 50)->index();
                 $table->string('method', 50)->index();
-                $table->string('agreement_id')->index();
-                $table->string('payer_id');
-                $table->string('payer_email');
+                $table->string('agreement_id', 100)->index();
+                $table->string('payer_id', 100);
+                $table->string('payer_email', 100);
                 $table->float('amount')->index();
                 $table->unsignedBigInteger('user_id')->index();
                 $table->timestamps();
@@ -34,7 +34,7 @@ return new class extends Migration {
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('subscription_user_subscriptions');
     }

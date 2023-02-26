@@ -22,6 +22,7 @@ return new class extends Migration {
                 $table->boolean('is_free')->default(false)->index();
                 $table->boolean('enable_trial')->default(false)->index();
                 $table->string('status', 50)->index()->default('draft');
+                $table->string('module', 50)->index();
                 $table->timestamps();
             }
         );

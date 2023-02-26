@@ -15,7 +15,7 @@ return new class extends Migration {
         Schema::create(
             'subscription_payment_histories',
             function (Blueprint $table) {
-                $table->uuid('id')->primary();
+                $table->bigIncrements('id');
                 $table->string('method', 50);
                 $table->unsignedBigInteger('user_subscription_id');
                 $table->unsignedBigInteger('user_id')->index();

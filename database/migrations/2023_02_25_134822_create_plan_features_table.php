@@ -22,7 +22,7 @@ return new class extends Migration {
 
                 $table->foreign('plan_id')
                     ->references('id')
-                    ->on('plans')
+                    ->on('subscription_plans')
                     ->onDelete('cascade');
                 $table->timestamps();
             }

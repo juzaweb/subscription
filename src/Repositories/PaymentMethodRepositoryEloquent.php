@@ -4,14 +4,14 @@ namespace Juzaweb\Subscription\Repositories;
 
 use Juzaweb\CMS\Repositories\BaseRepositoryEloquent;
 use Juzaweb\CMS\Traits\ResourceRepositoryEloquent;
-use Juzaweb\Subscription\Models\Plan;
+use Juzaweb\Subscription\Models\PaymentMethod;
 
-class PlanRepositoryEloquent extends BaseRepositoryEloquent implements PlanRepository
+class PaymentMethodRepositoryEloquent extends BaseRepositoryEloquent implements PlanRepository
 {
     use ResourceRepositoryEloquent;
 
     public function model(): string
     {
-        return Plan::class;
+        return PaymentMethod::class;
     }
 }
