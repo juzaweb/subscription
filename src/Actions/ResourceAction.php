@@ -11,7 +11,7 @@
 namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
-use Juzaweb\Subscription\Http\Datatables\PackageDatatable;
+use Juzaweb\Subscription\Http\Datatables\PlanDatatable;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 
@@ -32,7 +32,7 @@ class ResourceAction extends Action
             [
                 'label' => trans('subscription::content.plans'),
                 'repository' => PlanRepository::class,
-                'datatable' => PackageDatatable::class,
+                'datatable' => PlanDatatable::class,
                 'menu' => null,
                 'fields' => [
                     'name' => [

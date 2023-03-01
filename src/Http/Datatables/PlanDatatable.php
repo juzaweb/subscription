@@ -4,7 +4,7 @@ namespace Juzaweb\Subscription\Http\Datatables;
 
 use Juzaweb\Backend\Http\Datatables\ResourceDatatable;
 
-class PackageDatatable extends ResourceDatatable
+class PlanDatatable extends ResourceDatatable
 {
     public function columns(): array
     {
