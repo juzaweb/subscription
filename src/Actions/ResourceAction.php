@@ -40,7 +40,10 @@ class ResourceAction extends Action
                     ],
                     'price' => [
                         'label' => trans('subscription::content.price'),
-                    ]
+                        'data' => [
+                            'class' => 'is-number number-format'
+                        ]
+                    ],
                 ],
                 'validator' => [
                     'name' => ['required', 'string', 'max:100'],

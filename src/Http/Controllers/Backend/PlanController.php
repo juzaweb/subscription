@@ -7,16 +7,19 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Juzaweb\CMS\Facades\HookAction;
 use Juzaweb\CMS\Http\Controllers\BackendController;
 use Juzaweb\CMS\Traits\ResourceController;
 use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Exceptions\PaymentMethodException;
+use Juzaweb\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Subscription\Http\Datatables\PlanDatatable;
 use Juzaweb\Subscription\Http\Requests\Plan\UpdatePlanRequest;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
+use Symfony\Component\HttpFoundation\Response;
 
 class PlanController extends BackendController
 {
@@ -57,6 +60,25 @@ class PlanController extends BackendController
         return $this->success(trans('subscription::content.created_plan_success'));
     }
 
+    public function callAction($method, $parameters): Response|View
+    {
+        $params = collect($parameters)->filter(fn($item) => is_string($item))->values()->toArray();
+
+        throw_unless(
+            $this->getSettingModule(...$params),
+            new SubscriptionException('Module not found.')
+        );
+
+        return parent::callAction($method, $parameters);
+    }
+
+    protected function beforeSave(&$data, &$model, ...$params)
+    {
+        if (isset($data['price'])) {
+            $data['price'] = parse_price_format($data['price']);
+        }
+    }
+
     protected function getBreadcrumbPrefix(...$params)
     {
         $this->addBreadcrumb(
@@ -89,7 +111,10 @@ class PlanController extends BackendController
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'method' => ['required', 'string', 'max:100'],
+            'price' => ['required', 'string'],
+            'is_free' => ['required', 'numeric', 'in:0,1'],
+            'enable_trial' => ['required', 'numeric', 'in:0,1'],
+            'module' => ['required'],
         ];
     }
 
