@@ -23,17 +23,12 @@ class ResourceAction extends Action
         $this->addAction(Action::INIT_ACTION, [$this, 'registerResources']);
 
         $this->addAction(Action::BACKEND_INIT, [$this, 'enqueueStyles']);
-
-        /*$this->addAction(
-            action_replace(Action::RESOURCE_FORM_LEFT_ACTION, ['name' => 'payment-methods']),
-            [$this, 'formPaymentMethod']
-        );*/
     }
 
     public function registerResources()
     {
         $this->hookAction->registerResource(
-            'plans',
+            'subscription-plans',
             null,
             [
                 'label' => trans('subscription::content.plans'),
@@ -56,7 +51,7 @@ class ResourceAction extends Action
         );
 
         $this->hookAction->registerResource(
-            'payment-methods',
+            'subscription-payment-methods',
             null,
             [
                 'label' => trans('subscription::content.payment_methods'),
@@ -76,20 +71,6 @@ class ResourceAction extends Action
                     'method' => ['required', 'string', 'max:100'],
                 ],
             ]
-        );
-    }
-
-    public function formPaymentMethod($model)
-    {
-        $methods = PaymentMethod::all();
-
-        $methodOptions = $methods->mapWithKeys(fn ($item) => [$item['key'] => $item['label']])->toArray();
-
-        echo e_html(
-            view(
-                'subscription::payment_method.form',
-                compact('model', 'methods', 'methodOptions')
-            )->render()
         );
     }
 

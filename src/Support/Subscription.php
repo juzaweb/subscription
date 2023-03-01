@@ -2,6 +2,8 @@
 
 namespace Juzaweb\Subscription\Support;
 
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Juzaweb\CMS\Contracts\GlobalDataContract;
 use Juzaweb\CMS\Contracts\HookActionContract;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
@@ -9,6 +11,7 @@ use Juzaweb\Subscription\Contrasts\Subscription as SubscriptionContrasts;
 use Juzaweb\Subscription\Events\CreatePlanSuccess;
 use Juzaweb\Subscription\Events\UpdatePlanSuccess;
 use Juzaweb\Subscription\Exceptions\PaymentMethodException;
+use Juzaweb\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
@@ -24,26 +27,34 @@ class Subscription implements SubscriptionContrasts
     ) {
     }
 
-    public function registerModule(string $key, array $args = [])
+    public function registerModule(string $key, array $args = []): void
     {
-        $this->registerModulePlan($key, $args);
+        throw_if(empty($args['label']), new SubscriptionException("Option label is required"));
 
-        $this->registerModulePaymentMethod($key, $args);
+        if (Arr::get($args, 'allow_plans', true)) {
+            $this->registerModulePlan($key, $args);
+        }
+
+        if (Arr::get($args, 'allow_payment_methods', true)) {
+            $this->registerModulePaymentMethod($key, $args);
+        }
+
+        $this->globalData->set("subscription_modules.{$key}", new Collection($args));
     }
 
-    public function registerModulePlan(string $key, array $args = [])
+    public function registerModulePlan(string $key, array $args = []): void
     {
         $this->hookAction->addAdminMenu(
             trans('subscription::content.plans'),
             "subscription.{$key}.plans",
             $args['menu'] ?? [
-            'icon' => 'fa fa-users',
-            'position' => 30,
+                'icon' => 'fa fa-users',
+                'position' => 30,
             ]
         );
     }
 
-    public function registerModulePaymentMethod(string $key, array $args = [])
+    public function registerModulePaymentMethod(string $key, array $args = []): void
     {
         $this->hookAction->addAdminMenu(
             trans('subscription::content.payment_methods'),
@@ -53,6 +64,15 @@ class Subscription implements SubscriptionContrasts
                 'position' => 30,
             ]
         );
+    }
+
+    public function getModule(string $key = null): Collection
+    {
+        if ($key) {
+            return $this->globalData->get("subscription_modules.{$key}");
+        }
+
+        return new Collection($this->globalData->get("subscription_modules", []));
     }
 
     public function createPlanMethod(Plan $plan, int $method): Plan

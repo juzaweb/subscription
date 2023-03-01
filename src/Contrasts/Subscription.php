@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Subscription\Contrasts;
 
+use Illuminate\Support\Collection;
 use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Models\Plan;
 
@@ -30,5 +31,7 @@ interface Subscription
      */
     public function updatePlanMethod(Plan $plan, int $method): Plan;
 
-    public function registerModule(string $key, array $args = []);
+    public function registerModule(string $key, array $args = []): void;
+
+    public function getModule(string $key = null): Collection;
 }
