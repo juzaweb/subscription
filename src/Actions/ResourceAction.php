@@ -56,15 +56,6 @@ class ResourceAction extends Action
                 'label' => trans('subscription::content.payment_methods'),
                 'repository' => PaymentMethodRepository::class,
                 'menu' => null,
-                'fields' => [
-                    'name' => [
-                        'label' => trans('cms::app.name'),
-                    ],
-                    'description' => [
-                        'type' => 'textarea',
-                        'label' => trans('cms::app.description'),
-                    ]
-                ],
                 'validator' => [
                     'name' => ['required', 'string', 'max:100'],
                     'method' => ['required', 'string', 'max:100'],

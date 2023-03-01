@@ -28,12 +28,15 @@
                      'method',
                      [
                          'id' => 'select-payment-method',
-                         'options' => array_merge(['' => '--- '.trans('subscription::content.payment_method').' ---'], $methodOptions)
+                         'options' => array_merge(['' => '--- '.trans('subscription::content.payment_method').' ---'], $methodOptions),
+                         'value' => $model->method,
                      ]
                      )
                 }}
 
-                <div class="box-hidden" id="show-configs"></div>
+                <div @if(empty($model->configs)) class="box-hidden" @endif id="show-configs">
+                    {{ Field::render($config_fields, $model->configs ?? []) }}
+                </div>
             </div>
         </div>
 
