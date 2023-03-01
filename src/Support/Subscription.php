@@ -39,6 +39,8 @@ class Subscription implements SubscriptionContrasts
             $this->registerModulePaymentMethod($key, $args);
         }
 
+        $args = array_merge(['key' => $key], $args);
+
         $this->globalData->set("subscription_modules.{$key}", new Collection($args));
     }
 
@@ -72,7 +74,7 @@ class Subscription implements SubscriptionContrasts
             return $this->globalData->get("subscription_modules.{$key}");
         }
 
-        return new Collection($this->globalData->get("subscription_modules", []));
+        return new Collection($this->globalData->get("subscription_modules"));
     }
 
     public function createPlanMethod(Plan $plan, int $method): Plan

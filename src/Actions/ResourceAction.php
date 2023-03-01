@@ -11,7 +11,6 @@
 namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
-use Juzaweb\Subscription\Facades\PaymentMethod;
 use Juzaweb\Subscription\Http\Datatables\PackageDatatable;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;

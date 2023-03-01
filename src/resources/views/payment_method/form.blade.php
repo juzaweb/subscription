@@ -5,6 +5,8 @@
         'model' => $model,
     ])
 
+        <input type="hidden" name="module" value="{{ $module }}">
+
         <div class="card">
             <div class="card-header">
                 <h5 class="card-title">{{ trans('cms::app.info') }}</h5>

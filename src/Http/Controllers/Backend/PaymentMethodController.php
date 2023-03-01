@@ -2,8 +2,10 @@
 
 namespace Juzaweb\Subscription\Http\Controllers\Backend;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\View\View;
 use Juzaweb\CMS\Facades\Field;
 use Juzaweb\CMS\Facades\HookAction;
 use Juzaweb\CMS\Http\Controllers\BackendController;
@@ -12,10 +14,13 @@ use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Subscription\Facades\PaymentMethod;
 use Juzaweb\Subscription\Http\Datatables\PaymentMethodDatatable;
+use Juzaweb\Subscription\Models\PaymentMethod as PaymentMethodModel;
+use Symfony\Component\HttpFoundation\Response;
 
 class PaymentMethodController extends BackendController
 {
     protected ?Collection $moduleSetting;
+    protected string $resourceKey = 'subscription-payment-methods';
 
     use ResourceController {
         getDataForForm as DataForForm;
@@ -27,7 +32,7 @@ class PaymentMethodController extends BackendController
 
     protected string $viewPrefix = 'subscription::payment_method';
 
-    public function getConfigs(Request $request): \Illuminate\Http\JsonResponse
+    public function getConfigs(Request $request): JsonResponse
     {
         $method = $request->input('method');
         $config = PaymentMethod::all()->get($method, new Collection());
@@ -47,14 +52,26 @@ class PaymentMethodController extends BackendController
         );
     }
 
-    public function callAction($method, $parameters)
+    public function callAction($method, $parameters): Response|View
     {
+        $params = collect($parameters)->filter(fn($item) => is_string($item))->values()->toArray();
+
         throw_unless(
-            $this->getSettingModule(...array_values($parameters)),
+            $this->getSettingModule(...$params),
             new SubscriptionException('Module not found.')
         );
 
         return parent::callAction($method, $parameters);
+    }
+
+    protected function getBreadcrumbPrefix(...$params)
+    {
+        $this->addBreadcrumb(
+            [
+                'title' => $this->getSettingModule(...$params)->get('label'),
+                'url' => '#',
+            ]
+        );
     }
 
     protected function getSettingModule(...$params): Collection
@@ -76,12 +93,15 @@ class PaymentMethodController extends BackendController
         $data = $this->DataForForm($model, ...$params);
         $data['methods'] = $methods;
         $data['methodOptions'] = $methodOptions;
+        $data['module'] = $this->getSettingModule(...$params)->get('key');
         return $data;
     }
 
     protected function getDataTable(...$params)
     {
-        return app(PaymentMethodDatatable::class);
+        $dataTable = app(PaymentMethodDatatable::class);
+        $dataTable->mount($this->resourceKey, null);
+        return $dataTable;
     }
 
     protected function validator(array $attributes, ...$params): array
@@ -94,7 +114,7 @@ class PaymentMethodController extends BackendController
 
     protected function getModel(...$params): string
     {
-        return \Juzaweb\Subscription\Models\PaymentMethod::class;
+        return PaymentMethodModel::class;
     }
 
     protected function getTitle(...$params): string
@@ -108,7 +128,7 @@ class PaymentMethodController extends BackendController
             return $this->setting;
         }
 
-        $this->setting = HookAction::getResource('subscription-payment-methods');
+        $this->setting = HookAction::getResource($this->resourceKey);
 
         return $this->setting;
     }
