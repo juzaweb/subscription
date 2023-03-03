@@ -7,38 +7,22 @@
 
         <input type="hidden" name="module" value="{{ $module }}">
 
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">{{ trans('cms::app.info') }}</h5>
-            </div>
-            <div class="card-body">
+        <div class="row" id="plan-form">
+            <div class="col-md-8">
                 {{ Field::text($model, 'name') }}
 
                 {{ Field::textarea($model, 'description') }}
+
+                {{ Field::text($model, 'price', ['label' => trans('subscription::content.price'), 'class' => 'is-number number-format', 'value' => number_format($model->price), 'prefix' => '$', 'disabled' => $model->is_free == 1]) }}
+            </div>
+
+            <div class="col-md-4 mt-3">
+                {{ Field::checkbox($model, 'is_free', ['label' => trans('subscription::content.is_free'), 'checked' => $model->is_free == 1]) }}
+
+                {{ Field::checkbox($model, 'enable_trial', ['label' => trans('subscription::content.enable_trial'), 'checked' => $model->enable_trial == 1]) }}
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">{{ trans('cms::app.config') }}</h5>
-            </div>
-            <div class="card-body">
-                {{ Field::select(
-                    trans('subscription::content.payment_method'),
-                     'method',
-                     [
-                         'id' => 'select-payment-method',
-                         'options' => array_merge(['' => '--- '.trans('subscription::content.payment_method').' ---'], $methodOptions),
-                         'value' => $model->method,
-                     ]
-                     )
-                }}
-
-                <div @if(empty($model->configs)) class="box-hidden" @endif id="show-configs">
-                    {{ Field::render($config_fields, $model->configs ?? []) }}
-                </div>
-            </div>
-        </div>
 
     @endcomponent
 

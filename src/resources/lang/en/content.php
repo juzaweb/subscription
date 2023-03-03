@@ -8,4 +8,6 @@ return [
     'payment_method' => 'Payment Method',
     'created_plan_success' => 'Create plan success',
     'price' => 'Price',
+    'is_free' => 'Is Free',
+    'enable_trial' => 'Enable trial',
 ];

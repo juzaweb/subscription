@@ -20,4 +20,12 @@ $(document).ready(function () {
             return false;
         });
     });
+
+    $(document).on('change', '#plan-form input[name=is_free]', function (e) {
+        if ($(this).is(':checked')) {
+            $('#plan-form input[name=price]').prop('disabled', true);
+        } else {
+            $('#plan-form input[name=price]').prop('disabled', false);
+        }
+    });
 });

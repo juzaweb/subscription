@@ -13,6 +13,28 @@ class PlanDatatable extends ResourceDatatable
                 'label' => trans('cms::app.name'),
                 'formatter' => [$this, 'rowActionsFormatter'],
             ],
+            'price' => [
+                'label' => trans('subscription::content.price'),
+                'width' => '15%',
+                'align' => 'center',
+                'formatter' => fn($value, $row, $index) => number_format($value),
+            ],
+            'is_free' => [
+                'label' => trans('subscription::content.is_free'),
+                'width' => '10%',
+                'align' => 'center',
+                'formatter' => fn($value, $row, $index) => $value == 1
+                    ? '<i class="fa fa-check"></i>'
+                    : '<i class="fa fa-times"></i>',
+            ],
+            'enable_trial' => [
+                'label' => trans('subscription::content.enable_trial'),
+                'width' => '10%',
+                'align' => 'center',
+                'formatter' => fn($value, $row, $index) => $value == 1
+                    ? '<i class="fa fa-check"></i>'
+                    : '<i class="fa fa-times"></i>',
+            ],
             'created_at' => [
                 'label' => trans('cms::app.created_at'),
                 'width' => '15%',

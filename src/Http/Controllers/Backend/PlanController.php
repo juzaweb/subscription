@@ -5,6 +5,7 @@ namespace Juzaweb\Subscription\Http\Controllers\Backend;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -23,11 +24,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PlanController extends BackendController
 {
-    use ResourceController;
+    use ResourceController {
+        getDataForForm as DataForForm;
+        parseDataForSave as DataForSave;
+    }
 
     protected ?Collection $moduleSetting;
     protected string $resourceKey = 'subscription-plans';
-    protected string $viewPrefix = 'cms::backend.resource';
+    protected string $viewPrefix = 'subscription::plan';
 
     public function __construct(
         protected PlanRepository $planRepository,
@@ -72,6 +76,13 @@ class PlanController extends BackendController
         return parent::callAction($method, $parameters);
     }
 
+    protected function getDataForForm($model, ...$params): array
+    {
+        $data = $this->DataForForm($model, ...$params);
+        $data['module'] = $this->getSettingModule(...$params)->get('key');
+        return $data;
+    }
+
     protected function beforeSave(&$data, &$model, ...$params)
     {
         if (isset($data['price'])) {
@@ -107,13 +118,27 @@ class PlanController extends BackendController
         return $dataTable;
     }
 
+    protected function parseDataForSave(array $attributes, ...$params): array
+    {
+        $data = $this->DataForSave($attributes, ...$params);
+        $data['price'] = parse_price_format(Arr::get($attributes, 'price', 0));
+        $data['is_free'] = Arr::get($attributes, 'is_free', 0);
+        $data['enable_trial'] = Arr::get($attributes, 'enable_trial', 0);
+
+        if ($data['is_free']) {
+            $data['price'] = 0;
+        }
+
+        return $data;
+    }
+
     protected function validator(array $attributes, ...$params): array
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'price' => ['required', 'string'],
-            'is_free' => ['required', 'numeric', 'in:0,1'],
-            'enable_trial' => ['required', 'numeric', 'in:0,1'],
+            'price' => ['nullable', 'string'],
+            'is_free' => ['nullable', 'numeric', 'in:1'],
+            'enable_trial' => ['nullable', 'numeric', 'in:1'],
             'module' => ['required'],
         ];
     }
