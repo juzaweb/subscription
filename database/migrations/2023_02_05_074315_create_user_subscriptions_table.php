@@ -17,7 +17,6 @@ return new class extends Migration {
             function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->uuid()->unique();
-                $table->string('token', 100)->unique()->comment('Token of payment partner');
                 $table->string('agreement_id', 100)->unique()
                     ->comment('Agreement of payment partner');
                 $table->float('amount')->index();
@@ -28,6 +27,8 @@ return new class extends Migration {
                 $table->unsignedBigInteger('plan_id');
                 $table->unsignedBigInteger('user_id')->index();
                 $table->timestamps();
+
+                $table->unique(['module', 'user_id'], 'user_subscriptions_module_user_unique');
 
                 $table->unique(['plan_id', 'user_id'], 'user_subscriptions_plan_user_unique');
 

@@ -16,6 +16,13 @@ class PlanRepositoryEloquent extends BaseRepositoryEloquent implements PlanRepos
     protected array $sortableDefaults = ['id' => 'DESC'];
     protected array $searchableFields = ['name'];
 
+    public function findByUUID(string $uuid, bool $fail = false): ?Plan
+    {
+        $action = $fail ? 'firstOrFail' : 'first';
+
+        return $this->model->query()->where(['uuid' => $uuid])->{$action}();
+    }
+
     public function model(): string
     {
         return Plan::class;

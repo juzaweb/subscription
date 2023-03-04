@@ -12,7 +12,7 @@ class AjaxAction extends Action
     public function handle(): void
     {
         $this->addAction(Action::BACKEND_INIT, [$this, 'addAdminAjax']);
-        $this->addAction(Action::FRONTEND_INIT, [$this, 'addFrontendAjax']);
+        //$this->addAction(Action::FRONTEND_INIT, [$this, 'addFrontendAjax']);
     }
 
     public function addFrontendAjax()

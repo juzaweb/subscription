@@ -3,7 +3,10 @@
 namespace Juzaweb\Subscription\Http\Controllers\Frontend;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -28,12 +31,9 @@ class PaymentController extends FrontendController
     ) {
     }
 
-    public function payment(PaymentRequest $request)
+    public function payment(PaymentRequest $request, $module, $plan, $method)
     {
-        $method = $request->input('method');
-        $module = $request->input('module');
-
-        $plan = $this->planRepository->find($request->input('plan_id'));
+        $plan = $this->planRepository->findByUUID($plan);
         $planMethod = $plan->planPaymentMethods()->where(['method' => $method])->first();
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
@@ -48,32 +48,47 @@ class PaymentController extends FrontendController
         }
     }
 
-    public function return(Request $request): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+    public function return(Request $request, $module, $plan, $method): JsonResponse|RedirectResponse
     {
-        $method = $request->input('method');
-        $module = $request->input('module');
-
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
-        $plan = $this->planRepository->find($request->input('plan_id'));
+        $plan = $this->planRepository->findByUUID($plan, true);
 
         DB::beginTransaction();
         try {
             $helper = $this->paymentMethodManager->find($method);
             $result = $helper->return($plan, $request->all());
 
-            if (UserSubscription::where(['token' => $result->getToken()])->exists()) {
+            if (PaymentHistory::where(['token' => $result->getToken()])->exists()) {
                 throw new SubscriptionExistException('Payment already exist.');
             }
 
-            $subscriber = new UserSubscription();
-            $subscriber->token = $result->getToken();
-            $subscriber->plan_id = $plan->id;
-            $subscriber->method_id = $method->id;
-            $subscriber->user_id = Auth::id();
-            $subscriber->agreement_id = $result->getAgreementId();
-            $subscriber->module = $module;
-            $subscriber->amount = $result->getAmount();
-            $subscriber->save();
+            $subscriber = UserSubscription::updateOrCreate(
+                [
+                    'user_id' => Auth::id(),
+                    'module' => $module,
+                ],
+                [
+                    'plan_id' => $plan->id,
+                    'method_id' => $method->id,
+                    'agreement_id' => $result->getAgreementId(),
+                    'amount' => $result->getAmount(),
+                ]
+            );
+
+            PaymentHistory::create(
+                [
+                    'token' => $result->getToken(),
+                    'method' => $method->method,
+                    'module' => $module,
+                    'type' => 'return',
+                    'amount' => $result->getAmount(),
+                    'method_id' => $method->id,
+                    'plan_id' => $plan->id,
+                    'user_subscription_id' => $subscriber->id,
+                    'user_id' => Auth::id(),
+                    'agreement_id' => $result->getAgreementId(),
+                ]
+            );
 
             DB::commit();
         } catch (PaymentException $e) {
@@ -81,13 +96,23 @@ class PaymentController extends FrontendController
             return $this->error($e->getMessage());
         } catch (SubscriptionExistException $e) {
             DB::rollBack();
-            return $this->success(trans('content.payment_success'));
+            return $this->success(
+                [
+                    'message' => trans('subscription::content.payment_success'),
+                    'redirect' => $this->getReturnPageUrl(),
+                ]
+            );
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
 
-        return $this->success(trans('content.payment_success'));
+        return $this->success(
+            [
+                'message' => trans('subscription::content.payment_success'),
+                'redirect' => $this->getReturnPageUrl(),
+            ]
+        );
     }
 
     public function webhook(Request $request): \Illuminate\Http\Response
@@ -119,15 +144,23 @@ class PaymentController extends FrontendController
 
             $agreement->update(['start_date' => $agreement->start_date ?? now(), 'end_date' => $expirationDate]);
 
-            $subscriber = new PaymentHistory();
-            $subscriber->token = $method->method;
-            $subscriber->method = $method->method;
-            $subscriber->user_id = $agreement->user_id;
-            $subscriber->agreement_id = $agreement->agreement_id;
-            $subscriber->method_id = $agreement->agreement_id;
-            $subscriber->plan_id = $agreement->agreement_id;
-            $subscriber->end_date = $expirationDate;
-            $subscriber->save();
+            $subscriber = UserSubscription::where(['agreement_id' => Arr::get($resource, 'billing_agreement_id')])->first();
+
+            PaymentHistory::create(
+                [
+                    'token' => $agreement->getToken(),
+                    'method' => $method->method,
+                    'module' => $module,
+                    'type' => 'webhook',
+                    'amount' => $result->getAmount(),
+                    'method_id' => $method->id,
+                    'plan_id' => $plan->id,
+                    'user_subscription_id' => $subscriber->id,
+                    'user_id' => Auth::id(),
+                    'agreement_id' => $result->getAgreementId(),
+                    'end_date' => $expirationDate,
+                ]
+            );
 
             DB::commit();
         } catch (PaymentException $e) {
@@ -140,5 +173,10 @@ class PaymentController extends FrontendController
         }
 
         return response('Webhook Handled', 200);
+    }
+
+    protected function getReturnPageUrl(): string
+    {
+        return '/';
     }
 }

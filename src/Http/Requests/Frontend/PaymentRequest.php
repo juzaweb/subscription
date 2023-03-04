@@ -15,20 +15,6 @@ class PaymentRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'plan_id' => [
-                'required',
-                'integer',
-                Rule::modelExists(Plan::class, 'id', fn($q) => $q->whereIsActive())
-            ],
-            'method' => [
-                'required',
-                'string',
-            ],
-            'module' => [
-                'required',
-                'string',
-            ],
-        ];
+        return [];
     }
 }

@@ -4,6 +4,7 @@ namespace Juzaweb\Subscription\Abstracts;
 
 use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Models\PaymentMethod;
+use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Support\PaymentReturn;
 
 /**
@@ -38,6 +39,16 @@ abstract class PaymentMethodAbstract
     public function cancel(): bool
     {
         return true;
+    }
+
+    protected function getReturnUrl(Plan $plan): string
+    {
+        return route('subscription.module.return', [$plan->module, $plan->uuid, $this->name]);
+    }
+
+    protected function getCancelUrl(Plan $plan): string
+    {
+        return route('subscription.module.cancel', [$plan->module, $plan->uuid, $this->name]);
     }
 
     protected function makePaymentReturnResult(string $agreementId, float $amount, string $token): PaymentReturnResult

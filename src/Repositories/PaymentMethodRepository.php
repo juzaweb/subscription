@@ -12,5 +12,5 @@ use Juzaweb\Subscription\Models\PaymentMethod;
  */
 interface PaymentMethodRepository extends BaseRepository
 {
-    public function findByMethod(string $method, string $module): ?PaymentMethod;
+    public function findByMethod(string $method, string $module, bool $fail = false): ?PaymentMethod;
 }

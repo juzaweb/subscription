@@ -41,11 +41,14 @@ class PaymentHistory extends Model
     protected $fillable = [
         'token',
         'method',
+        'module',
         'method_id',
         'plan_id',
         'user_subscription_id',
         'user_id',
         'agreement_id',
+        'type',
+        'amount',
     ];
 
     protected $casts = [

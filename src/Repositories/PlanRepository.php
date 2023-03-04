@@ -3,6 +3,7 @@
 namespace Juzaweb\Subscription\Repositories;
 
 use Juzaweb\CMS\Repositories\BaseRepository;
+use Juzaweb\Subscription\Models\Plan;
 
 /**
  * Interface PlanRepository.
@@ -11,5 +12,5 @@ use Juzaweb\CMS\Repositories\BaseRepository;
  */
 interface PlanRepository extends BaseRepository
 {
-    //
+    public function findByUUID(string $uuid, bool $fail = false): ?Plan;
 }

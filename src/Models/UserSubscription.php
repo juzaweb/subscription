@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Models\User;
 use Juzaweb\CMS\Traits\UseUUIDColumn;
@@ -47,11 +48,12 @@ class UserSubscription extends Model
     protected $table = 'subscription_user_subscriptions';
 
     protected $fillable = [
-        'token',
+        'module',
         'agreement_id',
         'amount',
         'method_id',
         'user_id',
+        'plan_id',
     ];
 
     protected $casts = [
@@ -59,12 +61,12 @@ class UserSubscription extends Model
         'end_date' => 'datetime',
     ];
 
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function paymentMethod(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
     }

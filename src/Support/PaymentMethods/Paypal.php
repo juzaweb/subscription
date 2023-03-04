@@ -59,8 +59,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             );
 
         $merchantPreferences = new MerchantPreferences();
-        $merchantPreferences->setReturnUrl(route('ajax', ['subscription/return']))
-            ->setCancelUrl(route('ajax', ['subscription/cancal']))
+        $merchantPreferences->setReturnUrl($this->getReturnUrl($plan))
+            ->setCancelUrl($this->getCancelUrl($plan))
             ->setAutoBillAmount('yes')
             ->setInitialFailAmountAction('CONTINUE')
             ->setMaxFailAttempts('0');
@@ -78,9 +78,9 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
         $patchRequest = new PatchRequest();
         $patchRequest->addPatch($patch);
-        $createdPlan->update($patchRequest, $this->apiContext);
+        $createdPlan->update($patchRequest, $this->getApiContext());
 
-        $planAPI = Plan::get($createdPlan->getId(), $this->apiContext);
+        $planAPI = Plan::get($createdPlan->getId(), $this->getApiContext());
 
         return $planAPI->getId();
     }
@@ -128,7 +128,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    public function webhook(array $data, array $headers): UserSubscription
+    public function webhook(array $data, array $headers): PaymentReturnResult
     {
         $resource = Arr::get($data, 'resource');
 
@@ -158,7 +158,11 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             throw new PaymentException('Webhook Signature Invalid.');
         }
 
-        return UserSubscription::where(['agreement_id' => Arr::get($resource, 'billing_agreement_id')])->first();
+        return $this->makePaymentReturnResult(
+            Arr::get($resource, 'billing_agreement_id'),
+            $output->plan->payment_definitions[0]->amount->value,
+            $data['id']
+        );
     }
 
     public function getConfigs(): array
@@ -180,11 +184,17 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             'sandbox_secret' => [
                 'label' => 'Sandbox Secret',
             ],
+            'sandbox_webhook_id' => [
+                'label' => 'Sandbox Webhook ID',
+            ],
             'live_client_id' => [
                 'label' => 'Live Client ID',
             ],
             'live_secret' => [
                 'label' => 'Live Secret',
+            ],
+            'live_webhook_id' => [
+                'label' => 'Live Webhook ID',
             ],
         ];
     }
