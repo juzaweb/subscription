@@ -2,7 +2,8 @@
 
 namespace Juzaweb\Subscription\Contrasts;
 
-use Juzaweb\Subscription\Models\Plan as ModelPlan;
+use Juzaweb\Subscription\Models\Plan;
+use Juzaweb\Subscription\Models\PlanPaymentMethod;
 
 interface PaymentMethod
 {
@@ -23,12 +24,12 @@ interface PaymentMethod
 
     public function isRedirect(): bool;
 
-    public function getRedirectUrl(): string;
+    public function getRedirectUrl(PlanPaymentMethod $planPaymentMethod): string;
 
     /**
      * Create a plan
      *
      * @return string - identity plan id
      */
-    public function createPlan(): string;
+    public function createPlan(Plan $plan): string;
 }

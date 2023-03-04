@@ -4,10 +4,13 @@ namespace Juzaweb\Subscription\Support\PaymentMethods;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
 use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Models\PaymentHistory;
+use Juzaweb\Subscription\Models\Plan as PlanModel;
+use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
 use PayPal\Api\Agreement;
 use PayPal\Api\Currency;
@@ -28,11 +31,11 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
     protected ApiContext $apiContext;
 
-    public function createPlan(): string
+    public function createPlan(PlanModel $plan): string
     {
-        $plan = new Plan();
-        $plan->setName($this->plan->name)
-            ->setDescription($this->plan->description)
+        $planAPI = new Plan();
+        $planAPI->setName($plan->name)
+            ->setDescription($plan->description ?? 'Monthly Subscription to Premium plan')
             ->setType('infinite');
 
         $paymentDefinition = new PaymentDefinition();
@@ -44,23 +47,23 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             ->setAmount(
                 new Currency(
                     [
-                        'value' => $this->plan->price,
+                        'value' => $plan->price,
                         'currency' => 'USD'
                     ]
                 )
             );
 
         $merchantPreferences = new MerchantPreferences();
-        $merchantPreferences->setReturnUrl(route('paypal.return'))
-            ->setCancelUrl(route('paypal.cancel'))
+        $merchantPreferences->setReturnUrl(route('ajax', ['subscription/return']))
+            ->setCancelUrl(route('ajax', ['subscription/cancal']))
             ->setAutoBillAmount('yes')
             ->setInitialFailAmountAction('CONTINUE')
             ->setMaxFailAttempts('0');
 
-        $plan->setPaymentDefinitions(array($paymentDefinition));
-        $plan->setMerchantPreferences($merchantPreferences);
+        $planAPI->setPaymentDefinitions([$paymentDefinition]);
+        $planAPI->setMerchantPreferences($merchantPreferences);
 
-        $createdPlan = $plan->create($this->getApiContext());
+        $createdPlan = $planAPI->create($this->getApiContext());
 
         $patch = new Patch();
         $value = new PayPalModel('{"state":"ACTIVE"}');
@@ -72,17 +75,12 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $patchRequest->addPatch($patch);
         $createdPlan->update($patchRequest, $this->apiContext);
 
-        $plan = Plan::get($createdPlan->getId(), $this->apiContext);
+        $planAPI = Plan::get($createdPlan->getId(), $this->apiContext);
 
-        return $plan->getId();
+        return $planAPI->getId();
     }
 
-    public function isRedirect(): bool
-    {
-        return true;
-    }
-
-    public function getRedirectUrl(): string
+    public function getRedirectUrl(PlanPaymentMethod $planPaymentMethod): string
     {
         $agreement = new Agreement();
         $agreement->setName('Stream3s Monthly Subscription Agreement')
@@ -91,9 +89,9 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
                 Carbon::now()->addMinutes(2)->toIso8601String()
             );
 
-        $plan = new Plan();
-        $plan->setId($this->plan->planPaymentMethods()->where(['method_id' => $plan]));
-        $agreement->setPlan($plan);
+        $planAPI = new Plan();
+        $planAPI->setId($planPaymentMethod->payment_plan_id);
+        $agreement->setPlan($planAPI);
 
         $payer = new Payer();
         $payer->setPaymentMethod('paypal');
@@ -197,7 +195,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
     public function webhook(Request $request)
     {
         $resource = $request->input('resource');
-        $agreement = UserSubscription::where('agreement_id', '=', @$resource['billing_agreement_id'])->first(['user_id']);
+        $agreement = UserSubscription::where(['agreement_id' => $resource['billing_agreement_id']])->first(['user_id']);
+
         \Log::info('Paypal Notify: ' . json_encode($request->all()));
 
         if (empty($agreement)) {
@@ -266,12 +265,28 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             return $this->apiContext;
         }
 
+        $config = $this->getConfigByMod();
+
         $this->apiContext = new ApiContext(
-            new OAuthTokenCredential($this->client_id, $this->secret)
+            new OAuthTokenCredential($config['client_id'], $config['secret'])
         );
+
         $this->apiContext->setConfig($this->getPaypalSettings());
 
         return $this->apiContext;
+    }
+
+    protected function getConfigByMod(): array
+    {
+        $clientId = Arr::get($this->paymentMethod->configs, 'mod') == 'live'
+            ? Arr::get($this->paymentMethod->configs, 'live_client_id')
+            : Arr::get($this->paymentMethod->configs, 'sandbox_client_id');
+
+        $secret = Arr::get($this->paymentMethod->configs, 'mod') == 'live'
+            ? Arr::get($this->paymentMethod->configs, 'live_secret')
+            : Arr::get($this->paymentMethod->configs, 'sandbox_secret');
+
+        return ['client_id' => $clientId, 'secret' => $secret];
     }
 
     protected function getPaypalSettings(): array

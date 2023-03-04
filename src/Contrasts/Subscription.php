@@ -6,6 +6,7 @@ use Illuminate\Support\Collection;
 use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
+use Juzaweb\Subscription\Models\PlanPaymentMethod;
 
 interface Subscription
 {
@@ -15,11 +16,11 @@ interface Subscription
      * @param Plan $plan The Plan object
      * @param int|PaymentMethod $method The payment method ID
      *
-     * @return Plan The Plan object
+     * @return PlanPaymentMethod The Payment Method model
      *
      * @throws PaymentMethodException If the plan is already exists
      */
-    public function createPlanMethod(Plan $plan, int|PaymentMethod $method): Plan;
+    public function createPlanMethod(Plan $plan, int|PaymentMethod $method): PlanPaymentMethod;
 
     /**
      * Updates plan for payment method.

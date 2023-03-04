@@ -3,17 +3,19 @@
 namespace Juzaweb\Subscription\Http\Controllers\Frontend;
 
 use Juzaweb\CMS\Http\Controllers\FrontendController;
+use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Http\Requests\Frontend\PaymentRequest;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 
-class AjaxController extends FrontendController
+class PaymentController extends FrontendController
 {
     public function __construct(
         protected PlanRepository $planRepository,
         protected Subscription $subscription,
-        protected PaymentMethodRepository $paymentMethodRepository
+        protected PaymentMethodRepository $paymentMethodRepository,
+        protected PaymentMethodManager $paymentMethodManager
     ) {
     }
 
@@ -25,9 +27,15 @@ class AjaxController extends FrontendController
         $plan = $this->planRepository->find($request->input('plan_id'));
         $planMethod = $plan->planPaymentMethods()->where(['method' => $method])->first();
 
+        $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
+
         if (empty($planMethod)) {
-            $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
-            $planId = $this->subscription->createPlanMethod($plan, $method);
+            $planMethod = $this->subscription->createPlanMethod($plan, $method)->paymentMethods;
+        }
+
+        $helper = $this->paymentMethodManager->find($method);
+        if ($helper->isRedirect()) {
+            return redirect()->to($helper->getRedirectUrl($planMethod));
         }
     }
 }

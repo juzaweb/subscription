@@ -39,7 +39,11 @@ class SubscriptionServiceProvider extends ServiceProvider
     {
         $this->app->singleton(
             PaymentMethodManagerContrast::class,
-            fn ($app) => new PaymentMethodManager($app[HookActionContract::class], $app[GlobalDataContract::class])
+            fn ($app) => new PaymentMethodManager(
+                $app[HookActionContract::class],
+                $app[GlobalDataContract::class],
+                $app[PaymentMethodRepository::class]
+            )
         );
 
         $this->app->singleton(

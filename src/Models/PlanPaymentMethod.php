@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Juzaweb\CMS\Models\Model;
 
 /**
@@ -24,6 +25,8 @@ use Juzaweb\CMS\Models\Model;
  */
 class PlanPaymentMethod extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'subscription_plan_payment_methods';
 
     protected $fillable = [
@@ -32,4 +35,14 @@ class PlanPaymentMethod extends Model
         'payment_plan_id',
         'plan_id',
     ];
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'plan_id', 'id');
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
+    }
 }

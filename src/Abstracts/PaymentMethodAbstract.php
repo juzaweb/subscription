@@ -2,14 +2,14 @@
 
 namespace Juzaweb\Subscription\Abstracts;
 
-use Juzaweb\Subscription\Models\Plan;
+use Juzaweb\Subscription\Models\PaymentMethod;
 
 /**
  * @property string $name
  */
 abstract class PaymentMethodAbstract
 {
-    public function __construct(protected Plan $plan)
+    public function __construct(protected PaymentMethod $paymentMethod)
     {
     }
 
@@ -26,5 +26,10 @@ abstract class PaymentMethodAbstract
     public function getConfigs(): array
     {
         return [];
+    }
+
+    public function isRedirect(): bool
+    {
+        return $this->isRedirect ?? true;
     }
 }

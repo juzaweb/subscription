@@ -14,6 +14,7 @@ use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
+use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 
@@ -78,7 +79,7 @@ class Subscription implements SubscriptionContrasts
         return new Collection($this->globalData->get("subscription_modules"));
     }
 
-    public function createPlanMethod(Plan $plan, int|string|PaymentMethod $method): Plan
+    public function createPlanMethod(Plan $plan, int|string|PaymentMethod $method): PlanPaymentMethod
     {
         if (is_numeric($method)) {
             $method = $this->paymentMethodRepository->find($method);
@@ -96,12 +97,12 @@ class Subscription implements SubscriptionContrasts
 
         $planId = $payment->createPlan($plan);
 
-        $plan->planPaymentMethods()
+        $planPaymentMethod = $plan->planPaymentMethods()
             ->create(['method' => $method->method, 'payment_plan_id' => $planId, 'method_id' => $method->id]);
 
         event(new CreatePlanSuccess($plan));
 
-        return $plan;
+        return $planPaymentMethod;
     }
 
     public function updatePlanMethod(Plan $plan, int|string|PaymentMethod $method): Plan
@@ -127,5 +128,10 @@ class Subscription implements SubscriptionContrasts
         event(new UpdatePlanSuccess($plan));
 
         return $plan;
+    }
+
+    public function subscribe()
+    {
+        //
     }
 }

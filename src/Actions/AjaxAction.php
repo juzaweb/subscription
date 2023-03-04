@@ -5,7 +5,7 @@ namespace Juzaweb\Subscription\Actions;
 use Juzaweb\CMS\Abstracts\Action;
 use Juzaweb\Subscription\Http\Controllers\Backend\PaymentMethodController;
 use Juzaweb\Subscription\Http\Controllers\Backend\PlanController;
-use Juzaweb\Subscription\Http\Controllers\Frontend\AjaxController;
+use Juzaweb\Subscription\Http\Controllers\Frontend\PaymentController;
 
 class AjaxAction extends Action
 {
@@ -21,7 +21,7 @@ class AjaxAction extends Action
             'subscription.payment',
             [
                 //'method' => 'post',
-                'callback' => [AjaxController::class, 'subscriptionPayment'],
+                'callback' => [PaymentController::class, 'subscriptionPayment'],
             ]
         );
     }
