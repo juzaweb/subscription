@@ -10,6 +10,13 @@ class PaymentMethodRepositoryEloquent extends BaseRepositoryEloquent implements 
 {
     use ResourceRepositoryEloquent;
 
+    public function findByMethod(string $method, string $module, $fail = false): ?PaymentMethod
+    {
+        $action = $fail ? 'firstOrFail' : 'first';
+
+        return $this->model->query()->where(['method' => $method, 'module' => $module])->{$action}();
+    }
+
     public function model(): string
     {
         return PaymentMethod::class;

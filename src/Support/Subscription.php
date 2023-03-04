@@ -12,6 +12,7 @@ use Juzaweb\Subscription\Events\CreatePlanSuccess;
 use Juzaweb\Subscription\Events\UpdatePlanSuccess;
 use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Exceptions\SubscriptionException;
+use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
@@ -77,9 +78,15 @@ class Subscription implements SubscriptionContrasts
         return new Collection($this->globalData->get("subscription_modules"));
     }
 
-    public function createPlanMethod(Plan $plan, int $method): Plan
+    public function createPlanMethod(Plan $plan, int|string|PaymentMethod $method): Plan
     {
-        $method = $this->paymentMethodRepository->find($method);
+        if (is_numeric($method)) {
+            $method = $this->paymentMethodRepository->find($method);
+        }
+
+        if (is_string($method)) {
+            $method = $this->paymentMethodRepository->findByMethod($method, $plan->module);
+        }
 
         if ($plan->planPaymentMethods()->where(['method_id' => $method])->exists()) {
             throw new PaymentMethodException("Plan already exist.");
@@ -97,9 +104,15 @@ class Subscription implements SubscriptionContrasts
         return $plan;
     }
 
-    public function updatePlanMethod(Plan $plan, int $method): Plan
+    public function updatePlanMethod(Plan $plan, int|string|PaymentMethod $method): Plan
     {
-        $method = $this->paymentMethodRepository->find($method);
+        if (is_numeric($method)) {
+            $method = $this->paymentMethodRepository->find($method);
+        }
+
+        if (is_string($method)) {
+            $method = $this->paymentMethodRepository->findByMethod($method, $plan->module);
+        }
 
         if (!$planPaymentMethod = $plan->planPaymentMethods()->where(['method_id' => $method])->first()) {
             throw new PaymentMethodException("Plan do not exist exist.");

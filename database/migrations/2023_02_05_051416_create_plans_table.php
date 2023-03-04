@@ -16,10 +16,12 @@ return new class extends Migration {
             'subscription_plans',
             function (Blueprint $table) {
                 $table->bigIncrements('id');
+                $table->uuid()->unique();
                 $table->string('name');
                 $table->string('description', 250)->nullable();
                 $table->float('price')->index()->default(0);
                 $table->boolean('is_free')->default(false)->index();
+                $table->integer('free_trial_days')->default(0)->index();
                 $table->boolean('enable_trial')->default(false)->index();
                 $table->string('status', 50)->index()->default('draft');
                 $table->string('module', 50)->index();

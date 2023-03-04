@@ -28,4 +28,12 @@ $(document).ready(function () {
             $('#plan-form input[name=price]').prop('disabled', false);
         }
     });
+
+    $(document).on('change', '#plan-form input[name=enable_trial]', function (e) {
+        if ($(this).is(':checked')) {
+            $('#free-trial-days-box').show('slow').find('input[name=free_trial_days]').val(7);
+        } else {
+            $('#free-trial-days-box').hide('slow').find('input[name=free_trial_days]').val(0);
+        }
+    });
 });

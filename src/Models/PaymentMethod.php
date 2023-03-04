@@ -24,6 +24,11 @@ use Juzaweb\CMS\Traits\ResourceModel;
  * @method static \Illuminate\Database\Eloquent\Builder|PaymentMethod whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PaymentMethod whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string|null $description
+ * @property string $module
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentMethod whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentMethod whereFilter($params = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|PaymentMethod whereModule($value)
  */
 class PaymentMethod extends Model
 {

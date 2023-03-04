@@ -124,6 +124,7 @@ class PlanController extends BackendController
         $data['price'] = parse_price_format(Arr::get($attributes, 'price', 0));
         $data['is_free'] = Arr::get($attributes, 'is_free', 0);
         $data['enable_trial'] = Arr::get($attributes, 'enable_trial', 0);
+        $data['free_trial_days'] = (int) Arr::get($attributes, 'free_trial_days', 0);
 
         if ($data['is_free']) {
             $data['price'] = 0;
@@ -139,6 +140,7 @@ class PlanController extends BackendController
             'price' => ['nullable', 'string'],
             'is_free' => ['nullable', 'numeric', 'in:1'],
             'enable_trial' => ['nullable', 'numeric', 'in:1'],
+            'free_trial_days' => ['nullable', 'numeric', 'min:0'],
             'module' => ['required'],
         ];
     }

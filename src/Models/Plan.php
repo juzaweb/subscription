@@ -2,10 +2,14 @@
 
 namespace Juzaweb\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Traits\ResourceModel;
+use Juzaweb\CMS\Traits\UseUUIDColumn;
 
 /**
  * Juzaweb\Subscription\Models\Plan
@@ -36,10 +40,20 @@ use Juzaweb\CMS\Traits\ResourceModel;
  * @method static \Illuminate\Database\Eloquent\Builder|Plan whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Plan whereUpdatedAt($value)
  * @mixin \Eloquent
+ * @property string $uuid
+ * @property int $free_trial_days
+ * @property-read Collection|\Juzaweb\Subscription\Models\PaymentMethod[] $paymentMethods
+ * @property-read int|null $payment_methods_count
+ * @property-read int|null $plan_payment_methods_count
+ * @method static Builder|Plan whereFreeTrialDays($value)
+ * @method static Builder|Plan whereIsActive()
+ * @method static Builder|Plan whereUuid($value)
  */
 class Plan extends Model
 {
-    use ResourceModel;
+    const STATUS_ACTIVE = 'active';
+
+    use ResourceModel, UseUUIDColumn;
 
     protected $table = 'subscription_plans';
 
@@ -51,6 +65,7 @@ class Plan extends Model
         'enable_trial',
         'status',
         'module',
+        'free_trial_days',
     ];
 
     protected $casts = [
@@ -59,8 +74,33 @@ class Plan extends Model
         'enable_trial' => 'boolean',
     ];
 
+    public static function getAllstatus(): array
+    {
+        return [
+            'active' => trans('cms::app.active'),
+            'draft' => trans('cms::app.draft'),
+        ];
+    }
+
+    public function paymentMethods(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            PaymentMethod::class,
+            PlanPaymentMethod::class,
+            'plan_id',
+            'method_id',
+            'id',
+            'id'
+        );
+    }
+
     public function planPaymentMethods(): HasMany
     {
         return $this->hasMany(PlanPaymentMethod::class, 'plan_id', 'id');
+    }
+
+    public function scopeWhereIsActive(Builder $builder): Builder
+    {
+        return $builder->where('status', '=', self::STATUS_ACTIVE);
     }
 }
