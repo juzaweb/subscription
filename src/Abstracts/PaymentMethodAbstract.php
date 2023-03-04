@@ -32,4 +32,9 @@ abstract class PaymentMethodAbstract
     {
         return $this->isRedirect ?? true;
     }
+
+    public function cancel(): bool
+    {
+        return true;
+    }
 }

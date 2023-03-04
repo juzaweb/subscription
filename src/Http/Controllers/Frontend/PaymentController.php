@@ -19,7 +19,7 @@ class PaymentController extends FrontendController
     ) {
     }
 
-    public function subscriptionPayment(PaymentRequest $request)
+    public function payment(PaymentRequest $request)
     {
         $method = $request->input('method');
         $module = $request->input('module');
@@ -30,7 +30,7 @@ class PaymentController extends FrontendController
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
 
         if (empty($planMethod)) {
-            $planMethod = $this->subscription->createPlanMethod($plan, $method)->paymentMethods;
+            $planMethod = $this->subscription->createPlanMethod($plan, $method);
         }
 
         $helper = $this->paymentMethodManager->find($method);
@@ -38,4 +38,6 @@ class PaymentController extends FrontendController
             return redirect()->to($helper->getRedirectUrl($planMethod));
         }
     }
+
+
 }

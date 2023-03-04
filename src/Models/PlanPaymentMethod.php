@@ -22,6 +22,8 @@ use Juzaweb\CMS\Models\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod whereMethodId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod wherePaymentPlanId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod wherePlanId($value)
+ * @property-read \Juzaweb\Subscription\Models\PaymentMethod $paymentMethod
+ * @property-read \Juzaweb\Subscription\Models\Plan $plan
  */
 class PlanPaymentMethod extends Model
 {

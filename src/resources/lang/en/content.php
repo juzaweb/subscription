@@ -12,4 +12,5 @@ return [
     'enable_trial' => 'Enable trial',
     'free_trial_days' => 'Free trial days',
     'payment_url' => 'Payment URL',
+    'payment_success' => 'Payment Success',
 ];

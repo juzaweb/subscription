@@ -21,7 +21,7 @@ class AjaxAction extends Action
             'subscription.payment',
             [
                 //'method' => 'post',
-                'callback' => [PaymentController::class, 'subscriptionPayment'],
+                'callback' => [PaymentController::class, 'payment'],
             ]
         );
     }
