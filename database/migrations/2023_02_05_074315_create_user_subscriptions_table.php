@@ -17,6 +17,7 @@ return new class extends Migration {
             function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->uuid()->unique();
+                $table->string('token', 100)->unique()->comment('Token of payment partner');
                 $table->string('agreement_id', 100)->unique()
                     ->comment('Agreement of payment partner');
                 $table->float('amount')->index();

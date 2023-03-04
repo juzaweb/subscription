@@ -146,7 +146,6 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $signatureVerification->setWebhookId("9XL90610J3647323C");
         $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
         $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
-
         $signatureVerification->setRequestBody($requestBody);
 
         try {

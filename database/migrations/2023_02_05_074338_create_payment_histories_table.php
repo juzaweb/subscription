@@ -16,12 +16,11 @@ return new class extends Migration {
             'subscription_payment_histories',
             function (Blueprint $table) {
                 $table->bigIncrements('id');
-                $table->string('token', 100)->unique()
-                    ->comment('Token of payment partner');
                 $table->string('method', 50)->index();
                 $table->string('module', 50)->index();
                 $table->string('agreement_id', 100)->index()
                     ->comment('Agreement of payment partner');
+                $table->dateTime('end_date')->index();
                 $table->unsignedBigInteger('method_id');
                 $table->unsignedBigInteger('plan_id');
                 $table->unsignedBigInteger('user_subscription_id')->nullable();

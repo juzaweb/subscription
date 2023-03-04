@@ -72,8 +72,6 @@ class Plan extends Model
         'price' => 'float',
         'is_free' => 'boolean',
         'enable_trial' => 'boolean',
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
     ];
 
     public static function getAllstatus(): array

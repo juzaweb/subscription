@@ -47,4 +47,8 @@ class PaymentHistory extends Model
         'user_id',
         'agreement_id',
     ];
+
+    protected $casts = [
+        'end_date' => 'datetime',
+    ];
 }

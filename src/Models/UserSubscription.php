@@ -33,6 +33,12 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  * @mixin \Eloquent
  * @property string $module
  * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereModule($value)
+ * @property \Illuminate\Support\Carbon|null $start_date
+ * @property \Illuminate\Support\Carbon|null $end_date
+ * @property-read \Juzaweb\Subscription\Models\PaymentMethod $paymentMethod
+ * @property-read User|null $user
+ * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereEndDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereStartDate($value)
  */
 class UserSubscription extends Model
 {
@@ -41,10 +47,16 @@ class UserSubscription extends Model
     protected $table = 'subscription_user_subscriptions';
 
     protected $fillable = [
+        'token',
         'agreement_id',
         'amount',
         'method_id',
         'user_id',
+    ];
+
+    protected $casts = [
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
     ];
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo

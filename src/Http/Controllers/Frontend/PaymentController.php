@@ -61,11 +61,12 @@ class PaymentController extends FrontendController
             $helper = $this->paymentMethodManager->find($method);
             $result = $helper->return($plan, $request->all());
 
-            if (PaymentHistory::where(['token' => $result->getToken()])->exists()) {
+            if (UserSubscription::where(['token' => $result->getToken()])->exists()) {
                 throw new SubscriptionExistException('Payment already exist.');
             }
 
             $subscriber = new UserSubscription();
+            $subscriber->token = $result->getToken();
             $subscriber->plan_id = $plan->id;
             $subscriber->method_id = $method->id;
             $subscriber->user_id = Auth::id();
@@ -110,20 +111,22 @@ class PaymentController extends FrontendController
                 throw new PaymentException('Webhook: Empty user ' . json_encode($request->all()));
             }
 
-            if (strtotime($agreement->end_date) > time()) {
-                $expirationDate = date("Y-m-d 23:59:59", strtotime("+1 month", strtotime($agreement->end_date)));
+            if ($agreement->end_date?->gt(now())) {
+                $expirationDate = $agreement->end_date->addMonth()->format('Y-m-d 23:59:59');
             } else {
-                $expirationDate = date("Y-m-d 23:59:59", strtotime("+1 month"));
+                $expirationDate = now()->addMonth()->format('Y-m-d 23:59:59');
             }
 
             $agreement->update(['start_date' => $agreement->start_date ?? now(), 'end_date' => $expirationDate]);
 
             $subscriber = new PaymentHistory();
+            $subscriber->token = $method->method;
             $subscriber->method = $method->method;
             $subscriber->user_id = $agreement->user_id;
             $subscriber->agreement_id = $agreement->agreement_id;
             $subscriber->method_id = $agreement->agreement_id;
             $subscriber->plan_id = $agreement->agreement_id;
+            $subscriber->end_date = $expirationDate;
             $subscriber->save();
 
             DB::commit();
