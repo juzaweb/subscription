@@ -3,6 +3,7 @@
 namespace Juzaweb\Subscription\Models;
 
 use Juzaweb\CMS\Models\Model;
+use Juzaweb\CMS\Models\User;
 use Juzaweb\CMS\Traits\UseUUIDColumn;
 
 /**
@@ -45,4 +46,14 @@ class UserSubscription extends Model
         'method_id',
         'user_id',
     ];
+
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function paymentMethod(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
+    }
 }

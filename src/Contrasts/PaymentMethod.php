@@ -32,4 +32,6 @@ interface PaymentMethod
      * @return string - identity plan id
      */
     public function createPlan(Plan $plan): string;
+
+    public function return(Plan $plan, array $data): PaymentReturnResult;
 }

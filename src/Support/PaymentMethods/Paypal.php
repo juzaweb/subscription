@@ -3,12 +3,13 @@
 namespace Juzaweb\Subscription\Support\PaymentMethods;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
+use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
 use Juzaweb\Subscription\Models\PaymentHistory;
@@ -23,6 +24,7 @@ use PayPal\Api\PatchRequest;
 use PayPal\Api\Payer;
 use PayPal\Api\PaymentDefinition;
 use PayPal\Api\Plan;
+use PayPal\Api\VerifyWebhookSignature;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Common\PayPalModel;
 use PayPal\Exception\PayPalConnectionException;
@@ -103,19 +105,15 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             return $agreement->getApprovalLink();
         } catch (PayPalConnectionException $e) {
             throw new PaymentException($e);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }
 
-    public function return(PlanModel $plan, array $data): UserSubscription
+    public function return(PlanModel $plan, array $data): PaymentReturnResult
     {
         $agreement = new Agreement();
         $token = Arr::get($data, 'token');
-
-        if (PaymentHistory::where('token', '=', $token)->exists()) {
-            throw new SubscriptionExistException('Payment already exist.');
-        }
 
         $result = $agreement->execute($token, $this->getApiContext());
 
@@ -123,52 +121,45 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             throw new PaymentException('Payment not active.');
         }
 
-        $subscriber = new UserSubscription();
-        $subscriber->plan_id = $plan->id;
-        $subscriber->method_id = $this->paymentMethod->id;
-        $subscriber->user_id = Auth::id();
-        $subscriber->agreement_id = $result->id;
-        $subscriber->amount = $result->plan->payment_definitions[0]->amount->value;
-        $subscriber->save();
-        return $subscriber;
+        return $this->makePaymentReturnResult(
+            $result->id,
+            $result->plan->payment_definitions[0]->amount->value,
+            $token
+        );
     }
 
-    public function webhook(Request $request)
+    public function webhook(array $data, array $headers): UserSubscription
     {
-        $resource = $request->input('resource');
-        $agreement = UserSubscription::where(['agreement_id' => $resource['billing_agreement_id']])->first(['user_id']);
+        $resource = Arr::get($data, 'resource');
 
-        Log::info('Paypal Notify: ' . json_encode($request->all()));
+        $requestBody = json_encode($data);
 
-        if (empty($agreement)) {
-            Log::error('Not available agreement: postNotify ' . json_encode($request->all()));
-            return response('Webhook Handled', 200);
+        /**
+         * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
+         * All header keys as UPPERCASE, but I recive the header key as the example array, First letter as UPPERCASE
+         */
+        $headers = array_change_key_case($headers, CASE_UPPER);
+        $signatureVerification = new VerifyWebhookSignature();
+        $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
+        $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
+        $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
+        $signatureVerification->setWebhookId("9XL90610J3647323C");
+        $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
+        $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
+
+        $signatureVerification->setRequestBody($requestBody);
+
+        try {
+            $output = $signatureVerification->post($this->getApiContext());
+        } catch (Exception $e) {
+            throw new PaymentException($e);
         }
 
-        $user = User::find($agreement->user_id);
-        if (empty($user)) {
-            Log::error('Empty user. ' . json_encode($request->all()));
-            return response('Webhook Handled', 200);
+        if ($output->getVerificationStatus() != 'SUCCESS') {
+            throw new PaymentException('Webhook Signature Invalid.');
         }
 
-        if (strtotime($user->premium_enddate) > time()) {
-            $expiration_date = date("Y-m-d 23:59:59", strtotime("+1 month", strtotime($user->premium_enddate)));
-        } else {
-            $expiration_date = date("Y-m-d 23:59:59", strtotime("+1 month"));
-        }
-
-        $user->update(
-            [
-                'premium_enddate' => $expiration_date,
-            ]
-        );
-
-        $subscriber = new PaymentHistory();
-        $subscriber->method = 'paypal';
-        $subscriber->user_id = $user->id;
-        $subscriber->agreement_id = $resource['billing_agreement_id'];
-        $subscriber->save();
-        return true;
+        return UserSubscription::where(['agreement_id' => Arr::get($resource, 'billing_agreement_id')])->first();
     }
 
     public function getConfigs(): array

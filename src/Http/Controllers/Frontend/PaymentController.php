@@ -2,10 +2,19 @@
 
 namespace Juzaweb\Subscription\Http\Controllers\Frontend;
 
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Juzaweb\CMS\Http\Controllers\FrontendController;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\Subscription;
+use Juzaweb\Subscription\Exceptions\PaymentException;
+use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
 use Juzaweb\Subscription\Http\Requests\Frontend\PaymentRequest;
+use Juzaweb\Subscription\Models\PaymentHistory;
+use Juzaweb\Subscription\Models\UserSubscription;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 
@@ -39,5 +48,94 @@ class PaymentController extends FrontendController
         }
     }
 
+    public function return(Request $request): \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+    {
+        $method = $request->input('method');
+        $module = $request->input('module');
 
+        $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
+        $plan = $this->planRepository->find($request->input('plan_id'));
+
+        DB::beginTransaction();
+        try {
+            $helper = $this->paymentMethodManager->find($method);
+            $result = $helper->return($plan, $request->all());
+
+            if (PaymentHistory::where(['token' => $result->getToken()])->exists()) {
+                throw new SubscriptionExistException('Payment already exist.');
+            }
+
+            $subscriber = new UserSubscription();
+            $subscriber->plan_id = $plan->id;
+            $subscriber->method_id = $method->id;
+            $subscriber->user_id = Auth::id();
+            $subscriber->agreement_id = $result->getAgreementId();
+            $subscriber->module = $module;
+            $subscriber->amount = $result->getAmount();
+            $subscriber->save();
+
+            DB::commit();
+        } catch (PaymentException $e) {
+            DB::rollBack();
+            return $this->error($e->getMessage());
+        } catch (SubscriptionExistException $e) {
+            DB::rollBack();
+            return $this->success(trans('content.payment_success'));
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return $this->success(trans('content.payment_success'));
+    }
+
+    public function webhook(Request $request): \Illuminate\Http\Response
+    {
+        $method = $request->input('method');
+        $module = $request->input('module');
+
+        $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
+
+        DB::beginTransaction();
+        try {
+            $helper = $this->paymentMethodManager->find($method);
+
+            $agreement = $helper->webhook($request->all(), $request->headers->all());
+
+            if (empty($agreement)) {
+                throw new PaymentException('Webhook: Not available agreement ' . json_encode($request->all()));
+            }
+
+            if (empty($agreement->user)) {
+                throw new PaymentException('Webhook: Empty user ' . json_encode($request->all()));
+            }
+
+            if (strtotime($agreement->end_date) > time()) {
+                $expirationDate = date("Y-m-d 23:59:59", strtotime("+1 month", strtotime($agreement->end_date)));
+            } else {
+                $expirationDate = date("Y-m-d 23:59:59", strtotime("+1 month"));
+            }
+
+            $agreement->update(['start_date' => $agreement->start_date ?? now(), 'end_date' => $expirationDate]);
+
+            $subscriber = new PaymentHistory();
+            $subscriber->method = $method->method;
+            $subscriber->user_id = $agreement->user_id;
+            $subscriber->agreement_id = $agreement->agreement_id;
+            $subscriber->method_id = $agreement->agreement_id;
+            $subscriber->plan_id = $agreement->agreement_id;
+            $subscriber->save();
+
+            DB::commit();
+        } catch (PaymentException $e) {
+            DB::rollBack();
+            report($e);
+            return response($e->getMessage(), 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return response('Webhook Handled', 200);
+    }
 }
