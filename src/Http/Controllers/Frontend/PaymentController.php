@@ -15,6 +15,7 @@ use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
+use Juzaweb\Subscription\Exceptions\WebhookPaymentSkipException;
 use Juzaweb\Subscription\Http\Requests\Frontend\PaymentRequest;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\UserSubscription;
@@ -155,7 +156,7 @@ class PaymentController extends FrontendController
             $agreement = $helper->webhook($request);
 
             if (empty($agreement)) {
-                throw new PaymentException('Webhook: Not available agreement.');
+                throw new WebhookPaymentSkipException('Webhook: There is no handling.');
             }
 
             $subscriber = UserSubscription::where(
@@ -165,6 +166,10 @@ class PaymentController extends FrontendController
                 ]
             )
                 ->first();
+
+            if (empty($subscriber)) {
+                throw new PaymentException('Webhook: Not available agreement.');
+            }
 
             if (empty($subscriber->user)) {
                 throw new PaymentException('Webhook: Subscriber model is empty user.');
@@ -199,6 +204,10 @@ class PaymentController extends FrontendController
             DB::rollBack();
             report($e);
             return response($e->getMessage(), 422);
+        } catch (WebhookPaymentSkipException $e) {
+            DB::rollBack();
+            report($e);
+            return response($e->getMessage(), 200);
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
