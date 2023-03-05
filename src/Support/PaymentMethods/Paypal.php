@@ -128,10 +128,11 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    public function webhook(array $data, array $headers): PaymentReturnResult
+    public function webhook(array $data, array $headers): bool|PaymentReturnResult
     {
         $resource = Arr::get($data, 'resource');
-
+        $eventType = Arr::get($data, 'event_type');
+        $amount = Arr::get($resource, 'amount.total');
         $requestBody = json_encode($data);
 
         /**
@@ -143,7 +144,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
         $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
         $signatureVerification->setCertUrl($headers['PAYPAL-CERT-URL']);
-        $signatureVerification->setWebhookId("9XL90610J3647323C");
+        $signatureVerification->setWebhookId($this->getConfigByMod()['webhook_id']);
         $signatureVerification->setTransmissionSig($headers['PAYPAL-TRANSMISSION-SIG']);
         $signatureVerification->setTransmissionTime($headers['PAYPAL-TRANSMISSION-TIME']);
         $signatureVerification->setRequestBody($requestBody);
@@ -158,9 +159,13 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             throw new PaymentException('Webhook Signature Invalid.');
         }
 
+        if ($eventType != 'BILLING.SUBSCRIPTION.CREATED') {
+            return false;
+        }
+
         return $this->makePaymentReturnResult(
             Arr::get($resource, 'billing_agreement_id'),
-            $output->plan->payment_definitions[0]->amount->value,
+            $amount,
             $data['id']
         );
     }
@@ -216,6 +221,9 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $this->apiContext;
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function getConfigByMod(): array
     {
         $clientId = Arr::get($this->paymentMethod->configs, 'mod') == 'live'
@@ -226,7 +234,11 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             ? Arr::get($this->paymentMethod->configs, 'live_secret')
             : Arr::get($this->paymentMethod->configs, 'sandbox_secret');
 
-        return ['client_id' => $clientId, 'secret' => $secret];
+        $webhook = Arr::get($this->paymentMethod->configs, 'mod') == 'live'
+            ? Arr::get($this->paymentMethod->configs, 'live_webhook_id')
+            : Arr::get($this->paymentMethod->configs, 'sandbox_webhook_id');
+
+        return ['client_id' => $clientId, 'secret' => $secret, 'webhook_id' => $webhook];
     }
 
     protected function getPaypalSettings(): array
