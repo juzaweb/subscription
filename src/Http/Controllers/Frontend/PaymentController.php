@@ -15,6 +15,7 @@ use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
+use Juzaweb\Subscription\Exceptions\WebhookCancelException;
 use Juzaweb\Subscription\Http\Requests\Frontend\PaymentRequest;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\UserSubscription;
@@ -115,10 +116,9 @@ class PaymentController extends FrontendController
         );
     }
 
-    public function webhook(Request $request): \Illuminate\Http\Response
+    public function webhook(Request $request, $module, $method): \Illuminate\Http\Response
     {
-        $method = $request->input('method');
-        $module = $request->input('module');
+        Log::info("Subscription Webhook {$module} {$method}", $request->all());
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
 
@@ -126,25 +126,31 @@ class PaymentController extends FrontendController
         try {
             $helper = $this->paymentMethodManager->find($method);
 
-            $agreement = $helper->webhook($request->all(), $request->headers->all());
+            $agreement = $helper->webhook($request);
 
             if (empty($agreement)) {
                 throw new PaymentException('Webhook: Not available agreement ' . json_encode($request->all()));
             }
 
-            if (empty($agreement->user)) {
+            $subscriber = UserSubscription::where(
+                [
+                    'agreement_id' => $agreement->getAgreementId(),
+                    'module' => $module,
+                ]
+            )
+                ->first();
+
+            if (empty($subscriber->user)) {
                 throw new PaymentException('Webhook: Empty user ' . json_encode($request->all()));
             }
 
-            if ($agreement->end_date?->gt(now())) {
-                $expirationDate = $agreement->end_date->addMonth()->format('Y-m-d 23:59:59');
+            if ($subscriber->end_date?->gt(now())) {
+                $expirationDate = $subscriber->end_date->addMonth()->format('Y-m-d 23:59:59');
             } else {
                 $expirationDate = now()->addMonth()->format('Y-m-d 23:59:59');
             }
 
-            $agreement->update(['start_date' => $agreement->start_date ?? now(), 'end_date' => $expirationDate]);
-
-            $subscriber = UserSubscription::where(['agreement_id' => Arr::get($resource, 'billing_agreement_id')])->first();
+            $subscriber->update(['start_date' => $subscriber->start_date ?? now(), 'end_date' => $expirationDate]);
 
             PaymentHistory::create(
                 [
@@ -152,12 +158,12 @@ class PaymentController extends FrontendController
                     'method' => $method->method,
                     'module' => $module,
                     'type' => 'webhook',
-                    'amount' => $result->getAmount(),
+                    'amount' => $agreement->getAmount(),
                     'method_id' => $method->id,
-                    'plan_id' => $plan->id,
+                    'plan_id' => $subscriber->plan_id,
                     'user_subscription_id' => $subscriber->id,
                     'user_id' => Auth::id(),
-                    'agreement_id' => $result->getAgreementId(),
+                    'agreement_id' => $agreement->getAgreementId(),
                     'end_date' => $expirationDate,
                 ]
             );

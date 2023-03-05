@@ -128,18 +128,18 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    public function webhook(array $data, array $headers): bool|PaymentReturnResult
+    public function webhook(Request $request): bool|PaymentReturnResult
     {
-        $resource = Arr::get($data, 'resource');
-        $eventType = Arr::get($data, 'event_type');
+        $resource = $request->input('resource');
+        $eventType = $request->input('event_type');
         $amount = Arr::get($resource, 'amount.total');
-        $requestBody = json_encode($data);
+        $requestBody = json_encode($request->post());
 
         /**
          * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
          * All header keys as UPPERCASE, but I recive the header key as the example array, First letter as UPPERCASE
          */
-        $headers = array_change_key_case($headers, CASE_UPPER);
+        $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
         $signatureVerification = new VerifyWebhookSignature();
         $signatureVerification->setAuthAlgo($headers['PAYPAL-AUTH-ALGO']);
         $signatureVerification->setTransmissionId($headers['PAYPAL-TRANSMISSION-ID']);
@@ -166,7 +166,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $this->makePaymentReturnResult(
             Arr::get($resource, 'billing_agreement_id'),
             $amount,
-            $data['id']
+            $request->input('id')
         );
     }
 
