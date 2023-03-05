@@ -6,3 +6,5 @@ Route::post('subscription/{module}/payment/{plan}/{method}', [PaymentController:
     ->name('subscription.module.payment');
 Route::get('subscription/{module}/return/{plan}/{method}', [PaymentController::class, 'return'])
     ->name('subscription.module.return');
+Route::get('subscription/{module}/cancel/{plan}/{method}', [PaymentController::class, 'return'])
+    ->name('subscription.module.cancel');

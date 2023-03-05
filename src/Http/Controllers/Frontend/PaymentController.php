@@ -15,7 +15,6 @@ use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
-use Juzaweb\Subscription\Exceptions\WebhookCancelException;
 use Juzaweb\Subscription\Http\Requests\Frontend\PaymentRequest;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\UserSubscription;
@@ -116,6 +115,29 @@ class PaymentController extends FrontendController
         );
     }
 
+    public function cancel(Request $request, $module, $plan, $method): JsonResponse|RedirectResponse
+    {
+        $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
+
+        DB::beginTransaction();
+        try {
+            $helper = $this->paymentMethodManager->find($method);
+
+            $helper->cancel();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return $this->success(
+            [
+                'redirect' => $this->getCancelPageUrl(),
+            ]
+        );
+    }
+
     public function webhook(Request $request, $module, $method): \Illuminate\Http\Response
     {
         Log::info("Subscription Webhook {$module} {$method}", $request->all());
@@ -182,6 +204,11 @@ class PaymentController extends FrontendController
     }
 
     protected function getReturnPageUrl(): string
+    {
+        return '/';
+    }
+
+    protected function getCancelPageUrl(): string
     {
         return '/';
     }
