@@ -140,7 +140,11 @@ class PaymentController extends FrontendController
 
     public function webhook(Request $request, $module, $method): \Illuminate\Http\Response
     {
-        Log::info("Subscription Webhook {$module} {$method}", $request->all());
+        Log::info(
+            "Subscription Webhook {$module} {$method}"
+            ."\n Request: " . json_encode($request->all())
+            ."\n Headers: ". json_encode($request->headers->all())
+        );
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
 
@@ -151,7 +155,7 @@ class PaymentController extends FrontendController
             $agreement = $helper->webhook($request);
 
             if (empty($agreement)) {
-                throw new PaymentException('Webhook: Not available agreement ' . json_encode($request->all()));
+                throw new PaymentException('Webhook: Not available agreement.');
             }
 
             $subscriber = UserSubscription::where(
@@ -163,7 +167,7 @@ class PaymentController extends FrontendController
                 ->first();
 
             if (empty($subscriber->user)) {
-                throw new PaymentException('Webhook: Empty user ' . json_encode($request->all()));
+                throw new PaymentException('Webhook: Subscriber model is empty user.');
             }
 
             if ($subscriber->end_date?->gt(now())) {
