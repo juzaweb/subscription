@@ -6,16 +6,12 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
 use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Exceptions\PaymentException;
-use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
-use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
-use Juzaweb\Subscription\Models\UserSubscription;
 use PayPal\Api\Agreement;
 use PayPal\Api\Currency;
 use PayPal\Api\MerchantPreferences;
@@ -33,6 +29,7 @@ use PayPal\Rest\ApiContext;
 class Paypal extends PaymentMethodAbstract implements PaymentMethod
 {
     protected string $name = 'paypal';
+    protected bool $isRedirect = true;
 
     protected ApiContext $apiContext;
 
@@ -85,11 +82,58 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $planAPI->getId();
     }
 
-    public function getRedirectUrl(PlanPaymentMethod $planPaymentMethod): string
+    public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string
+    {
+        $planAPI = Plan::get($planPaymentMethod->payment_plan_id, $this->getApiContext());
+
+        // make changes to the plan object
+        $planAPI->setDescription($plan->description ?? "Subscription plan {$plan->name}");
+
+        $paymentDefinition = new PaymentDefinition();
+        $paymentDefinition->setName('Regular Payments')
+            ->setType('REGULAR')
+            ->setFrequency('Month')
+            ->setFrequencyInterval('1')
+            ->setCycles('0')
+            ->setAmount(
+                new Currency(
+                    [
+                        'value' => $plan->price,
+                        'currency' => 'USD'
+                    ]
+                )
+            );
+
+        $merchantPreferences = new MerchantPreferences();
+        $merchantPreferences->setReturnUrl($this->getReturnUrl($plan))
+            ->setCancelUrl($this->getCancelUrl($plan))
+            ->setAutoBillAmount('yes')
+            ->setInitialFailAmountAction('CONTINUE')
+            ->setMaxFailAttempts('0');
+
+        $planAPI->setPaymentDefinitions([$paymentDefinition]);
+        $planAPI->setMerchantPreferences($merchantPreferences);
+
+        $patch = new Patch();
+        $value = new PayPalModel('{"state":"ACTIVE"}');
+        $patch->setOp('replace')
+            ->setPath('/')
+            ->setValue($value);
+
+        $patchRequest = new PatchRequest();
+        $patchRequest->addPatch($patch);
+
+        // update the plan on PayPal server
+        $planAPI->update($patchRequest, $this->getApiContext());
+
+        return $planAPI->getId();
+    }
+
+    public function subscribe(PlanModel $plan, PlanPaymentMethod $planPaymentMethod, Request $request): bool
     {
         $agreement = new Agreement();
         $agreement->setName('Monthly Subscription Agreement')
-            ->setDescription("{$planPaymentMethod->plan->name} Premium Plan")
+            ->setDescription("{$plan->name} Premium Plan")
             ->setStartDate(Carbon::now()->addMinutes(2)->toIso8601String());
 
         $planAPI = new Plan();
@@ -102,7 +146,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
         try {
             $agreement = $agreement->create($this->getApiContext());
-            return $agreement->getApprovalLink();
+            $this->setRedirectUrl($agreement->getApprovalLink());
+            return true;
         } catch (PayPalConnectionException $e) {
             throw new PaymentException($e);
         } catch (Exception $e) {

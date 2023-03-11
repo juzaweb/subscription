@@ -2,7 +2,9 @@
 
 namespace Juzaweb\Subscription\Contrasts;
 
+use Illuminate\Http\Request;
 use Juzaweb\Subscription\Models\Plan;
+use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
 
 interface PaymentMethod
@@ -24,7 +26,11 @@ interface PaymentMethod
 
     public function isRedirect(): bool;
 
-    public function getRedirectUrl(PlanPaymentMethod $planPaymentMethod): string;
+    public function getRedirectUrl(): ?string;
+
+    public function subscribe(PlanModel $plan, PlanPaymentMethod $planPaymentMethod, Request $request): bool;
+
+    public function setRedirectUrl(string $redirectUrl): void;
 
     /**
      * Create a plan
@@ -33,5 +39,7 @@ interface PaymentMethod
      */
     public function createPlan(Plan $plan): string;
 
-    public function return(Plan $plan, array $data): PaymentReturnResult;
+    public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string;
+
+    public function return(Plan $plan, array $data): ?PaymentReturnResult;
 }

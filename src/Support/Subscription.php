@@ -82,7 +82,7 @@ class Subscription implements SubscriptionContrasts
 
         $this->hookAction->registerConfig(
             [
-                'subscription_enable_trial' => [
+                "subscription_{$key}_enable_trial" => [
                     'type' => 'select',
                     'label' => trans('subscription::content.enable_trial'),
                     'form' => 'subscription',
@@ -93,7 +93,7 @@ class Subscription implements SubscriptionContrasts
                         ]
                     ]
                 ],
-                'subscription_free_trial_days' => [
+                "subscription_{$key}_free_trial_days" => [
                     'label' => trans('subscription::content.free_trial_days'),
                     'form' => 'subscription',
                     'data' => [
@@ -179,6 +179,9 @@ class Subscription implements SubscriptionContrasts
 
         $planId = $payment->createPlan($plan);
 
+        /**
+         * @var PlanPaymentMethod $planPaymentMethod
+         */
         $planPaymentMethod = $plan->planPaymentMethods()
             ->create(['method' => $method->method, 'payment_plan_id' => $planId, 'method_id' => $method->id]);
 
@@ -197,13 +200,16 @@ class Subscription implements SubscriptionContrasts
             $method = $this->paymentMethodRepository->findByMethod($method, $plan->module);
         }
 
+        /**
+         * @var PlanPaymentMethod $planPaymentMethod
+         */
         if (!$planPaymentMethod = $plan->planPaymentMethods()->where(['method_id' => $method])->first()) {
             throw new PaymentMethodException("Plan do not exist exist.");
         }
 
         $payment = $this->paymentMethodManager->find($method);
 
-        $planId = $payment->updatePlan($plan);
+        $planId = $payment->updatePlan($plan, $planPaymentMethod);
 
         $planPaymentMethod->update(['method' => $method->method, 'payment_plan_id' => $planId]);
 

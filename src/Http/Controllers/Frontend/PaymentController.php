@@ -32,7 +32,7 @@ class PaymentController extends FrontendController
     ) {
     }
 
-    public function payment(PaymentRequest $request, $module, $plan, $method)
+    public function payment(PaymentRequest $request, $module, $plan, $method): JsonResponse|RedirectResponse
     {
         global $jw_user;
 
@@ -49,9 +49,29 @@ class PaymentController extends FrontendController
         }
 
         $helper = $this->paymentMethodManager->find($method);
-        if ($helper->isRedirect()) {
-            return redirect()->to($helper->getRedirectUrl($planMethod));
+
+        try {
+            $helper->subscribe($plan, $planMethod, $request);
+        } catch (PaymentException $e) {
+            return $this->error($e->getMessage());
+        } catch (\Exception $e) {
+            throw $e;
         }
+
+        if ($helper->isRedirect()) {
+            return $this->success(
+                [
+                    'redirect' => $helper->getRedirectUrl(),
+                ]
+            );
+        }
+
+        return $this->success(
+            [
+                'message' => trans('subscription::content.payment_success'),
+                'redirect' => $this->getReturnPageUrl($module, $plan, $method),
+            ]
+        );
     }
 
     public function return(Request $request, $module, $plan, $method): JsonResponse|RedirectResponse
