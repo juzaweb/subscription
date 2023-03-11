@@ -6,8 +6,8 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Juzaweb\CMS\Http\Controllers\FrontendController;
@@ -34,7 +34,12 @@ class PaymentController extends FrontendController
 
     public function payment(PaymentRequest $request, $module, $plan, $method)
     {
+        global $jw_user;
+
+        Cache::set("subscription_payment_{$jw_user->id}", $request->only(['return_url', 'cancel_url']), 3600);
+
         $plan = $this->planRepository->findByUUID($plan);
+
         $planMethod = $plan->planPaymentMethods()->where(['method' => $method])->first();
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
@@ -97,10 +102,10 @@ class PaymentController extends FrontendController
             return $this->error($e->getMessage());
         } catch (SubscriptionExistException $e) {
             DB::rollBack();
-            return $this->success(
+            return $this->error(
                 [
-                    'message' => trans('subscription::content.payment_success'),
-                    'redirect' => $this->getReturnPageUrl(),
+                    'message' => $e->getMessage(),
+                    'redirect' => $this->getReturnPageUrl($module, $plan, $method),
                 ]
             );
         } catch (Exception $e) {
@@ -111,7 +116,7 @@ class PaymentController extends FrontendController
         return $this->success(
             [
                 'message' => trans('subscription::content.payment_success'),
-                'redirect' => $this->getReturnPageUrl(),
+                'redirect' => $this->getReturnPageUrl($module, $plan, $method),
             ]
         );
     }
@@ -216,13 +221,25 @@ class PaymentController extends FrontendController
         return response('Webhook Handled', 200);
     }
 
-    protected function getReturnPageUrl(): string
+    protected function getReturnPageUrl($module, $plan, $method): string
     {
-        return '/';
+        global $jw_user;
+
+        $url = Cache::get("subscription_payment_{$jw_user->id}")['return_url'] ?? '/';
+
+        Cache::forget("subscription_payment_{$jw_user->id}");
+
+        return apply_filters('subscription.return_page_url', $url, $module, $plan, $method);
     }
 
-    protected function getCancelPageUrl(): string
+    protected function getCancelPageUrl($module, $plan, $method): string
     {
-        return '/';
+        global $jw_user;
+
+        $url = Cache::get("subscription_payment_{$jw_user->id}")['cancel_url'] ?? '/';
+
+        Cache::forget("subscription_payment_{$jw_user->id}");
+
+        return apply_filters('subscription.cancel_page_url', $url, $module, $plan, $method);
     }
 }

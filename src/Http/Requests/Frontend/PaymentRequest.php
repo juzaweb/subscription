@@ -3,8 +3,6 @@
 namespace Juzaweb\Subscription\Http\Requests\Frontend;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Juzaweb\Subscription\Models\Plan;
 
 class PaymentRequest extends FormRequest
 {
@@ -15,6 +13,13 @@ class PaymentRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [];
+        return [
+            'return_url' => [
+                'required',
+            ],
+            'cancel_url' => [
+                'required',
+            ],
+        ];
     }
 }
