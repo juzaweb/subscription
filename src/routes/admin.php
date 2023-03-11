@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
@@ -11,6 +10,7 @@
 |
 */
 
+use Juzaweb\Subscription\Http\Controllers\Backend\PaymentHistoryController;
 use Juzaweb\Subscription\Http\Controllers\Backend\PaymentMethodController;
 use Juzaweb\Subscription\Http\Controllers\Backend\PlanController;
 use Juzaweb\Subscription\Http\Controllers\Backend\UserSubscriptionController;
@@ -18,4 +18,4 @@ use Juzaweb\Subscription\Http\Controllers\Backend\UserSubscriptionController;
 Route::jwResource('subscription/{module}/plans', PlanController::class);
 Route::jwResource('subscription/{module}/payment-methods', PaymentMethodController::class);
 Route::jwResource('subscription/{module}/subscriptions', UserSubscriptionController::class);
-Route::jwResource('subscription/{module}/payment-histories', PaymentMethodController::class);
+Route::jwResource('subscription/{module}/payment-histories', PaymentHistoryController::class);

@@ -78,6 +78,17 @@ class ResourceAction extends Action
                 'menu' => null,
             ]
         );
+
+        $this->hookAction->registerResource(
+            'subscription-payment-histories',
+            null,
+            [
+                'label' => trans('subscription::content.payment_histories'),
+                'repository' => UserSubscriptionRepository::class,
+                'datatable' => UserSubscriptionDatatable::class,
+                'menu' => null,
+            ]
+        );
     }
 
     public function enqueueStyles()
