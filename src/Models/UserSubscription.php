@@ -5,6 +5,7 @@ namespace Juzaweb\Subscription\Models;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Models\User;
+use Juzaweb\CMS\Traits\ResourceModel;
 use Juzaweb\CMS\Traits\UseUUIDColumn;
 
 /**
@@ -43,7 +44,7 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  */
 class UserSubscription extends Model
 {
-    use UseUUIDColumn;
+    use UseUUIDColumn, ResourceModel;
 
     protected $table = 'subscription_user_subscriptions';
 

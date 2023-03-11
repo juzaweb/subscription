@@ -13,4 +13,13 @@ return [
     'free_trial_days' => 'Free trial days',
     'payment_url' => 'Payment URL',
     'payment_success' => 'Payment Success',
+    'subscriptions' => 'Subscriptions',
+    'payment_histories' => 'Payment histories',
+    'agreement_id' => 'Agreement id',
+    'amount' => 'Amount',
+    'end_date' => 'End date',
+    'user_subscriptions' => 'User subscriptions',
+    'plan' => 'Plan',
+    'start_date' => 'Start date',
+    'user' => 'User',
 ];

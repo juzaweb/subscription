@@ -41,9 +41,41 @@ class Subscription implements SubscriptionContrasts
             $this->registerModulePaymentMethod($key, $args);
         }
 
+        if (Arr::get($args, 'allow_user_subscriptions', true)) {
+            $this->registerModuleUserSubscription($key, $args);
+        }
+
+        if (Arr::get($args, 'allow_payment_histories', true)) {
+            $this->registerModulePaymentHistory($key, $args);
+        }
+
         $args = array_merge(['key' => $key], $args);
 
         $this->globalData->set("subscription_modules.{$key}", new Collection($args));
+    }
+
+    public function registerModuleUserSubscription(string $key, array $args = [])
+    {
+        $this->hookAction->addAdminMenu(
+            trans('subscription::content.user_subscriptions'),
+            "subscription.{$key}.subscriptions",
+            $args['menu'] ?? [
+                'icon' => 'fa fa-users',
+                'position' => 30,
+            ]
+        );
+    }
+
+    public function registerModulePaymentHistory(string $key, array $args = [])
+    {
+        $this->hookAction->addAdminMenu(
+            trans('subscription::content.payment_histories'),
+            "subscription.{$key}.payment-histories",
+            $args['menu'] ?? [
+                'icon' => 'fa fa-users',
+                'position' => 30,
+            ]
+        );
     }
 
     public function registerModulePlan(string $key, array $args = []): void
@@ -128,10 +160,5 @@ class Subscription implements SubscriptionContrasts
         event(new UpdatePlanSuccess($plan));
 
         return $plan;
-    }
-
-    public function subscribe()
-    {
-        //
     }
 }
