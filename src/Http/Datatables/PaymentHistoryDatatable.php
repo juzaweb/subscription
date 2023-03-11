@@ -29,6 +29,7 @@ class PaymentHistoryDatatable extends ResourceDatatable
             ],
             'method' => [
                 'label' => trans('subscription::content.method'),
+                'formatter' => fn($value, $row, $index) => $row->paymentMethod?->name,
             ],
             'plan_id' => [
                 'label' => trans('subscription::content.plan'),
@@ -38,6 +39,9 @@ class PaymentHistoryDatatable extends ResourceDatatable
             ],
             'user_id' => [
                 'label' => trans('subscription::content.user'),
+                'formatter' => function ($value, $row, $index) {
+                    return $row->user?->name;
+                }
             ],
             'created_at' => [
                 'label' => trans('cms::app.created_at'),

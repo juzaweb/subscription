@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Subscription\Repositories;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Juzaweb\CMS\Repositories\BaseRepositoryEloquent;
 use Juzaweb\CMS\Traits\Criterias\UseSearchCriteria;
 use Juzaweb\CMS\Traits\Criterias\UseSortableCriteria;
@@ -18,5 +19,20 @@ class UserSubscriptionRepositoryEloquent extends BaseRepositoryEloquent implemen
     public function model(): string
     {
         return UserSubscription::class;
+    }
+
+    public function adminPaginate(int $limit, ?int $page = null, array $columns = ['*']): LengthAwarePaginator
+    {
+        $this->applyCriteria();
+        $this->applyScope();
+
+        $results = $this->model->with(['plan', 'user', 'paymentMethod'])
+            ->paginate($limit, $columns, 'page', $page);
+        $results->appends(app('request')->query());
+
+        $this->resetModel();
+        $this->resetScope();
+
+        return $this->parserResult($results);
     }
 }
