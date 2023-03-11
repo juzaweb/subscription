@@ -31,7 +31,7 @@ class PlanController extends BackendController
 
     protected ?Collection $moduleSetting;
     protected string $resourceKey = 'subscription-plans';
-    protected string $viewPrefix = 'subscription::plan';
+    protected string $viewPrefix = 'subscription::backend.plan';
 
     public function __construct(
         protected PlanRepository $planRepository,

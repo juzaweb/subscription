@@ -12,8 +12,10 @@ namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
 use Juzaweb\Subscription\Http\Datatables\PlanDatatable;
+use Juzaweb\Subscription\Http\Datatables\UserSubscriptionDatatable;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
+use Juzaweb\Subscription\Repositories\UserSubscriptionRepository;
 
 class ResourceAction extends Action
 {
@@ -63,6 +65,17 @@ class ResourceAction extends Action
                     'name' => ['required', 'string', 'max:100'],
                     'method' => ['required', 'string', 'max:100'],
                 ],
+            ]
+        );
+
+        $this->hookAction->registerResource(
+            'subscription-user-subscriptions',
+            null,
+            [
+                'label' => trans('subscription::content.user_subscriptions'),
+                'repository' => UserSubscriptionRepository::class,
+                'datatable' => UserSubscriptionDatatable::class,
+                'menu' => null,
             ]
         );
     }

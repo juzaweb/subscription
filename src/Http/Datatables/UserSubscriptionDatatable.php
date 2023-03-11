@@ -2,12 +2,9 @@
 
 namespace Juzaweb\Subscription\Http\Datatables;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
-use Juzaweb\CMS\Abstracts\DataTable;
-use Juzaweb\Subscription\Models\UserSubscription;
+use Juzaweb\Backend\Http\Datatables\ResourceDatatable;
 
-class UserSubscriptionDatatable extends DataTable
+class UserSubscriptionDatatable extends ResourceDatatable
 {
     /**
      * Columns datatable
@@ -17,10 +14,6 @@ class UserSubscriptionDatatable extends DataTable
     public function columns(): array
     {
         return [
-            // 'title' => [
-            //     'label' => trans('cms::app.title'),
-            //     'formatter' => [$this, 'rowActionsFormatter'],
-            // ],
             'agreement_id' => [
                 'label' => trans('subscription::content.agreement_id'),
             ],
@@ -51,35 +44,5 @@ class UserSubscriptionDatatable extends DataTable
                 }
             ]
         ];
-    }
-
-    /**
-     * Query data datatable
-     *
-     * @param array $data
-     * @return Builder
-     */
-    public function query($data)
-    {
-        $query = UserSubscription::query();
-
-        if ($keyword = Arr::get($data, 'keyword')) {
-            $query->where(
-                function (Builder $q) use ($keyword) {
-                    // $q->where('title', JW_SQL_LIKE, '%'. $keyword .'%');
-                }
-            );
-        }
-
-        return $query;
-    }
-
-    public function bulkActions($action, $ids)
-    {
-        switch ($action) {
-            case 'delete':
-                SubscriptionUserSubscription::destroy($ids);
-                break;
-        }
     }
 }

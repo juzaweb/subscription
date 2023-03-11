@@ -21,7 +21,7 @@ class PaymentMethodController extends BackendController
 {
     protected ?Collection $moduleSetting;
     protected string $resourceKey = 'subscription-payment-methods';
-    protected string $viewPrefix = 'subscription::payment_method';
+    protected string $viewPrefix = 'subscription::backend.payment_method';
 
     use ResourceController {
         getDataForForm as DataForForm;
