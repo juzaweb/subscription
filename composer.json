@@ -2,17 +2,15 @@
     "name": "juzaweb/subscription",
     "description": "",
     "extra": {
-        "laravel": {
-            "providers": [
-                "Juzaweb\\Subscription\\Providers\\SubscriptionServiceProvider"
-            ]
-        },
         "juzaweb": {
             "name": "Subscription",
             "description": "Subscription payment support",
             "domain": "subscription",
             "cms_min": "3.3",
-            "version": "1.0"
+            "version": "1.0",
+            "providers": [
+                "Juzaweb\\Subscription\\Providers\\SubscriptionServiceProvider"
+            ]
         }
     },
     "autoload": {
