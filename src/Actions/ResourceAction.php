@@ -11,8 +11,10 @@
 namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
+use Juzaweb\Subscription\Http\Datatables\PaymentHistoryDatatable;
 use Juzaweb\Subscription\Http\Datatables\PlanDatatable;
 use Juzaweb\Subscription\Http\Datatables\UserSubscriptionDatatable;
+use Juzaweb\Subscription\Repositories\PaymentHistoryRepository;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 use Juzaweb\Subscription\Repositories\UserSubscriptionRepository;
@@ -84,8 +86,8 @@ class ResourceAction extends Action
             null,
             [
                 'label' => trans('subscription::content.payment_histories'),
-                'repository' => UserSubscriptionRepository::class,
-                'datatable' => UserSubscriptionDatatable::class,
+                'repository' => PaymentHistoryRepository::class,
+                'datatable' => PaymentHistoryDatatable::class,
                 'menu' => null,
             ]
         );

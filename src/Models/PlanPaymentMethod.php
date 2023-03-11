@@ -2,28 +2,29 @@
 
 namespace Juzaweb\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Juzaweb\CMS\Models\Model;
 
 /**
  * Juzaweb\Subscription\Models\PlanPaymentMethod
  *
- * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod query()
- * @mixin \Eloquent
  * @property int $id
  * @property string $payment_plan_id Plan id of payment service
  * @property string $method
  * @property int $plan_id
  * @property int $method_id
- * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod whereMethod($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod whereMethodId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod wherePaymentPlanId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|PlanPaymentMethod wherePlanId($value)
- * @property-read \Juzaweb\Subscription\Models\PaymentMethod $paymentMethod
- * @property-read \Juzaweb\Subscription\Models\Plan $plan
+ * @property-read PaymentMethod $paymentMethod
+ * @property-read Plan $plan
+ * @method static Builder|PlanPaymentMethod newModelQuery()
+ * @method static Builder|PlanPaymentMethod newQuery()
+ * @method static Builder|PlanPaymentMethod query()
+ * @method static Builder|PlanPaymentMethod whereId($value)
+ * @method static Builder|PlanPaymentMethod whereMethod($value)
+ * @method static Builder|PlanPaymentMethod whereMethodId($value)
+ * @method static Builder|PlanPaymentMethod wherePaymentPlanId($value)
+ * @method static Builder|PlanPaymentMethod wherePlanId($value)
+ * @mixin \Eloquent
  */
 class PlanPaymentMethod extends Model
 {

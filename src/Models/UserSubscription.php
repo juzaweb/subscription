@@ -2,7 +2,9 @@
 
 namespace Juzaweb\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Models\User;
 use Juzaweb\CMS\Traits\ResourceModel;
@@ -15,32 +17,34 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  * @property string $uuid
  * @property string $agreement_id Agreement of payment partner
  * @property float $amount
+ * @property string $module
+ * @property Carbon|null $start_date
+ * @property Carbon|null $end_date
  * @property int $method_id
  * @property int $plan_id
  * @property int $user_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription query()
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereAgreementId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereMethodId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription wherePlanId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereUserId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereUuid($value)
- * @mixin \Eloquent
- * @property string $module
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereModule($value)
- * @property \Illuminate\Support\Carbon|null $start_date
- * @property \Illuminate\Support\Carbon|null $end_date
- * @property-read \Juzaweb\Subscription\Models\PaymentMethod $paymentMethod
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read PaymentMethod $paymentMethod
+ * @property-read Plan $plan
  * @property-read User|null $user
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereEndDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|UserSubscription whereStartDate($value)
+ * @method static Builder|UserSubscription newModelQuery()
+ * @method static Builder|UserSubscription newQuery()
+ * @method static Builder|UserSubscription query()
+ * @method static Builder|UserSubscription whereAgreementId($value)
+ * @method static Builder|UserSubscription whereAmount($value)
+ * @method static Builder|UserSubscription whereCreatedAt($value)
+ * @method static Builder|UserSubscription whereEndDate($value)
+ * @method static Builder|UserSubscription whereFilter($params = [])
+ * @method static Builder|UserSubscription whereId($value)
+ * @method static Builder|UserSubscription whereMethodId($value)
+ * @method static Builder|UserSubscription whereModule($value)
+ * @method static Builder|UserSubscription wherePlanId($value)
+ * @method static Builder|UserSubscription whereStartDate($value)
+ * @method static Builder|UserSubscription whereUpdatedAt($value)
+ * @method static Builder|UserSubscription whereUserId($value)
+ * @method static Builder|UserSubscription whereUuid($value)
+ * @mixin \Eloquent
  */
 class UserSubscription extends Model
 {
@@ -65,6 +69,11 @@ class UserSubscription extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function plan(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class, 'plan_id', 'id');
     }
 
     public function paymentMethod(): BelongsTo

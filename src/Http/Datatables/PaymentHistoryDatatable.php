@@ -3,7 +3,6 @@
 namespace Juzaweb\Subscription\Http\Datatables;
 
 use Juzaweb\Backend\Http\Datatables\ResourceDatatable;
-use Juzaweb\CMS\Abstracts\DataTable;
 
 class PaymentHistoryDatatable extends ResourceDatatable
 {
@@ -15,24 +14,27 @@ class PaymentHistoryDatatable extends ResourceDatatable
     public function columns(): array
     {
         return [
-            // 'title' => [
-            //     'label' => trans('cms::app.title'),
-            //     'formatter' => [$this, 'rowActionsFormatter'],
-            // ],
             'agreement_id' => [
                 'label' => trans('subscription::content.agreement_id'),
             ],
             'amount' => [
                 'label' => trans('subscription::content.amount'),
+                'formatter' => fn($value, $row, $index) => "$".$value,
             ],
             'end_date' => [
                 'label' => trans('subscription::content.end_date'),
+                'formatter' => function ($value, $row, $index) {
+                    return $row->end_date ? jw_date_format($row->end_date) : '_';
+                }
             ],
             'method' => [
                 'label' => trans('subscription::content.method'),
             ],
             'plan_id' => [
                 'label' => trans('subscription::content.plan'),
+                'formatter' => function ($value, $row, $index) {
+                    return $row->plan?->name;
+                }
             ],
             'user_id' => [
                 'label' => trans('subscription::content.user'),

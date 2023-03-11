@@ -15,39 +15,39 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  * Juzaweb\Subscription\Models\Plan
  *
  * @property int $id
+ * @property string $uuid
  * @property string $name
  * @property string|null $description
  * @property float $price
  * @property bool $is_free
+ * @property int $free_trial_days
  * @property bool $enable_trial
  * @property string $status
  * @property string $module
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read Collection|\Juzaweb\Subscription\Models\PlanPaymentMethod[] $planPaymentMethods
- * @method static \Illuminate\Database\Eloquent\Builder|Plan newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Plan newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Plan query()
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereEnableTrial($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereFilter($params = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereIsFree($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereModule($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan wherePrice($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Plan whereUpdatedAt($value)
- * @mixin \Eloquent
- * @property string $uuid
- * @property int $free_trial_days
- * @property-read Collection|\Juzaweb\Subscription\Models\PaymentMethod[] $paymentMethods
+ * @property-read \Illuminate\Database\Eloquent\Collection|\Juzaweb\Subscription\Models\PaymentMethod[] $paymentMethods
  * @property-read int|null $payment_methods_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|PlanPaymentMethod[] $planPaymentMethods
  * @property-read int|null $plan_payment_methods_count
- * @method static Builder|Plan whereFreeTrialDays($value)
- * @method static Builder|Plan whereIsActive()
- * @method static Builder|Plan whereUuid($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereEnableTrial($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereFilter($params = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereFreeTrialDays($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereIsActive()
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereIsFree($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereModule($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\Plan whereUuid($value)
+ * @mixin \Eloquent
  */
 class Plan extends Model
 {
