@@ -49,9 +49,59 @@ class Subscription implements SubscriptionContrasts
             $this->registerModulePaymentHistory($key, $args);
         }
 
+        if (Arr::get($args, 'allow_setting_page', true)) {
+            $this->registerSettingPage($key, $args);
+        }
+
         $args = array_merge(['key' => $key], $args);
 
         $this->globalData->set("subscription_modules.{$key}", new Collection($args));
+    }
+
+    public function registerSettingPage(string $key, array $args = [])
+    {
+        $this->hookAction->registerSettingPage(
+            'subscription',
+            [
+                'label' => trans('cms::app.setting'),
+                'menu' => $args['menu'] ?? [
+                    'icon' => 'fa fa-cogs',
+                    'position' => 30,
+                ],
+            ]
+        );
+
+        $this->hookAction->addSettingForm(
+            'subscription',
+            [
+                'name' => trans('subscription::content.subscription'),
+                'page' => 'subscription',
+                'priority' => 99,
+            ]
+        );
+
+        $this->hookAction->registerConfig(
+            [
+                'subscription_enable_trial' => [
+                    'type' => 'select',
+                    'label' => trans('subscription::content.enable_trial'),
+                    'form' => 'subscription',
+                    'data' => [
+                        'options' => [
+                            0 => trans('cms::app.disabled'),
+                            1 => trans('cms::app.enabled'),
+                        ]
+                    ]
+                ],
+                'subscription_free_trial_days' => [
+                    'label' => trans('subscription::content.free_trial_days'),
+                    'form' => 'subscription',
+                    'data' => [
+                        'class' => 'is-number'
+                    ]
+                ],
+            ]
+        );
     }
 
     public function registerModuleUserSubscription(string $key, array $args = [])
