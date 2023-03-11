@@ -7,6 +7,7 @@ use Juzaweb\CMS\Facades\HookAction;
 use Juzaweb\CMS\Traits\ResourceController;
 use Illuminate\Support\Facades\Validator;
 use Juzaweb\CMS\Http\Controllers\BackendController;
+use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Http\Datatables\PaymentHistoryDatatable;
 use Juzaweb\Subscription\Models\PaymentHistory;
 
@@ -17,11 +18,36 @@ class PaymentHistoryController extends BackendController
     protected string $resourceKey = 'subscription-payment-histories';
     protected string $viewPrefix = 'subscription::backend.payment_history';
 
+    public function __construct(protected Subscription $subscription)
+    {
+    }
+
     protected function getDataTable(...$params): PaymentHistoryDatatable
     {
         $datatable = new PaymentHistoryDatatable();
         $datatable->mount($this->resourceKey, null);
         return $datatable;
+    }
+
+    protected function getBreadcrumbPrefix(...$params)
+    {
+        $this->addBreadcrumb(
+            [
+                'title' => $this->getSettingModule(...$params)->get('label'),
+                'url' => '#',
+            ]
+        );
+    }
+
+    protected function getSettingModule(...$params): Collection
+    {
+        if (isset($this->moduleSetting)) {
+            return $this->moduleSetting;
+        }
+
+        $this->moduleSetting = $this->subscription->getModule($params[0]);
+
+        return $this->moduleSetting;
     }
 
     protected function validator(array $attributes, ...$params): \Illuminate\Contracts\Validation\Validator

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Juzaweb\CMS\Facades\HookAction;
 use Juzaweb\CMS\Http\Controllers\BackendController;
 use Juzaweb\CMS\Traits\ResourceController;
+use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Http\Datatables\UserSubscriptionDatatable;
 use Juzaweb\Subscription\Models\UserSubscription;
 
@@ -16,6 +17,10 @@ class UserSubscriptionController extends BackendController
 
     protected string $resourceKey = 'subscription-user-subscriptions';
     protected string $viewPrefix = 'subscription::backend.user_subscription';
+
+    public function __construct(protected Subscription $subscription)
+    {
+    }
 
     protected function getDataTable(...$params)
     {
@@ -32,6 +37,27 @@ class UserSubscriptionController extends BackendController
             // Rules
             ]
         );
+    }
+
+    protected function getBreadcrumbPrefix(...$params)
+    {
+        $this->addBreadcrumb(
+            [
+                'title' => $this->getSettingModule(...$params)->get('label'),
+                'url' => '#',
+            ]
+        );
+    }
+
+    protected function getSettingModule(...$params): Collection
+    {
+        if (isset($this->moduleSetting)) {
+            return $this->moduleSetting;
+        }
+
+        $this->moduleSetting = $this->subscription->getModule($params[0]);
+
+        return $this->moduleSetting;
     }
 
     protected function getModel(...$params): string
