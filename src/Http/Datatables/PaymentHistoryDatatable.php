@@ -31,26 +31,11 @@ class PaymentHistoryDatatable extends ResourceDatatable
             'method' => [
                 'label' => trans('subscription::content.method'),
             ],
-            'method_id' => [
-                'label' => trans('subscription::content.method_id'),
-            ],
-            'module' => [
-                'label' => trans('subscription::content.module'),
-            ],
             'plan_id' => [
-                'label' => trans('subscription::content.plan_id'),
-            ],
-            'token' => [
-                'label' => trans('subscription::content.token'),
-            ],
-            'type' => [
-                'label' => trans('subscription::content.type'),
+                'label' => trans('subscription::content.plan'),
             ],
             'user_id' => [
-                'label' => trans('subscription::content.user_id'),
-            ],
-            'user_subscription_id' => [
-                'label' => trans('subscription::content.user_subscription_id'),
+                'label' => trans('subscription::content.user'),
             ],
             'created_at' => [
                 'label' => trans('cms::app.created_at'),
