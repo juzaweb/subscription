@@ -3,6 +3,7 @@
 namespace Juzaweb\Subscription\Http\Controllers\Backend;
 
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
@@ -76,7 +77,7 @@ class PlanController extends BackendController
         return parent::callAction($method, $parameters);
     }
 
-    protected function getDataForForm($model, ...$params): array
+    protected function getDataForForm(Model $model, ...$params): array
     {
         $data = $this->DataForForm($model, ...$params);
         $data['module'] = $this->getSettingModule(...$params)->get('key');

@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Subscription\Http\Controllers\Backend;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -78,7 +79,7 @@ class PaymentMethodController extends BackendController
         return $this->moduleSetting;
     }
 
-    protected function getDataForForm($model, ...$params): array
+    protected function getDataForForm(Model $model, ...$params): array
     {
         $methods = PaymentMethod::all();
         $methodOptions = $methods->mapWithKeys(fn ($item) => [$item['key'] => $item['label']])->toArray();
