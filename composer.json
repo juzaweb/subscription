@@ -1,13 +1,18 @@
 {
     "name": "juzaweb/subscription",
-    "description": "",
+    "description": "Subscription payment support",
+    "license": "MIT",
+    "keywords": [
+        "juzaweb",
+        "subscription",
+        "payment",
+        "plugin"
+    ],
     "extra": {
         "juzaweb": {
             "name": "Subscription",
             "description": "Subscription payment support",
             "domain": "subscription",
-            "cms_min": "3.3",
-            "version": "1.0",
             "providers": [
                 "Juzaweb\\Subscription\\Providers\\SubscriptionServiceProvider"
             ]
@@ -17,7 +22,7 @@
         "psr-4": {
             "Juzaweb\\Subscription\\": "src/"
         },
-        "files": ["src/Helpers/helpers.php"]
+        "files": ["helpers/helpers.php"]
     },
     "require": {
         "paypal/rest-api-sdk-php": "^1.14"

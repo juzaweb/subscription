@@ -84,14 +84,14 @@ class PlanController extends BackendController
         return $data;
     }
 
-    protected function beforeSave(&$data, &$model, ...$params)
+    protected function beforeSave(&$data, &$model, ...$params): void
     {
         if (isset($data['price'])) {
             $data['price'] = parse_price_format($data['price']);
         }
     }
 
-    protected function getBreadcrumbPrefix(...$params)
+    protected function getBreadcrumbPrefix(...$params): void
     {
         $this->addBreadcrumb(
             [
@@ -112,7 +112,7 @@ class PlanController extends BackendController
         return $this->moduleSetting;
     }
 
-    protected function getDataTable(...$params)
+    protected function getDataTable(...$params): \Juzaweb\CMS\Abstracts\DataTable
     {
         $dataTable = app(PlanDatatable::class);
         $dataTable->mount($this->resourceKey, null);

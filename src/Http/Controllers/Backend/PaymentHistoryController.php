@@ -22,14 +22,14 @@ class PaymentHistoryController extends BackendController
     {
     }
 
-    protected function getDataTable(...$params): PaymentHistoryDatatable
+    protected function getDataTable(...$params): \Juzaweb\CMS\Abstracts\DataTable
     {
-        $datatable = new PaymentHistoryDatatable();
+        $datatable = app()->make(PaymentHistoryDatatable::class);
         $datatable->mount($this->resourceKey, null);
         return $datatable;
     }
 
-    protected function getBreadcrumbPrefix(...$params)
+    protected function getBreadcrumbPrefix(...$params): void
     {
         $this->addBreadcrumb(
             [
@@ -55,7 +55,7 @@ class PaymentHistoryController extends BackendController
         return Validator::make(
             $attributes,
             [
-            // Rules
+                // Rules
             ]
         );
     }
