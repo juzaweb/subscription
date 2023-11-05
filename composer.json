@@ -1,5 +1,6 @@
 {
     "name": "juzaweb/subscription",
+    "type": "juzaweb-plugin",
     "description": "Subscription payment support",
     "license": "MIT",
     "keywords": [
