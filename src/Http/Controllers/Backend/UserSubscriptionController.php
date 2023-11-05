@@ -22,7 +22,7 @@ class UserSubscriptionController extends BackendController
     {
     }
 
-    protected function getDataTable(...$params)
+    protected function getDataTable(...$params): \Juzaweb\CMS\Abstracts\DataTable
     {
         $dataTable = app(UserSubscriptionDatatable::class);
         $dataTable->mount($this->resourceKey, null);

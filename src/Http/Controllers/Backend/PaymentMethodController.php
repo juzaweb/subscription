@@ -7,6 +7,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
+use Juzaweb\CMS\Abstracts\DataTable;
 use Juzaweb\CMS\Facades\Field;
 use Juzaweb\CMS\Facades\HookAction;
 use Juzaweb\CMS\Http\Controllers\BackendController;
@@ -58,7 +59,7 @@ class PaymentMethodController extends BackendController
         return parent::callAction($method, $parameters);
     }
 
-    protected function getBreadcrumbPrefix(...$params)
+    protected function getBreadcrumbPrefix(...$params): void
     {
         $this->addBreadcrumb(
             [
@@ -82,7 +83,7 @@ class PaymentMethodController extends BackendController
     protected function getDataForForm(Model $model, ...$params): array
     {
         $methods = PaymentMethod::all();
-        $methodOptions = $methods->mapWithKeys(fn ($item) => [$item['key'] => $item['label']])->toArray();
+        $methodOptions = $methods->mapWithKeys(fn($item) => [$item['key'] => $item['label']])->toArray();
 
         $data = $this->DataForForm($model, ...$params);
         $data['methods'] = $methods;
@@ -104,7 +105,7 @@ class PaymentMethodController extends BackendController
         )->toArray();
     }
 
-    protected function getDataTable(...$params)
+    protected function getDataTable(...$params): DataTable
     {
         $dataTable = app(PaymentMethodDatatable::class);
         $dataTable->mount($this->resourceKey, null);

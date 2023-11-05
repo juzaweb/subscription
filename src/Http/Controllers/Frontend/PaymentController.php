@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -54,7 +55,7 @@ class PaymentController extends FrontendController
             $helper->subscribe($plan, $planMethod, $request);
         } catch (PaymentException $e) {
             return $this->error($e->getMessage());
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
 
@@ -152,24 +153,24 @@ class PaymentController extends FrontendController
             $helper->cancel();
 
             DB::commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }
 
         return $this->success(
             [
-                'redirect' => $this->getCancelPageUrl(),
+                'redirect' => $this->getCancelPageUrl($module, $plan, $method),
             ]
         );
     }
 
-    public function webhook(Request $request, $module, $method): \Illuminate\Http\Response
+    public function webhook(Request $request, $module, $method): Response
     {
         Log::info(
             "Subscription Webhook {$module} {$method}"
-            ."\n Request: " . json_encode($request->all())
-            ."\n Headers: ". json_encode($request->headers->all())
+            ."\n Request: " .json_encode($request->all(), JSON_THROW_ON_ERROR)
+            ."\n Headers: ".json_encode($request->headers->all(), JSON_THROW_ON_ERROR)
         );
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
@@ -233,7 +234,7 @@ class PaymentController extends FrontendController
             DB::rollBack();
             report($e);
             return response($e->getMessage(), 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             throw $e;
         }

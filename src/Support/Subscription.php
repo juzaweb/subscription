@@ -58,7 +58,7 @@ class Subscription implements SubscriptionContrasts
         $this->globalData->set("subscription_modules.{$key}", new Collection($args));
     }
 
-    public function registerSettingPage(string $key, array $args = [])
+    public function registerSettingPage(string $key, array $args = []): void
     {
         $this->hookAction->registerSettingPage(
             'subscription',

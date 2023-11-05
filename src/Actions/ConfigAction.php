@@ -16,7 +16,7 @@ class ConfigAction extends Action
         $this->addAction(Action::BACKEND_INIT, [$this, 'registerConfigs']);
     }
 
-    public function registerConfigs()
+    public function registerConfigs(): void
     {
         //
     }

@@ -15,7 +15,7 @@ class AjaxAction extends Action
         //$this->addAction(Action::FRONTEND_INIT, [$this, 'addFrontendAjax']);
     }
 
-    public function addFrontendAjax()
+    public function addFrontendAjax(): void
     {
         $this->hookAction->registerFrontendAjax(
             'subscription.payment',
@@ -26,7 +26,7 @@ class AjaxAction extends Action
         );
     }
 
-    public function addAdminAjax()
+    public function addAdminAjax(): void
     {
         $this->hookAction->registerAdminAjax(
             'subscription.payment-config',

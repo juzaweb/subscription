@@ -30,7 +30,11 @@ interface PaymentMethod
 
     public function subscribe(PlanModel $plan, PlanPaymentMethod $planPaymentMethod, Request $request): bool;
 
+    public function cancel(): bool;
+
     public function setRedirectUrl(string $redirectUrl): void;
+
+    public function webhook(Request $request): bool|PaymentReturnResult;
 
     /**
      * Create a plan
