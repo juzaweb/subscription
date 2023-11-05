@@ -26,6 +26,6 @@
         "files": ["helpers/helpers.php"]
     },
     "require": {
-        "paypal/rest-api-sdk-php": "^1.14"
+        "juzaweb/paypal-rest-api-sdk-php": "^1.0"
     }
 }

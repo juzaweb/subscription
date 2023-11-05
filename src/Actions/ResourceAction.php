@@ -28,7 +28,7 @@ class ResourceAction extends Action
         $this->addAction(Action::BACKEND_INIT, [$this, 'enqueueStyles']);
     }
 
-    public function registerResources()
+    public function registerResources(): void
     {
         $this->hookAction->registerResource(
             'subscription-plans',
@@ -93,7 +93,7 @@ class ResourceAction extends Action
         );
     }
 
-    public function enqueueStyles()
+    public function enqueueStyles(): void
     {
         $this->hookAction->enqueueScript(
             'subs-js',

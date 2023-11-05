@@ -18,7 +18,7 @@ class MethodDefaultAction extends Action
         $this->addAction(Action::INIT_ACTION, [$this, 'initActions']);
     }
 
-    public function initActions()
+    public function initActions(): void
     {
         $this->paymentMethodManager->register(Paypal::class);
     }

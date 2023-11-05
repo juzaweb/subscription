@@ -31,7 +31,7 @@ class SubscriptionServiceProvider extends ServiceProvider
         PaymentHistoryRepository::class => PaymentHistoryRepositoryEloquent::class,
     ];
 
-    public function boot()
+    public function boot(): void
     {
         ActionRegister::register([MethodDefaultAction::class, ResourceAction::class, AjaxAction::class]);
     }
