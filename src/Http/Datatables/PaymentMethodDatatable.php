@@ -2,7 +2,7 @@
 
 namespace Juzaweb\Subscription\Http\Datatables;
 
-use Juzaweb\Backend\Http\Datatables\ResourceDatatable;
+use Juzaweb\Backend\Http\Datatables\PostType\ResourceDatatable;
 
 class PaymentMethodDatatable extends ResourceDatatable
 {
