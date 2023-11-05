@@ -33,13 +33,14 @@ class PaymentController extends FrontendController
     ) {
     }
 
-    public function payment(PaymentRequest $request, $module, $plan, $method): JsonResponse|RedirectResponse
+    public function payment(PaymentRequest $request, string $module): JsonResponse|RedirectResponse
     {
         global $jw_user;
 
         Cache::set("subscription_payment_{$jw_user->id}", $request->only(['return_url', 'cancel_url']), 3600);
 
-        $plan = $this->planRepository->findByUUID($plan);
+        $plan = $this->planRepository->findByUUIDOrFail($request->post('plan'));
+        $method = $request->post('method');
 
         $planMethod = $plan->planPaymentMethods()->where(['method' => $method])->first();
 
@@ -55,8 +56,6 @@ class PaymentController extends FrontendController
             $helper->subscribe($plan, $planMethod, $request);
         } catch (PaymentException $e) {
             return $this->error($e->getMessage());
-        } catch (Exception $e) {
-            throw $e;
         }
 
         if ($helper->isRedirect()) {

@@ -47,7 +47,7 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  */
 class Plan extends Model
 {
-    const STATUS_ACTIVE = 'active';
+    public const STATUS_ACTIVE = 'active';
 
     use ResourceModel, UseUUIDColumn;
 

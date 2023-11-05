@@ -23,6 +23,11 @@ class PlanRepositoryEloquent extends BaseRepositoryEloquent implements PlanRepos
         return $this->model->query()->where(['uuid' => $uuid])->{$action}();
     }
 
+    public function findByUUIDOrFail(string $uuid): Plan
+    {
+        return $this->findByUUID($uuid, true);
+    }
+
     public function model(): string
     {
         return Plan::class;

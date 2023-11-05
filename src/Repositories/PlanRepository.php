@@ -13,4 +13,6 @@ use Juzaweb\Subscription\Models\Plan;
 interface PlanRepository extends BaseRepository
 {
     public function findByUUID(string $uuid, bool $fail = false): ?Plan;
+
+    public function findByUUIDOrFail(string $uuid): Plan;
 }

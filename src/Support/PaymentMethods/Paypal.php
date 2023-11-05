@@ -150,8 +150,6 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             return true;
         } catch (PayPalConnectionException $e) {
             throw new PaymentException($e);
-        } catch (Exception $e) {
-            throw $e;
         }
     }
 
@@ -178,7 +176,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $resource = $request->input('resource');
         $eventType = $request->input('event_type');
         $amount = Arr::get($resource, 'amount.total');
-        $requestBody = json_encode($request->post());
+        $requestBody = json_encode($request->post(), JSON_THROW_ON_ERROR);
 
         /**
          * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post

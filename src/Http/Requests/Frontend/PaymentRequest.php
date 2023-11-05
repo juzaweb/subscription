@@ -15,11 +15,21 @@ class PaymentRequest extends FormRequest
     {
         return [
             'return_url' => [
-                'required',
+                'nullable',
+                'string',
             ],
             'cancel_url' => [
-                'required',
+                'nullable',
+                'string',
             ],
+            'plan' => [
+                'required',
+                'exists:subscription_plans,uuid',
+            ],
+            'method' => [
+                'required',
+                'exists:subscription_payment_methods,method',
+            ]
         ];
     }
 }
