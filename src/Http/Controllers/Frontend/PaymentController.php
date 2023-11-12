@@ -15,6 +15,7 @@ use Juzaweb\CMS\Http\Controllers\FrontendController;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Contrasts\Subscription;
+use Juzaweb\Subscription\Events\WebhookHandleSuccess;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
 use Juzaweb\Subscription\Exceptions\WebhookPaymentSkipException;
@@ -202,7 +203,9 @@ class PaymentController extends FrontendController
                 throw new PaymentException('Webhook: Subscriber model is empty user.');
             }
 
-            $this->webhookHandle($agreement, $method, $subscriber);
+            $paymentHistory = $this->webhookHandle($agreement, $method, $subscriber);
+
+            event(new WebhookHandleSuccess($agreement, $method, $subscriber, $paymentHistory));
 
             DB::commit();
         } catch (PaymentException $e) {
@@ -225,10 +228,10 @@ class PaymentController extends FrontendController
         PaymentReturnResult $agreement,
         PaymentMethod $method,
         UserSubscription $subscriber
-    ): void {
+    ): ?PaymentHistory {
         if (!$agreement->isActive()) {
             $subscriber->update(['status' => $agreement->getStatus()]);
-            return;
+            return null;
         }
 
         if ($subscriber->end_date?->gt(now())) {
@@ -251,7 +254,7 @@ class PaymentController extends FrontendController
 
         $subscriber->update(['start_date' => $subscriber->start_date ?? now(), 'end_date' => $expirationDate]);
 
-        PaymentHistory::create(
+        return PaymentHistory::create(
             [
                 'token' => $agreement->getToken(),
                 'method' => $method->method,
