@@ -13,12 +13,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Juzaweb\CMS\Http\Controllers\FrontendController;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
+use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
 use Juzaweb\Subscription\Exceptions\WebhookPaymentSkipException;
 use Juzaweb\Subscription\Http\Requests\Frontend\PaymentRequest;
 use Juzaweb\Subscription\Models\PaymentHistory;
+use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
@@ -200,41 +202,7 @@ class PaymentController extends FrontendController
                 throw new PaymentException('Webhook: Subscriber model is empty user.');
             }
 
-            if ($subscriber->end_date?->gt(now())) {
-                $expirationDate = $subscriber->end_date->addMonth()->format('Y-m-d 23:59:59');
-            } else {
-                $expirationDate = now()->addMonth()->format('Y-m-d 23:59:59');
-            }
-
-            $historyExists = PaymentHistory::where(
-                [
-                    'token' => $agreement->getToken(),
-                    'method' => $method->method,
-                    'module' => $module,
-                    'type' => 'webhook',
-                    'agreement_id' => $agreement->getAgreementId(),
-                ]
-            )->exists();
-
-            throw_if($historyExists, new WebhookPaymentSkipException('Webhook: Already handled.'));
-
-            $subscriber->update(['start_date' => $subscriber->start_date ?? now(), 'end_date' => $expirationDate]);
-
-            PaymentHistory::create(
-                [
-                    'token' => $agreement->getToken(),
-                    'method' => $method->method,
-                    'module' => $module,
-                    'type' => 'webhook',
-                    'amount' => $agreement->getAmount(),
-                    'method_id' => $method->id,
-                    'plan_id' => $subscriber->plan_id,
-                    'user_subscription_id' => $subscriber->id,
-                    'user_id' => Auth::id(),
-                    'agreement_id' => $agreement->getAgreementId(),
-                    'end_date' => $expirationDate,
-                ]
-            );
+            $this->webhookHandle($agreement, $method, $subscriber);
 
             DB::commit();
         } catch (PaymentException $e) {
@@ -251,6 +219,53 @@ class PaymentController extends FrontendController
         }
 
         return response('Webhook Handled', 200);
+    }
+
+    protected function webhookHandle(
+        PaymentReturnResult $agreement,
+        PaymentMethod $method,
+        UserSubscription $subscriber
+    ): void {
+        if (!$agreement->isActive()) {
+            $subscriber->update(['status' => $agreement->getStatus()]);
+            return;
+        }
+
+        if ($subscriber->end_date?->gt(now())) {
+            $expirationDate = $subscriber->end_date->addMonth()->format('Y-m-d 23:59:59');
+        } else {
+            $expirationDate = now()->addMonth()->format('Y-m-d 23:59:59');
+        }
+
+        $historyExists = PaymentHistory::where(
+            [
+                'token' => $agreement->getToken(),
+                'method' => $method->method,
+                'module' => $method->module,
+                'type' => 'webhook',
+                'agreement_id' => $agreement->getAgreementId(),
+            ]
+        )->exists();
+
+        throw_if($historyExists, new WebhookPaymentSkipException('Webhook: Already handled.'));
+
+        $subscriber->update(['start_date' => $subscriber->start_date ?? now(), 'end_date' => $expirationDate]);
+
+        PaymentHistory::create(
+            [
+                'token' => $agreement->getToken(),
+                'method' => $method->method,
+                'module' => $method->module,
+                'type' => 'webhook',
+                'amount' => $agreement->getAmount(),
+                'method_id' => $method->id,
+                'plan_id' => $subscriber->plan_id,
+                'user_subscription_id' => $subscriber->id,
+                'user_id' => Auth::id(),
+                'agreement_id' => $agreement->getAgreementId(),
+                'end_date' => $expirationDate,
+            ]
+        );
     }
 
     protected function getReturnPageUrl($module, $plan, $method): string

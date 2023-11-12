@@ -11,11 +11,16 @@
 namespace Juzaweb\Subscription\Support;
 
 use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Models\UserSubscription;
 
 class PaymentReturn implements PaymentReturnResult
 {
-    public function __construct(protected string $agreementId, protected float $amount, protected string $token)
-    {
+    public function __construct(
+        protected string $agreementId,
+        protected float $amount,
+        protected string $token,
+        protected string $status = UserSubscription::STATUS_ACTIVE
+    ) {
     }
 
     public function getAgreementId(): string
@@ -31,5 +36,15 @@ class PaymentReturn implements PaymentReturnResult
     public function getToken(): string
     {
         return $this->token;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === UserSubscription::STATUS_ACTIVE;
     }
 }

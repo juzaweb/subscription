@@ -18,6 +18,7 @@ use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
+use Juzaweb\Subscription\Models\UserSubscription;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class Paypal extends PaymentMethodAbstract implements PaymentMethod
@@ -70,14 +71,27 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             throw new PaymentException('Webhook Signature Invalid.');
         }
 
-        if ($eventType != 'PAYMENT.SALE.COMPLETED') {
+        $handleEvents = [
+            'PAYMENT.SALE.COMPLETED',
+            'BILLING.SUBSCRIPTION.CANCELLED',
+            'BILLING.SUBSCRIPTION.SUSPENDED'
+        ];
+
+        if (!in_array($eventType, $handleEvents)) {
             return false;
         }
+
+        $status = match ($eventType) {
+            'PAYMENT.SALE.COMPLETED' => UserSubscription::STATUS_ACTIVE,
+            'BILLING.SUBSCRIPTION.CANCELLED' => UserSubscription::STATUS_CANCEL,
+            default => UserSubscription::STATUS_SUSPEND,
+        };
 
         return $this->makePaymentReturnResult(
             Arr::get($resource, 'billing_agreement_id'),
             $amount,
-            $request->input('id')
+            $request->input('id'),
+            $status
         );
     }
 

@@ -6,6 +6,7 @@ use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
+use Juzaweb\Subscription\Models\UserSubscription;
 use Juzaweb\Subscription\Support\PaymentReturn;
 
 /**
@@ -70,8 +71,12 @@ abstract class PaymentMethodAbstract
         return route('subscription.module.cancel', [$plan->module, $plan->uuid, $this->name]);
     }
 
-    protected function makePaymentReturnResult(string $agreementId, float $amount, string $token): PaymentReturnResult
-    {
-        return new PaymentReturn($agreementId, $amount, $token);
+    protected function makePaymentReturnResult(
+        string $agreementId,
+        float $amount,
+        string $token,
+        string $status = UserSubscription::STATUS_ACTIVE
+    ): PaymentReturnResult {
+        return new PaymentReturn($agreementId, $amount, $token, $status);
     }
 }

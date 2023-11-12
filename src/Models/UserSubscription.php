@@ -50,6 +50,10 @@ class UserSubscription extends Model
 {
     use UseUUIDColumn, ResourceModel;
 
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_SUSPEND = 'suspend';
+    public const STATUS_CANCEL = 'cancel';
+
     protected $table = 'subscription_user_subscriptions';
 
     protected $fillable = [
@@ -59,6 +63,7 @@ class UserSubscription extends Model
         'method_id',
         'user_id',
         'plan_id',
+        'status',
     ];
 
     protected $casts = [
