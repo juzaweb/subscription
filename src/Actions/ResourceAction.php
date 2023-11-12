@@ -12,6 +12,7 @@ namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
 use Juzaweb\Subscription\Http\Datatables\PaymentHistoryDatatable;
+use Juzaweb\Subscription\Http\Datatables\PaymentMethodDatatable;
 use Juzaweb\Subscription\Http\Datatables\PlanDatatable;
 use Juzaweb\Subscription\Http\Datatables\UserSubscriptionDatatable;
 use Juzaweb\Subscription\Repositories\PaymentHistoryRepository;
@@ -62,6 +63,7 @@ class ResourceAction extends Action
             [
                 'label' => trans('subscription::content.payment_methods'),
                 'repository' => PaymentMethodRepository::class,
+                'datatable' => PaymentMethodDatatable::class,
                 'menu' => null,
                 'validator' => [
                     'name' => ['required', 'string', 'max:100'],

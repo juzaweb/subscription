@@ -101,6 +101,7 @@ class PaymentController extends FrontendController
                     'method_id' => $method->id,
                     'agreement_id' => $result->getAgreementId(),
                     'amount' => $result->getAmount(),
+                    'start_date' => now(),
                 ]
             );
 
