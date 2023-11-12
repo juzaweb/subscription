@@ -206,6 +206,18 @@ class PaymentController extends FrontendController
                 $expirationDate = now()->addMonth()->format('Y-m-d 23:59:59');
             }
 
+            $historyExists = PaymentHistory::where(
+                [
+                    'token' => $agreement->getToken(),
+                    'method' => $method->method,
+                    'module' => $module,
+                    'type' => 'webhook',
+                    'agreement_id' => $agreement->getAgreementId(),
+                ]
+            )->exists();
+
+            throw_if($historyExists, new WebhookPaymentSkipException('Webhook: Already handled.'));
+
             $subscriber->update(['start_date' => $subscriber->start_date ?? now(), 'end_date' => $expirationDate]);
 
             PaymentHistory::create(
