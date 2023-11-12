@@ -15,12 +15,26 @@ use Juzaweb\Subscription\Models\UserSubscription;
 
 class PaymentReturn implements PaymentReturnResult
 {
+    protected ?string $message = null;
+
     public function __construct(
         protected string $agreementId,
         protected float $amount,
         protected string $token,
         protected string $status = UserSubscription::STATUS_ACTIVE
     ) {
+    }
+
+    public function setMessage(string $message): static
+    {
+        $this->message = $message;
+
+        return $this;
+    }
+
+    public function getMessage(): ?string
+    {
+        return $this->message;
     }
 
     public function getAgreementId(): string

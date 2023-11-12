@@ -12,6 +12,7 @@ namespace Juzaweb\Subscription\Support\PaymentMethods;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Juzaweb\CMS\Models\User;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
 use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
@@ -27,12 +28,15 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
     public function subscribe(PlanModel $plan, PlanPaymentMethod $planPaymentMethod, Request $request): bool
     {
+        /** @var User $user */
+        $user = $request->user();
+
         $response = $this->getProvider()
-            ->addProduct('Demo Product', 'Demo Product', 'SERVICE', 'SOFTWARE')
+            ->addProduct($plan->name, $plan->description ?? "Subscription plan {$plan->name}", 'SERVICE', 'SOFTWARE')
             //->addPlanTrialPricing('DAY', 7)
-            ->addMonthlyPlan('Demo Plan', 'Demo Plan', 100)
+            ->addMonthlyPlan('Monthly Subscription', 'Monthly Subscription Plan', $plan->price)
             ->setReturnAndCancelUrl($this->getReturnUrl($plan), $this->getCancelUrl($plan))
-            ->setupSubscription('John Doe', 'john@example.com', now()->addMinutes(2));
+            ->setupSubscription($user->name, $user->email, now()->addMinutes(2));
 
         $approveLink = Arr::get($response, 'links.0.href');
 
@@ -91,6 +95,24 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             Arr::get($resource, 'billing_agreement_id'),
             $amount,
             $request->input('id'),
+            $status
+        );
+    }
+
+    public function return(PlanModel $plan, array $data): ?PaymentReturnResult
+    {
+        $provider = $this->getProvider();
+
+        $response = $provider->showSubscriptionDetails($data['subscription_id']);
+
+        $status = Arr::get($response, 'status') == 'ACTIVE'
+            ? UserSubscription::STATUS_ACTIVE
+            : UserSubscription::STATUS_CANCEL;
+
+        return $this->makePaymentReturnResult(
+            Arr::get($response, 'id'),
+            Arr::get($response, 'billing_info.last_payment.amount.value'),
+            $data['token'],
             $status
         );
     }

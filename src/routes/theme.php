@@ -9,7 +9,7 @@ Route::group(
             ->name('subscription.module.payment');
         Route::get('subscription/{module}/return/{plan}/{method}', [PaymentController::class, 'return'])
             ->name('subscription.module.return');
-        Route::get('subscription/{module}/cancel/{plan}/{method}', [PaymentController::class, 'return'])
+        Route::get('subscription/{module}/cancel/{plan}/{method}', [PaymentController::class, 'cancel'])
             ->name('subscription.module.cancel');
     }
 );

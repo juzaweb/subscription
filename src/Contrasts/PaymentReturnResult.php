@@ -12,6 +12,9 @@ namespace Juzaweb\Subscription\Contrasts;
 
 use Juzaweb\Subscription\Models\UserSubscription;
 
+/**
+ * @see \Juzaweb\Subscription\Support\PaymentReturn
+ */
 interface PaymentReturnResult
 {
     public function __construct(
@@ -20,6 +23,10 @@ interface PaymentReturnResult
         string $token,
         string $status = UserSubscription::STATUS_ACTIVE
     );
+
+    public function setMessage(string $message): static;
+
+    public function getMessage(): ?string;
 
     public function getAgreementId(): string;
 

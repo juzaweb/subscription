@@ -109,7 +109,7 @@ class PaymentController extends FrontendController
                     'token' => $result->getToken(),
                     'method' => $method->method,
                     'module' => $module,
-                    'type' => 'return',
+                    'type' => PaymentHistory::TYPE_RETURN,
                     'amount' => $result->getAmount(),
                     'method_id' => $method->id,
                     'plan_id' => $plan->id,
@@ -242,10 +242,9 @@ class PaymentController extends FrontendController
 
         $historyExists = PaymentHistory::where(
             [
-                'token' => $agreement->getToken(),
                 'method' => $method->method,
                 'module' => $method->module,
-                'type' => 'webhook',
+                'type' => PaymentHistory::TYPE_WEBHOOK,
                 'agreement_id' => $agreement->getAgreementId(),
             ]
         )->exists();
@@ -259,7 +258,7 @@ class PaymentController extends FrontendController
                 'token' => $agreement->getToken(),
                 'method' => $method->method,
                 'module' => $method->module,
-                'type' => 'webhook',
+                'type' => PaymentHistory::TYPE_WEBHOOK,
                 'amount' => $agreement->getAmount(),
                 'method_id' => $method->id,
                 'plan_id' => $subscriber->plan_id,

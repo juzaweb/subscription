@@ -50,6 +50,9 @@ use Juzaweb\CMS\Models\User;
  */
 class PaymentHistory extends Model
 {
+    public const TYPE_WEBHOOK = 'webhook';
+    public const TYPE_RETURN = 'return';
+
     protected $table = 'subscription_payment_histories';
 
     protected $fillable = [
