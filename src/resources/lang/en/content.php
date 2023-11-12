@@ -22,4 +22,5 @@ return [
     'plan' => 'Plan',
     'start_date' => 'Start date',
     'user' => 'User',
+    'status' => 'Status',
 ];

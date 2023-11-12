@@ -12,6 +12,7 @@ namespace Juzaweb\Subscription\Support\PaymentMethods;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Juzaweb\CMS\Models\User;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
@@ -50,6 +51,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $resource = $request->input('resource');
         $eventType = $request->input('event_type');
         $amount = Arr::get($resource, 'agreement_details.last_payment_amount.value');
+        $requestBody = json_encode($request->post(), JSON_THROW_ON_ERROR);
 
         /**
          * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
@@ -58,23 +60,23 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
 
         $provider = $this->getProvider();
-        $verifyResource = $provider->verifyWebHook(
-            [
-                "transmission_id" => $headers['PAYPAL-TRANSMISSION-ID'][0],
-                "transmission_time" => $headers['PAYPAL-TRANSMISSION-TIME'][0],
-                "cert_url" => $headers['PAYPAL-CERT-URL'][0],
-                "auth_algo" => $headers['PAYPAL-AUTH-ALGO'][0],
-                "transmission_sig" => $headers['PAYPAL-TRANSMISSION-SIG'][0],
-                "webhook_id" => $this->getConfigByMod()['webhook_id'],
-                "webhook_event" => [
-                    'event_version' => $request->input('event_version'),
-                    'resource_version' => $request->input('resource_version'),
-                ],
-            ]
-        );
+        $verifyData = [
+            "transmission_id" => $headers['PAYPAL-TRANSMISSION-ID'][0],
+            "transmission_time" => $headers['PAYPAL-TRANSMISSION-TIME'][0],
+            "cert_url" => $headers['PAYPAL-CERT-URL'][0],
+            "auth_algo" => $headers['PAYPAL-AUTH-ALGO'][0],
+            "transmission_sig" => $headers['PAYPAL-TRANSMISSION-SIG'][0],
+            "webhook_id" => $this->getConfigByMod()['webhook_id'],
+            "webhook_event" => $requestBody,
+        ];
 
-        if (Arr::get($verifyResource, 'verification_status') != 'SUCCESS') {
-            throw new PaymentException('Webhook Signature Invalid.');
+        $this->logger()->info('Webhook Verify Data', $verifyData);
+        $verifyResponse = $provider->verifyWebHook($verifyData);
+
+        $this->logger()->info('Webhook Verify Response', $verifyResponse);
+
+        if (Arr::get($verifyResponse, 'verification_status') != 'SUCCESS') {
+            throw new PaymentException("Event {$eventType} Webhook Signature Invalid.");
         }
 
         $handleEvents = [
@@ -163,6 +165,16 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         ];
     }
 
+    protected function logger(): \Psr\Log\LoggerInterface
+    {
+        return Log::build(
+            [
+                'driver' => 'daily',
+                'path' => storage_path('logs/paypal.log'),
+            ]
+        );
+    }
+
     protected function getConfigByMod(): array
     {
         $clientId = Arr::get($this->paymentMethod->configs, 'mod') == 'live'
@@ -196,7 +208,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             ],
             'payment_action' => 'Sale',
             'currency'       => 'USD',
-            'notify_url'     => 'https://your-app.com/paypal/notify',
+            //'notify_url'     => 'https://your-app.com/paypal/notify',
+            'notify_url'     => null,
             'locale'         => 'en_US',
             'validate_ssl'   => false,
         ];

@@ -216,6 +216,7 @@ class PaymentController extends FrontendController
         } catch (Exception $e) {
             DB::rollBack();
             report($e);
+            return response('Webhook Handled', 422);
         }
 
         return response('Webhook Handled', 200);
