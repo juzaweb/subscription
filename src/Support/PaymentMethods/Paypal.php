@@ -51,31 +51,9 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $resource = $request->input('resource');
         $eventType = $request->input('event_type');
         $amount = Arr::get($resource, 'agreement_details.last_payment_amount.value');
-        $requestBody = json_encode($request->post(), JSON_THROW_ON_ERROR);
-
-        /**
-         * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
-         * All header keys as UPPERCASE, but I recive the header key as the example array, First letter as UPPERCASE
-         */
-        $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
-
         $provider = $this->getProvider();
-        $verifyData = [
-            "transmission_id" => $headers['PAYPAL-TRANSMISSION-ID'][0],
-            "transmission_time" => $headers['PAYPAL-TRANSMISSION-TIME'][0],
-            "cert_url" => $headers['PAYPAL-CERT-URL'][0],
-            "auth_algo" => $headers['PAYPAL-AUTH-ALGO'][0],
-            "transmission_sig" => $headers['PAYPAL-TRANSMISSION-SIG'][0],
-            "webhook_id" => $this->getConfigByMod()['webhook_id'],
-            "webhook_event" => $requestBody,
-        ];
 
-        $this->logger()->info('Webhook Verify Data', $verifyData);
-        $verifyResponse = $provider->verifyWebHook($verifyData);
-
-        $this->logger()->info('Webhook Verify Response', $verifyResponse);
-
-        if (Arr::get($verifyResponse, 'verification_status') != 'SUCCESS') {
+        if ($this->verifyWebhook($provider, $request)) {
             throw new PaymentException("Event {$eventType} Webhook Signature Invalid.");
         }
 
@@ -163,6 +141,34 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
                 'label' => 'Live Webhook ID',
             ],
         ];
+    }
+
+    protected function verifyWebhook($provider, Request $request): bool
+    {
+        $requestBody = json_encode($request->post(), JSON_THROW_ON_ERROR);
+
+        /**
+         * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
+         * All header keys as UPPERCASE, but I recive the header key as the example array, First letter as UPPERCASE
+         */
+        $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
+
+        $verifyData = [
+            "transmission_id" => $headers['PAYPAL-TRANSMISSION-ID'][0],
+            "transmission_time" => $headers['PAYPAL-TRANSMISSION-TIME'][0],
+            "cert_url" => $headers['PAYPAL-CERT-URL'][0],
+            "auth_algo" => $headers['PAYPAL-AUTH-ALGO'][0],
+            "transmission_sig" => $headers['PAYPAL-TRANSMISSION-SIG'][0],
+            "webhook_id" => $this->getConfigByMod()['webhook_id'],
+            "webhook_event" => $requestBody,
+        ];
+
+        $this->logger()->info('Webhook Verify Data', $verifyData);
+        $verifyResponse = $provider->verifyWebHook($verifyData);
+
+        $this->logger()->info('Webhook Verify Response', $verifyResponse);
+
+        return Arr::get($verifyResponse, 'verification_status') != 'SUCCESS';
     }
 
     protected function logger(): \Psr\Log\LoggerInterface
