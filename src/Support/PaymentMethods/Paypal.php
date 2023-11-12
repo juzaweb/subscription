@@ -49,8 +49,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
     {
         $resource = $request->input('resource');
         $eventType = $request->input('event_type');
-        $amount = Arr::get($resource, 'amount.total');
-        $requestBody = json_encode($request->post(), JSON_THROW_ON_ERROR);
+        $amount = Arr::get($resource, 'agreement_details.last_payment_amount.value');
 
         /**
          * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
@@ -61,17 +60,20 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $provider = $this->getProvider();
         $verifyResource = $provider->verifyWebHook(
             [
-                "transmission_id" => $headers['PAYPAL-TRANSMISSION-ID'],
-                "transmission_time" => $headers['PAYPAL-TRANSMISSION-TIME'],
-                "cert_url" => $headers['PAYPAL-CERT-URL'],
-                "auth_algo" => $headers['PAYPAL-AUTH-ALGO'],
-                "transmission_sig" => $headers['PAYPAL-TRANSMISSION-SIG'],
+                "transmission_id" => $headers['PAYPAL-TRANSMISSION-ID'][0],
+                "transmission_time" => $headers['PAYPAL-TRANSMISSION-TIME'][0],
+                "cert_url" => $headers['PAYPAL-CERT-URL'][0],
+                "auth_algo" => $headers['PAYPAL-AUTH-ALGO'][0],
+                "transmission_sig" => $headers['PAYPAL-TRANSMISSION-SIG'][0],
                 "webhook_id" => $this->getConfigByMod()['webhook_id'],
-                "webhook_event" => $requestBody,
+                "webhook_event" => [
+                    'event_version' => $request->input('event_version'),
+                    'resource_version' => $request->input('resource_version'),
+                ],
             ]
         );
 
-        if ($verifyResource['verification_status'] != 'SUCCESS') {
+        if (Arr::get($verifyResource, 'verification_status') != 'SUCCESS') {
             throw new PaymentException('Webhook Signature Invalid.');
         }
 
@@ -125,6 +127,40 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
     public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string
     {
         // TODO: Implement updatePlan() method.
+    }
+
+    public function getConfigs(): array
+    {
+        return [
+            'mode' => [
+                'type' => 'select',
+                'label' => 'Payment Mode',
+                'data' => [
+                    'options' => [
+                        'sandbox' => 'Sandbox',
+                        'live' => 'Live',
+                    ]
+                ]
+            ],
+            'sandbox_client_id' => [
+                'label' => 'Sandbox Client ID',
+            ],
+            'sandbox_secret' => [
+                'label' => 'Sandbox Secret',
+            ],
+            'sandbox_webhook_id' => [
+                'label' => 'Sandbox Webhook ID',
+            ],
+            'live_client_id' => [
+                'label' => 'Live Client ID',
+            ],
+            'live_secret' => [
+                'label' => 'Live Secret',
+            ],
+            'live_webhook_id' => [
+                'label' => 'Live Webhook ID',
+            ],
+        ];
     }
 
     protected function getConfigByMod(): array

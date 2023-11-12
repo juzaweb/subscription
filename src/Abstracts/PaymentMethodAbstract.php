@@ -31,10 +31,7 @@ abstract class PaymentMethodAbstract
         return $this->label ?? ucfirst($this->name);
     }
 
-    public function getConfigs(): array
-    {
-        return [];
-    }
+    abstract public function getConfigs(): array;
 
     public function isRedirect(): bool
     {

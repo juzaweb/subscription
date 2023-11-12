@@ -49,6 +49,12 @@ class UserSubscriptionDatatable extends ResourceDatatable
                     return $row->user?->name;
                 }
             ],
+            'status' => [
+                'label' => trans('subscription::content.status'),
+                'formatter' => function ($value, $row, $index) {
+                    return $row->status;
+                }
+            ],
             'created_at' => [
                 'label' => trans('cms::app.created_at'),
                 'width' => '15%',

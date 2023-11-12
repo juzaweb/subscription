@@ -35,7 +35,7 @@
                 }}
 
                 <div @if(empty($model->configs)) class="box-hidden" @endif id="show-configs">
-                    {{ Field::render($config_fields, $model->configs ?? []) }}
+                    {{ Field::render($configFields, $model->configs ?? []) }}
                 </div>
             </div>
         </div>

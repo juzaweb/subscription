@@ -101,7 +101,7 @@ class PaymentController extends FrontendController
                     'method_id' => $method->id,
                     'agreement_id' => $result->getAgreementId(),
                     'amount' => $result->getAmount(),
-                    'start_date' => now(),
+                    'status' => UserSubscription::STATUS_ACTIVE,
                 ]
             );
 
@@ -209,17 +209,13 @@ class PaymentController extends FrontendController
             event(new WebhookHandleSuccess($agreement, $method, $subscriber, $paymentHistory));
 
             DB::commit();
-        } catch (PaymentException $e) {
-            DB::rollBack();
-            report($e);
-            return response($e->getMessage(), 422);
-        } catch (WebhookPaymentSkipException $e) {
+        } catch (PaymentException|WebhookPaymentSkipException $e) {
             DB::rollBack();
             report($e);
             return response($e->getMessage(), 200);
         } catch (Exception $e) {
             DB::rollBack();
-            throw $e;
+            report($e);
         }
 
         return response('Webhook Handled', 200);

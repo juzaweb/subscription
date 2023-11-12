@@ -89,17 +89,20 @@ class PaymentMethodController extends BackendController
         $data['methods'] = $methods;
         $data['methodOptions'] = $methodOptions;
         $data['module'] = $this->getSettingModule(...$params)->get('key');
-        $data['config_fields'] = $this->getConfigFields($model->method);
+        $data['configFields'] = $this->getConfigFields($model->method, $model);
         return $data;
     }
 
-    protected function getConfigFields(?string $method): array
+    protected function getConfigFields(?string $method, ?Model $model = null): array
     {
         $config = PaymentMethod::all()->get($method, new Collection());
 
         return collect($config->get('configs', []))->map(
-            function ($item, $key) {
+            function ($item, $key) use ($model) {
                 $item['name'] = "configs[{$key}]";
+                if ($model?->configs) {
+                    $item['value'] = $model->configs[$key];
+                }
                 return $item;
             }
         )->toArray();
