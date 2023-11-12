@@ -53,7 +53,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $amount = Arr::get($resource, 'agreement_details.last_payment_amount.value');
         $provider = $this->getProvider();
 
-        if ($this->verifyWebhook($provider, $request)) {
+        if (!$this->verifyWebhook($provider, $request)) {
             throw new PaymentException("Event {$eventType} Webhook Signature Invalid.");
         }
 
@@ -143,7 +143,40 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         ];
     }
 
-    protected function verifyWebhook($provider, Request $request): bool
+    protected function verifyWebhook($provider, Request $request): bool|int
+    {
+        $payload = file_get_contents('php://input');
+        $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
+
+        $transmissionId = $headers['PAYPAL-TRANSMISSION-ID'][0];
+        $transmissionSig = $headers['PAYPAL-TRANSMISSION-SIG'][0];
+        $transmissionTime = $headers['PAYPAL-TRANSMISSION-TIME'][0];
+
+        $cert_url = $headers['PAYPAL-CERT-URL'][0];
+        $cert = file_get_contents($cert_url);
+
+        $signature = base64_decode($transmissionSig);
+
+        // <transmissionId>|<timeStamp>|<webhookId>|<crc32>
+        $string_chain = implode(
+            '|',
+            [
+                $transmissionId,
+                $transmissionTime,
+                $this->getConfigByMod()['webhook_id'],
+                crc32($payload),
+            ]
+        );
+
+        return openssl_verify(
+            data: $string_chain,
+            signature: $signature,
+            public_key: openssl_pkey_get_public(public_key: $cert),
+            algorithm: 'sha256WithRSAEncryption'
+        );
+    }
+
+    protected function verifyWebhook2($provider, Request $request): bool
     {
         $requestBody = json_encode($request->post(), JSON_THROW_ON_ERROR);
 
