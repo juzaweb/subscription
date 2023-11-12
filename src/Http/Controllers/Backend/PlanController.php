@@ -10,6 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use Juzaweb\CMS\Abstracts\DataTable;
 use Juzaweb\CMS\Facades\HookAction;
 use Juzaweb\CMS\Http\Controllers\BackendController;
 use Juzaweb\CMS\Traits\ResourceController;
@@ -80,7 +81,7 @@ class PlanController extends BackendController
     protected function getDataForForm(Model $model, ...$params): array
     {
         $data = $this->DataForForm($model, ...$params);
-        $data['module'] = $this->getSettingModule(...$params)->get('key');
+        $data['module'] = $this->getModuleName(...$params);
         return $data;
     }
 
@@ -112,7 +113,7 @@ class PlanController extends BackendController
         return $this->moduleSetting;
     }
 
-    protected function getDataTable(...$params): \Juzaweb\CMS\Abstracts\DataTable
+    protected function getDataTable(...$params): DataTable
     {
         $dataTable = app(PlanDatatable::class);
         $dataTable->mount($this->resourceKey, null);
@@ -144,6 +145,11 @@ class PlanController extends BackendController
             'free_trial_days' => ['nullable', 'numeric', 'min:0'],
             'module' => ['required'],
         ];
+    }
+
+    protected function getModuleName(...$params)
+    {
+        return $this->getSettingModule(...$params)->get('key');
     }
 
     protected function getModel(...$params): string

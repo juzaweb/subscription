@@ -27,7 +27,7 @@ class PlanDatatable extends ResourceDatatable
                 'label' => trans('subscription::content.price'),
                 'width' => '15%',
                 'align' => 'center',
-                'formatter' => fn($value, $row, $index) => '$'. number_format($value),
+                'formatter' => fn($value, $row, $index) => '$'.number_format($value),
             ],
             'is_free' => [
                 'label' => trans('subscription::content.is_free'),
