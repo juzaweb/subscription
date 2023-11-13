@@ -70,7 +70,7 @@ abstract class PaymentMethodAbstract
 
     protected function makePaymentReturnResult(
         string $agreementId,
-        float $amount,
+        ?float $amount,
         string $token,
         string $status = UserSubscription::STATUS_ACTIVE
     ): PaymentReturnResult {

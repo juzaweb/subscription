@@ -15,6 +15,7 @@ use Juzaweb\CMS\Http\Controllers\FrontendController;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Contrasts\Subscription;
+use Juzaweb\Subscription\Events\PaymentSuccess;
 use Juzaweb\Subscription\Events\WebhookHandleSuccess;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
@@ -105,7 +106,7 @@ class PaymentController extends FrontendController
                 ]
             );
 
-            PaymentHistory::create(
+            $paymentHistory = PaymentHistory::create(
                 [
                     'token' => $result->getToken(),
                     'method' => $method->method,
@@ -184,9 +185,7 @@ class PaymentController extends FrontendController
 
             $agreement = $helper->webhook($request);
 
-            if (empty($agreement)) {
-                throw new WebhookPaymentSkipException('Webhook: There is no handling.');
-            }
+            throw_unless($agreement, new WebhookPaymentSkipException('Webhook: There is no handling.'));
 
             $subscriber = UserSubscription::where(
                 [
@@ -196,9 +195,7 @@ class PaymentController extends FrontendController
             )
                 ->first();
 
-            if (empty($subscriber)) {
-                throw new PaymentException('Webhook: Not available agreement.');
-            }
+            throw_if($subscriber === null, new PaymentException('Webhook: Not available agreement.'));
 
             if (empty($subscriber->user)) {
                 throw new PaymentException('Webhook: Subscriber model is empty user.');
@@ -215,8 +212,12 @@ class PaymentController extends FrontendController
             return response($e->getMessage(), 200);
         } catch (Exception $e) {
             DB::rollBack();
-            throw $e;
-            return response('Webhook Handled', 422);
+            report($e);
+            return response('Webhook Handle Failed', 422);
+        }
+
+        if ($agreement->isActive()) {
+            event(new PaymentSuccess($agreement, $subscriber, $paymentHistory));
         }
 
         return response('Webhook Handled', 200);
@@ -244,6 +245,7 @@ class PaymentController extends FrontendController
                 'module' => $method->module,
                 'type' => PaymentHistory::TYPE_WEBHOOK,
                 'agreement_id' => $agreement->getAgreementId(),
+                'token' => $agreement->getToken(),
             ]
         )->exists();
 
@@ -261,7 +263,7 @@ class PaymentController extends FrontendController
                 'method_id' => $method->id,
                 'plan_id' => $subscriber->plan_id,
                 'user_subscription_id' => $subscriber->id,
-                'user_id' => Auth::id(),
+                'user_id' => $subscriber->user_id,
                 'agreement_id' => $agreement->getAgreementId(),
                 'end_date' => $expirationDate,
             ]

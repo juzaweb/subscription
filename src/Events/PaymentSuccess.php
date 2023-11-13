@@ -10,12 +10,16 @@
 
 namespace Juzaweb\Subscription\Events;
 
+use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Models\PaymentHistory;
+use Juzaweb\Subscription\Models\UserSubscription;
+
 class PaymentSuccess
 {
-    public $responre;
-
-    public function __construct($responre)
-    {
-        $this->responre = $responre;
+    public function __construct(
+        protected PaymentReturnResult $paymentReturnResult,
+        UserSubscription $userSubscription,
+        PaymentHistory $paymentHistory
+    ) {
     }
 }

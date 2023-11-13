@@ -17,7 +17,6 @@ use Juzaweb\CMS\Models\User;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
 use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
-use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
@@ -50,11 +49,11 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
     {
         $resource = $request->input('resource');
         $eventType = $request->input('event_type');
-        $amount = Arr::get($resource, 'agreement_details.last_payment_amount.value');
+        $amount = $this->getAmountInWebhookResource($resource);
         $provider = $this->getProvider();
 
         if (!$this->verifyWebhook($provider, $request)) {
-            throw new PaymentException("Event {$eventType} Webhook Signature Invalid.");
+            throw new \RuntimeException("Event {$eventType} Webhook Signature Invalid.");
         }
 
         $handleEvents = [
@@ -76,7 +75,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $this->makePaymentReturnResult(
             Arr::get($resource, 'billing_agreement_id'),
             $amount,
-            $request->input('id'),
+            Arr::get($resource, 'id'),
             $status
         );
     }
@@ -143,7 +142,44 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         ];
     }
 
-    protected function verifyWebhook($provider, Request $request): bool|int
+    protected function getAmountInWebhookResource(array $resource)
+    {
+        $amount = Arr::get($resource, 'amount.total');
+
+        if (empty($amount)) {
+            return Arr::get($resource, 'agreement_details.last_payment_amount.value');
+        }
+
+        return $amount;
+    }
+
+    protected function verifyWebhook($provider, Request $request): bool
+    {
+        $webhookData = $request->getContent();
+        $headers = $request->headers;
+
+        $transmissionId = $headers->get('PAYPAL-TRANSMISSION-ID');
+        $timestamp = $headers->get('PAYPAL-TRANSMISSION-TIME');
+        $certUrl = $headers->get('PAYPAL-CERT-URL');
+        $authAlgo = $headers->get('PAYPAL-AUTH-ALGO');
+        $transmissionSig = $headers->get('PAYPAL-TRANSMISSION-SIG');
+
+        info('transaction', [$transmissionId, $timestamp, $certUrl, $authAlgo, $transmissionSig]);
+
+        $expectedSignature = hash_hmac(
+            'sha256',
+            $transmissionId."|".$timestamp."|".$this->getConfigByMod()['webhook_id'].'|'.$webhookData,
+            $certUrl
+        );
+
+        if (hash_equals($expectedSignature, $transmissionSig)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function verifyWebhook3($provider, Request $request): bool|int
     {
         $payload = file_get_contents('php://input');
         $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
@@ -234,23 +270,23 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
     protected function getProvider(): PayPalClient
     {
         $config = [
-            'mode'    => Arr::get($this->paymentMethod->configs, 'mod', 'sandbox'),
+            'mode' => Arr::get($this->paymentMethod->configs, 'mod', 'sandbox'),
             'live' => [
-                'client_id'         => Arr::get($this->paymentMethod->configs, 'live_client_id'),
-                'client_secret'     => Arr::get($this->paymentMethod->configs, 'live_secret'),
+                'client_id' => Arr::get($this->paymentMethod->configs, 'live_client_id'),
+                'client_secret' => Arr::get($this->paymentMethod->configs, 'live_secret'),
                 //'app_id'            => 'APP-80W284485P519543T',
             ],
             'sandbox' => [
-                'client_id'         => Arr::get($this->paymentMethod->configs, 'sandbox_client_id'),
-                'client_secret'     => Arr::get($this->paymentMethod->configs, 'sandbox_secret'),
+                'client_id' => Arr::get($this->paymentMethod->configs, 'sandbox_client_id'),
+                'client_secret' => Arr::get($this->paymentMethod->configs, 'sandbox_secret'),
                 //'app_id'            => 'APP-80W284485P519543T',
             ],
             'payment_action' => 'Sale',
-            'currency'       => 'USD',
+            'currency' => 'USD',
             //'notify_url'     => 'https://your-app.com/paypal/notify',
-            'notify_url'     => null,
-            'locale'         => 'en_US',
-            'validate_ssl'   => false,
+            'notify_url' => null,
+            'locale' => 'en_US',
+            'validate_ssl' => false,
         ];
         //dd($config);
         $provider = new PayPalClient($config);

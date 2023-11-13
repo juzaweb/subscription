@@ -19,7 +19,7 @@ class PaymentReturn implements PaymentReturnResult
 
     public function __construct(
         protected string $agreementId,
-        protected float $amount,
+        protected ?float $amount,
         protected string $token,
         protected string $status = UserSubscription::STATUS_ACTIVE
     ) {
@@ -47,6 +47,11 @@ class PaymentReturn implements PaymentReturnResult
         return $this->amount;
     }
 
+    /**
+     * Unique for check handle exists
+     *
+     * @return string
+     */
     public function getToken(): string
     {
         return $this->token;
