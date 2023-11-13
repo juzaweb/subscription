@@ -15,6 +15,7 @@ use Juzaweb\CMS\Http\Controllers\FrontendController;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Contrasts\Subscription;
+use Juzaweb\Subscription\Events\PaymentReturn;
 use Juzaweb\Subscription\Events\PaymentSuccess;
 use Juzaweb\Subscription\Events\WebhookHandleSuccess;
 use Juzaweb\Subscription\Exceptions\PaymentException;
@@ -137,6 +138,8 @@ class PaymentController extends FrontendController
             DB::rollBack();
             throw $e;
         }
+
+        event(new PaymentReturn($result, $subscriber, $paymentHistory));
 
         return $this->success(
             [

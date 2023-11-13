@@ -153,7 +153,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $amount;
     }
 
-    protected function verifyWebhook($provider, Request $request): bool
+    protected function verifyWebhook4($provider, Request $request): bool
     {
         $webhookData = $request->getContent();
         $headers = $request->headers;
@@ -179,22 +179,29 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return false;
     }
 
-    protected function verifyWebhook3($provider, Request $request): bool|int
+    protected function verifyWebhook($provider, Request $request): bool|int
     {
-        $payload = file_get_contents('php://input');
-        $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
+        // $payload = file_get_contents('php://input');
+        // $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
+        //
+        // $transmissionId = $headers['PAYPAL-TRANSMISSION-ID'][0];
+        // $transmissionSig = $headers['PAYPAL-TRANSMISSION-SIG'][0];
+        // $transmissionTime = $headers['PAYPAL-TRANSMISSION-TIME'][0];
 
-        $transmissionId = $headers['PAYPAL-TRANSMISSION-ID'][0];
-        $transmissionSig = $headers['PAYPAL-TRANSMISSION-SIG'][0];
-        $transmissionTime = $headers['PAYPAL-TRANSMISSION-TIME'][0];
+        $payload = $request->getContent();
+        $headers = $request->headers;
 
-        $cert_url = $headers['PAYPAL-CERT-URL'][0];
-        $cert = file_get_contents($cert_url);
+        $transmissionId = $headers->get('PAYPAL-TRANSMISSION-ID');
+        $transmissionTime = $headers->get('PAYPAL-TRANSMISSION-TIME');
+        $certUrl = $headers->get('PAYPAL-CERT-URL');
+        $transmissionSig = $headers->get('PAYPAL-TRANSMISSION-SIG');
+
+        $cert = file_get_contents($certUrl);
 
         $signature = base64_decode($transmissionSig);
 
         // <transmissionId>|<timeStamp>|<webhookId>|<crc32>
-        $string_chain = implode(
+        $stringChain = implode(
             '|',
             [
                 $transmissionId,
@@ -205,7 +212,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
 
         return openssl_verify(
-            data: $string_chain,
+            data: $stringChain,
             signature: $signature,
             public_key: openssl_pkey_get_public(public_key: $cert),
             algorithm: 'sha256WithRSAEncryption'
