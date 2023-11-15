@@ -20,6 +20,8 @@ use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
+use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class Paypal extends PaymentMethodAbstract implements PaymentMethod
@@ -53,7 +55,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $provider = $this->getProvider();
 
         if (!$this->verifyWebhook($provider, $request)) {
-            throw new \RuntimeException("Event {$eventType} Webhook Signature Invalid.");
+            throw new RuntimeException("Event {$eventType} Webhook Signature Invalid.");
         }
 
         $handleEvents = [
@@ -153,41 +155,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $amount;
     }
 
-    protected function verifyWebhook4($provider, Request $request): bool
-    {
-        $webhookData = $request->getContent();
-        $headers = $request->headers;
-
-        $transmissionId = $headers->get('PAYPAL-TRANSMISSION-ID');
-        $timestamp = $headers->get('PAYPAL-TRANSMISSION-TIME');
-        $certUrl = $headers->get('PAYPAL-CERT-URL');
-        $authAlgo = $headers->get('PAYPAL-AUTH-ALGO');
-        $transmissionSig = $headers->get('PAYPAL-TRANSMISSION-SIG');
-
-        info('transaction', [$transmissionId, $timestamp, $certUrl, $authAlgo, $transmissionSig]);
-
-        $expectedSignature = hash_hmac(
-            'sha256',
-            $transmissionId."|".$timestamp."|".$this->getConfigByMod()['webhook_id'].'|'.$webhookData,
-            $certUrl
-        );
-
-        if (hash_equals($expectedSignature, $transmissionSig)) {
-            return true;
-        }
-
-        return false;
-    }
-
     protected function verifyWebhook($provider, Request $request): bool|int
     {
-        // $payload = file_get_contents('php://input');
-        // $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
-        //
-        // $transmissionId = $headers['PAYPAL-TRANSMISSION-ID'][0];
-        // $transmissionSig = $headers['PAYPAL-TRANSMISSION-SIG'][0];
-        // $transmissionTime = $headers['PAYPAL-TRANSMISSION-TIME'][0];
-
         $payload = $request->getContent();
         $headers = $request->headers;
 
@@ -196,8 +165,13 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $certUrl = $headers->get('PAYPAL-CERT-URL');
         $transmissionSig = $headers->get('PAYPAL-TRANSMISSION-SIG');
 
-        $cert = file_get_contents($certUrl);
+        // Check domain cert
+        $domain = get_domain_by_url($certUrl);
+        if ($domain !== 'paypal.com' && !str_contains($domain, '.paypal.com')) {
+            return false;
+        }
 
+        $cert = file_get_contents($certUrl);
         $signature = base64_decode($transmissionSig);
 
         // <transmissionId>|<timeStamp>|<webhookId>|<crc32>
@@ -219,35 +193,18 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    protected function verifyWebhook2($provider, Request $request): bool
+    protected function verifyWebhook2(PayPalClient $provider, Request $request): bool
     {
-        $requestBody = json_encode($request->post(), JSON_THROW_ON_ERROR);
+        $verifyResponse = $provider->setWebHookID($this->getConfigByMod('webhook_id'))->verifyIPN($request);
 
-        /**
-         * In Documentions https://developer.paypal.com/docs/api/webhooks/#verify-webhook-signature_post
-         * All header keys as UPPERCASE, but I recive the header key as the example array, First letter as UPPERCASE
-         */
-        $headers = array_change_key_case($request->headers->all(), CASE_UPPER);
+        if (isset($verifyResponse['error'])) {
+            return false;
+        }
 
-        $verifyData = [
-            "transmission_id" => $headers['PAYPAL-TRANSMISSION-ID'][0],
-            "transmission_time" => $headers['PAYPAL-TRANSMISSION-TIME'][0],
-            "cert_url" => $headers['PAYPAL-CERT-URL'][0],
-            "auth_algo" => $headers['PAYPAL-AUTH-ALGO'][0],
-            "transmission_sig" => $headers['PAYPAL-TRANSMISSION-SIG'][0],
-            "webhook_id" => $this->getConfigByMod()['webhook_id'],
-            "webhook_event" => $requestBody,
-        ];
-
-        $this->logger()->info('Webhook Verify Data', $verifyData);
-        $verifyResponse = $provider->verifyWebHook($verifyData);
-
-        $this->logger()->info('Webhook Verify Response', $verifyResponse);
-
-        return Arr::get($verifyResponse, 'verification_status') != 'SUCCESS';
+        return Arr::get($verifyResponse, 'verification_status') == 'SUCCESS';
     }
 
-    protected function logger(): \Psr\Log\LoggerInterface
+    protected function logger(): LoggerInterface
     {
         return Log::build(
             [
@@ -257,7 +214,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    protected function getConfigByMod(): array
+    protected function getConfigByMod(?string $key = null): string|array
     {
         $clientId = Arr::get($this->paymentMethod->configs, 'mod') == 'live'
             ? Arr::get($this->paymentMethod->configs, 'live_client_id')
@@ -271,7 +228,9 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             ? Arr::get($this->paymentMethod->configs, 'live_webhook_id')
             : Arr::get($this->paymentMethod->configs, 'sandbox_webhook_id');
 
-        return ['client_id' => $clientId, 'secret' => $secret, 'webhook_id' => $webhook];
+        $params = ['client_id' => $clientId, 'secret' => $secret, 'webhook_id' => $webhook];
+
+        return $key ? Arr::get($params, $key) : $params;
     }
 
     protected function getProvider(): PayPalClient

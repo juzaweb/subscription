@@ -254,7 +254,9 @@ class PaymentController extends FrontendController
 
         throw_if($historyExists, new WebhookPaymentSkipException('Webhook: Already handled.'));
 
-        $subscriber->update(['start_date' => $subscriber->start_date ?? now(), 'end_date' => $expirationDate]);
+        $subscriber->setAttribute('start_date', $subscriber->start_date ?? now());
+        $subscriber->setAttribute('end_date', $expirationDate);
+        $subscriber->save();
 
         return PaymentHistory::create(
             [
