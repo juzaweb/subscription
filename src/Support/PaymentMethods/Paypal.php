@@ -102,7 +102,21 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
     public function createPlan(PlanModel $plan): string
     {
-        // TODO: Implement createPlan() method.
+        // Create product for plan
+        $provider = $this->getProvider();
+
+        $product = $provider->createProduct(
+            [
+                'name' => "{$plan->name} plan monthly subscription",
+                'type' => 'DIGITAL',
+            ]
+        );
+
+        // Create plan
+        $planParams = [
+            'product_id' => $product['id'],
+            'name' => $plan->name,
+        ];
     }
 
     public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string
