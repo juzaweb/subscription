@@ -14,6 +14,7 @@ use Juzaweb\CMS\Models\Model;
  * @property string $method
  * @property int $plan_id
  * @property int $method_id
+ * @property array $metas
  * @property-read PaymentMethod $paymentMethod
  * @property-read Plan $plan
  * @method static Builder|PlanPaymentMethod newModelQuery()

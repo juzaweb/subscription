@@ -33,10 +33,8 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         /** @var User $user */
         $user = $request->user();
 
-        $response = $this->getProvider()
-            ->addProduct($plan->name, $plan->description ?? "Subscription plan {$plan->name}", 'SERVICE', 'SOFTWARE')
-            //->addPlanTrialPricing('DAY', 7)
-            ->addMonthlyPlan('Monthly Subscription', 'Monthly Subscription Plan', $plan->price)
+        $response = $this->getProvider()->addProductById($planPaymentMethod->metas['product_id'])
+            ->addBillingPlanById($planPaymentMethod->payment_plan_id)
             ->setReturnAndCancelUrl($this->getReturnUrl($plan), $this->getCancelUrl($plan))
             ->setupSubscription($user->name, $user->email, now()->addMinutes(2));
 
@@ -116,7 +114,35 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $planParams = [
             'product_id' => $product['id'],
             'name' => $plan->name,
+            'description' => $plan->description ?? "Monthly Subscription {$plan->name} Plan",
+            'status' => 'ACTIVE',
+            'billing_cycles' => [
+                [
+                    'frequency' => [
+                        'interval_unit' => 'MONTH',
+                        'interval_count' => 1,
+                    ],
+                    'tenure_type' => 'REGULAR',
+                    'sequence' => 3,
+                    'total_cycles' => 12,
+                    'pricing_scheme' => [
+                        'fixed_price' => [
+                            'value' => $plan->price,
+                            'currency_code' => 'USD',
+                        ],
+                    ],
+                ],
+            ],
+            'payment_preferences' => [
+                'auto_bill_outstanding' => true,
+                'setup_fee_failure_action' => 'CONTINUE',
+                'payment_failure_threshold' => 3,
+            ]
         ];
+
+        $response = $provider->createPlan($planParams);
+
+        return Arr::get($response, 'id');
     }
 
     public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string
@@ -169,7 +195,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $amount;
     }
 
-    protected function verifyWebhook($provider, Request $request): bool|int
+    protected function verifyWebhook2($provider, Request $request): bool|int
     {
         $payload = $request->getContent();
         $headers = $request->headers;
@@ -207,7 +233,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    protected function verifyWebhook2(PayPalClient $provider, Request $request): bool
+    protected function verifyWebhook(PayPalClient $provider, Request $request): bool
     {
         $verifyResponse = $provider->setWebHookID($this->getConfigByMod('webhook_id'))->verifyIPN($request);
 
