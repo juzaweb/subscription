@@ -17,7 +17,7 @@
 
                 <h5>{{ trans('subscription::content.features') }}</h5>
 
-                 {{ Field::repicter(
+                 {{ Field::repeater(
                     [
                         'label' => 'Feature',
                         'name' => 'features',
