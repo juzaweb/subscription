@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
-use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Contrasts\PaymentResult;
 use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
@@ -153,7 +153,7 @@ class PaypalOld extends PaymentMethodAbstract implements PaymentMethod
         }
     }
 
-    public function return(PlanModel $plan, array $data): PaymentReturnResult
+    public function return(PlanModel $plan, array $data): PaymentResult
     {
         $agreement = new Agreement();
         $token = Arr::get($data, 'token');
@@ -171,7 +171,7 @@ class PaypalOld extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    public function webhook(Request $request): bool|PaymentReturnResult
+    public function webhook(Request $request): bool|PaymentResult
     {
         $resource = $request->input('resource');
         $eventType = $request->input('event_type');

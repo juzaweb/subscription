@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Juzaweb\CMS\Models\User;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
-use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Contrasts\PaymentResult;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
@@ -45,7 +45,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return SubscribeResult::make(Arr::get($response, 'id'))->setRedirectUrl($approveLink);
     }
 
-    public function webhook(Request $request): bool|PaymentReturnResult
+    public function webhook(Request $request): bool|PaymentResult
     {
         $resource = $request->input('resource');
         $eventType = $request->input('event_type');
@@ -80,7 +80,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    public function return(PlanModel $plan, array $data): ?PaymentReturnResult
+    public function return(PlanModel $plan, array $data): PaymentResult
     {
         $provider = $this->getProvider();
 

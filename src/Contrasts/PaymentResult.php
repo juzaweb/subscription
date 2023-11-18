@@ -13,9 +13,9 @@ namespace Juzaweb\Subscription\Contrasts;
 use Juzaweb\Subscription\Models\UserSubscription;
 
 /**
- * @see \Juzaweb\Subscription\Support\PaymentReturn
+ * @see \Juzaweb\Subscription\Support\PaymentResult
  */
-interface PaymentReturnResult
+interface PaymentResult
 {
     public function __construct(
         string $agreementId,

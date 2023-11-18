@@ -33,7 +33,7 @@ interface PaymentMethod
 
     public function cancel(): bool;
 
-    public function webhook(Request $request): bool|PaymentReturnResult;
+    public function webhook(Request $request): bool|PaymentResult;
 
     /**
      * Create a plan
@@ -44,5 +44,5 @@ interface PaymentMethod
 
     public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string;
 
-    public function return(Plan $plan, array $data): ?PaymentReturnResult;
+    public function return(Plan $plan, array $data): PaymentResult;
 }

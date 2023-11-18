@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Juzaweb\CMS\Http\Controllers\FrontendController;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
-use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Contrasts\PaymentResult;
 use Juzaweb\Subscription\Contrasts\Subscription;
 use Juzaweb\Subscription\Events\PaymentReturn;
 use Juzaweb\Subscription\Events\PaymentSuccess;
@@ -229,7 +229,7 @@ class PaymentController extends FrontendController
     }
 
     protected function webhookHandle(
-        PaymentReturnResult $agreement,
+        PaymentResult $agreement,
         PaymentMethod $method,
         UserSubscription $subscriber
     ): ?PaymentHistory {

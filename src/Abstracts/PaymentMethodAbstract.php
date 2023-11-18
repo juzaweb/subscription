@@ -2,12 +2,12 @@
 
 namespace Juzaweb\Subscription\Abstracts;
 
-use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Contrasts\PaymentResult as PaymentResultContract;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\UserSubscription;
-use Juzaweb\Subscription\Support\PaymentReturn;
+use Juzaweb\Subscription\Support\PaymentResult;
 
 /**
  * @property string $name
@@ -30,10 +30,7 @@ abstract class PaymentMethodAbstract
 
     abstract public function getConfigs(): array;
 
-    public function return(PlanModel $plan, array $data): ?PaymentReturnResult
-    {
-        return null;
-    }
+    abstract public function return(PlanModel $plan, array $data): PaymentResultContract;
 
     public function cancel(): bool
     {
@@ -55,7 +52,7 @@ abstract class PaymentMethodAbstract
         ?float $amount,
         string $token,
         string $status = UserSubscription::STATUS_ACTIVE
-    ): PaymentReturnResult {
-        return new PaymentReturn($agreementId, $amount, $token, $status);
+    ): PaymentResultContract {
+        return new PaymentResult($agreementId, $amount, $token, $status);
     }
 }

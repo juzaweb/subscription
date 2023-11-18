@@ -10,10 +10,10 @@
 
 namespace Juzaweb\Subscription\Support;
 
-use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Contrasts\PaymentResult as PaymentResultContract;
 use Juzaweb\Subscription\Models\UserSubscription;
 
-class PaymentReturn implements PaymentReturnResult
+class PaymentResult implements PaymentResultContract
 {
     protected ?string $message = null;
 

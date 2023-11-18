@@ -10,7 +10,7 @@
 
 namespace Juzaweb\Subscription\Events;
 
-use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Contrasts\PaymentResult;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
@@ -18,7 +18,7 @@ use Juzaweb\Subscription\Models\UserSubscription;
 class WebhookHandleSuccess
 {
     public function __construct(
-        protected PaymentReturnResult $agreement,
+        protected PaymentResult $agreement,
         protected PaymentMethod $method,
         protected UserSubscription $subscriber,
         protected ?PaymentHistory $paymentHistory

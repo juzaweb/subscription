@@ -10,14 +10,14 @@
 
 namespace Juzaweb\Subscription\Events;
 
-use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
+use Juzaweb\Subscription\Contrasts\PaymentResult;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\UserSubscription;
 
 class PaymentReturn
 {
     public function __construct(
-        protected PaymentReturnResult $paymentReturnResult,
+        protected PaymentResult $paymentReturnResult,
         UserSubscription $userSubscription,
         PaymentHistory $paymentHistory
     ) {
