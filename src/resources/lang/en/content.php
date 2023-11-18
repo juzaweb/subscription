@@ -24,4 +24,9 @@ return [
     'start_date' => 'Start date',
     'user' => 'User',
     'status' => 'Status',
+    'features' => 'Features',
+    'feature' => [
+        'label' => 'Label',
+        'value' => 'Value',
+    ],
 ];

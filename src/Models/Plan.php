@@ -60,11 +60,13 @@ class Plan extends Model
         'is_free',
         'status',
         'module',
+        'features',
     ];
 
     protected $casts = [
         'price' => 'float',
         'is_free' => 'boolean',
+        'features' => 'array',
     ];
 
     public static function getAllstatus(): array
