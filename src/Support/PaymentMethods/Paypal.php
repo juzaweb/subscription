@@ -146,7 +146,42 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
     public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string
     {
-        // TODO: Implement updatePlan() method.
+        $provider = $this->getProvider();
+
+        $provider->updatePlan(
+            $planPaymentMethod->payment_plan_id,
+            [
+                [
+                    'op' => 'replace',
+                    'path' => '/name',
+                    'value' => $plan->name,
+                ],
+                [
+                    'op' => 'replace',
+                    'path' => '/description',
+                    'value' => $plan->description ?? "Monthly Subscription {$plan->name} Plan",
+                ],
+            ]
+        );
+
+        $provider->updatePlanPricing(
+            $planPaymentMethod->payment_plan_id,
+            [
+                'pricing_schemes' => [
+                    [
+                        'billing_cycle_sequence' => 1,
+                        'pricing_scheme' => [
+                            'fixed_price' => [
+                                'value' => $plan->price,
+                                'currency_code' => 'USD',
+                            ],
+                        ],
+                    ],
+                ],
+            ]
+        );
+
+        return $planPaymentMethod->payment_plan_id;
     }
 
     public function getConfigs(): array
