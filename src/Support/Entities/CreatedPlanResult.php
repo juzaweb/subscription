@@ -12,20 +12,20 @@ namespace Juzaweb\Subscription\Support\Entities;
 
 class CreatedPlanResult extends ResultEntity
 {
-    protected array $meta = [];
+    protected array $metas = [];
 
     public function __construct(public string $id)
     {
     }
 
-    public function getMeta(): array
+    public function getMetas(): array
     {
-        return $this->meta;
+        return $this->metas;
     }
 
-    public function setMeta(array $meta): static
+    public function setMeta(array $metas): static
     {
-        $this->meta = $meta;
+        $this->metas = $metas;
 
         return $this;
     }

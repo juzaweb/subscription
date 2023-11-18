@@ -44,11 +44,9 @@ class PaymentMethod extends Model
         'method',
         'name',
         'module',
-        'metas',
     ];
 
     protected $casts = [
         'configs' => 'array',
-        'metas' => 'array',
     ];
 }

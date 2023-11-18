@@ -24,6 +24,8 @@ use Juzaweb\Subscription\Exceptions\WebhookPaymentSkipException;
 use Juzaweb\Subscription\Http\Requests\Frontend\PaymentRequest;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\PaymentMethod;
+use Juzaweb\Subscription\Models\Plan;
+use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
@@ -45,18 +47,15 @@ class PaymentController extends FrontendController
         Cache::set("subscription_payment_{$jw_user->id}", $request->only(['return_url', 'cancel_url']), 3600);
 
         $plan = $this->planRepository->findByUUIDOrFail($request->post('plan'));
-        $method = $request->post('method');
 
-        $planMethod = $plan->planPaymentMethods()->where(['method' => $method])->first();
+        $method = $request->post('method');
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
 
         try {
             $result = DB::transaction(
-                function () use ($method, $plan, $planMethod, $request) {
-                    if (empty($planMethod)) {
-                        $planMethod = $this->subscription->createPlanMethod($plan, $method);
-                    }
+                function () use ($method, $plan, $request) {
+                    $planMethod = $this->getPlanMethod($plan, $method);
 
                     return $this->paymentMethodManager->find($method)->subscribe($plan, $planMethod, $request);
                 }
@@ -275,6 +274,14 @@ class PaymentController extends FrontendController
                 'end_date' => $expirationDate,
             ]
         );
+    }
+
+    protected function getPlanMethod(Plan $plan, PaymentMethod $method): PlanPaymentMethod
+    {
+        /** @var null|PlanPaymentMethod $planMethod */
+        $planMethod = $plan->planPaymentMethods()->where(['method' => $method->method])->first();
+
+        return $planMethod ?? $this->subscription->createPlanMethod($plan, $method);
     }
 
     protected function getReturnPageUrl($module, $plan, $method): string

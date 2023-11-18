@@ -177,13 +177,20 @@ class Subscription implements SubscriptionContrasts
 
         $payment = $this->paymentMethodManager->find($method);
 
-        $planId = $payment->createPlan($plan);
+        $paymentPlan = $payment->createPlan($plan);
 
         /**
          * @var PlanPaymentMethod $planPaymentMethod
          */
         $planPaymentMethod = $plan->planPaymentMethods()
-            ->create(['method' => $method->method, 'payment_plan_id' => $planId, 'method_id' => $method->id]);
+            ->create(
+                [
+                    'method' => $method->method,
+                    'payment_plan_id' => $paymentPlan->id,
+                    'method_id' => $method->id,
+                    'metas' => $paymentPlan->getMetas(),
+                ]
+            );
 
         event(new CreatePlanSuccess($plan));
 

@@ -35,7 +35,6 @@ class SubscribeResult extends ResultEntity
         return $this;
     }
 
-
     public function isRedirect(): bool
     {
         return $this->isRedirect;

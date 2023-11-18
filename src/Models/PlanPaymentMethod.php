@@ -38,6 +38,11 @@ class PlanPaymentMethod extends Model
         'method_id',
         'payment_plan_id',
         'plan_id',
+        'metas',
+    ];
+
+    protected $casts = [
+        'metas' => 'array',
     ];
 
     public function plan(): BelongsTo
