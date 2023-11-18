@@ -7,6 +7,7 @@ return [
     'payment_methods' => 'Payment Methods',
     'payment_method' => 'Payment Method',
     'created_plan_success' => 'Create plan success',
+    'updated_plan_success' => 'Updated plan success',
     'price' => 'Price',
     'is_free' => 'Is Free',
     'enable_trial' => 'Trial Functionality',

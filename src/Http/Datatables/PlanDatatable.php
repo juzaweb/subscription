@@ -9,16 +9,16 @@ class PlanDatatable extends ResourceDatatable
     public function columns(): array
     {
         return [
-            /*'action' => [
+            'action' => [
                 'label' => trans('cms::app.actions'),
                 'width' => '10%',
                 'align' => 'center',
                 'formatter' => fn($value, $row, $index) =>
                     view(
-                        'subscription::plan.components.datatable.plan_action',
+                        'subscription::backend.plan.components.datatable.plan_action',
                         compact('value', 'row', 'index')
                     ),
-            ],*/
+            ],
             'name' => [
                 'label' => trans('cms::app.name'),
                 'formatter' => [$this, 'rowActionsFormatter'],
@@ -35,15 +35,7 @@ class PlanDatatable extends ResourceDatatable
                 'align' => 'center',
                 'formatter' => fn($value, $row, $index) => $value == 1
                     ? '<span class="text-success"><i class="fa fa-check"></i></span>'
-                    : '_',
-            ],
-            'enable_trial' => [
-                'label' => trans('subscription::content.enable_trial'),
-                'width' => '10%',
-                'align' => 'center',
-                'formatter' => fn($value, $row, $index) => $value == 1
-                    ? '<span class="text-success"><i class="fa fa-check"></i></span>'
-                    : '_',
+                    : '<span class="text-secondary"><i class="fa fa-times"></i></span>',
             ],
             'created_at' => [
                 'label' => trans('cms::app.created_at'),

@@ -29,6 +29,74 @@ class Subscription implements SubscriptionContrasts
     ) {
     }
 
+    public function createPlanMethod(Plan $plan, int|string|PaymentMethod $method): PlanPaymentMethod
+    {
+        if (is_numeric($method)) {
+            $method = $this->paymentMethodRepository->find($method);
+        }
+
+        if (is_string($method)) {
+            $method = $this->paymentMethodRepository->findByMethod($method, $plan->module);
+        }
+
+        if ($plan->planPaymentMethods()->where(['method_id' => $method])->exists()) {
+            throw new PaymentMethodException("Plan already exist.");
+        }
+
+        $payment = $this->paymentMethodManager->find($method);
+
+        $paymentPlan = $payment->createPlan($plan);
+
+        /**
+         * @var PlanPaymentMethod $planPaymentMethod
+         */
+        $planPaymentMethod = $plan->planPaymentMethods()
+            ->create(
+                [
+                    'method' => $method->method,
+                    'payment_plan_id' => $paymentPlan->id,
+                    'method_id' => $method->id,
+                    'metas' => $paymentPlan->getMetas(),
+                ]
+            );
+
+        event(new CreatePlanSuccess($plan));
+
+        return $planPaymentMethod;
+    }
+
+    public function updatePlanMethod(Plan $plan, int|string|PaymentMethod $method): Plan
+    {
+        if (is_numeric($method)) {
+            $method = $this->paymentMethodRepository->find($method);
+        }
+
+        if (is_string($method)) {
+            $method = $this->paymentMethodRepository->findByMethod($method, $plan->module);
+        }
+
+        /**
+         * @var PlanPaymentMethod|null $planPaymentMethod
+         */
+        $planPaymentMethod = $plan->planPaymentMethods()->where(['method_id' => $method->id])->first();
+
+        if ($planPaymentMethod === null) {
+            $this->createPlanMethod($plan, $method);
+
+            return $plan;
+        }
+
+        $payment = $this->paymentMethodManager->find($method);
+
+        $payment->updatePlan($plan, $planPaymentMethod);
+
+        $planPaymentMethod->touch();
+
+        event(new UpdatePlanSuccess($plan));
+
+        return $plan;
+    }
+
     public function registerModule(string $key, array $args = []): void
     {
         throw_if(empty($args['label']), new SubscriptionException("Option label is required"));
@@ -104,7 +172,7 @@ class Subscription implements SubscriptionContrasts
         );
     }
 
-    public function registerModuleUserSubscription(string $key, array $args = [])
+    public function registerModuleUserSubscription(string $key, array $args = []): void
     {
         $this->hookAction->addAdminMenu(
             trans('subscription::content.user_subscriptions'),
@@ -116,7 +184,7 @@ class Subscription implements SubscriptionContrasts
         );
     }
 
-    public function registerModulePaymentHistory(string $key, array $args = [])
+    public function registerModulePaymentHistory(string $key, array $args = []): void
     {
         $this->hookAction->addAdminMenu(
             trans('subscription::content.payment_histories'),
@@ -159,69 +227,5 @@ class Subscription implements SubscriptionContrasts
         }
 
         return new Collection($this->globalData->get("subscription_modules"));
-    }
-
-    public function createPlanMethod(Plan $plan, int|string|PaymentMethod $method): PlanPaymentMethod
-    {
-        if (is_numeric($method)) {
-            $method = $this->paymentMethodRepository->find($method);
-        }
-
-        if (is_string($method)) {
-            $method = $this->paymentMethodRepository->findByMethod($method, $plan->module);
-        }
-
-        if ($plan->planPaymentMethods()->where(['method_id' => $method])->exists()) {
-            throw new PaymentMethodException("Plan already exist.");
-        }
-
-        $payment = $this->paymentMethodManager->find($method);
-
-        $paymentPlan = $payment->createPlan($plan);
-
-        /**
-         * @var PlanPaymentMethod $planPaymentMethod
-         */
-        $planPaymentMethod = $plan->planPaymentMethods()
-            ->create(
-                [
-                    'method' => $method->method,
-                    'payment_plan_id' => $paymentPlan->id,
-                    'method_id' => $method->id,
-                    'metas' => $paymentPlan->getMetas(),
-                ]
-            );
-
-        event(new CreatePlanSuccess($plan));
-
-        return $planPaymentMethod;
-    }
-
-    public function updatePlanMethod(Plan $plan, int|string|PaymentMethod $method): Plan
-    {
-        if (is_numeric($method)) {
-            $method = $this->paymentMethodRepository->find($method);
-        }
-
-        if (is_string($method)) {
-            $method = $this->paymentMethodRepository->findByMethod($method, $plan->module);
-        }
-
-        /**
-         * @var PlanPaymentMethod $planPaymentMethod
-         */
-        if (!$planPaymentMethod = $plan->planPaymentMethods()->where(['method_id' => $method])->first()) {
-            throw new PaymentMethodException("Plan do not exist exist.");
-        }
-
-        $payment = $this->paymentMethodManager->find($method);
-
-        $planId = $payment->updatePlan($plan, $planPaymentMethod);
-
-        $planPaymentMethod->update(['method' => $method->method, 'payment_plan_id' => $planId]);
-
-        event(new UpdatePlanSuccess($plan));
-
-        return $plan;
     }
 }

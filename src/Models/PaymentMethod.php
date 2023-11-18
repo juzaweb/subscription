@@ -49,4 +49,6 @@ class PaymentMethod extends Model
     protected $casts = [
         'configs' => 'array',
     ];
+
+    protected $hidden = ['configs'];
 }

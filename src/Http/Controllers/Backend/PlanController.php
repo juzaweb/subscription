@@ -19,6 +19,7 @@ use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Subscription\Http\Datatables\PlanDatatable;
 use Juzaweb\Subscription\Http\Requests\Plan\UpdatePlanRequest;
+use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
@@ -44,26 +45,22 @@ class PlanController extends BackendController
 
     public function updatePlan(UpdatePlanRequest $request): JsonResponse|RedirectResponse
     {
-        $method = $request->input('method_id');
         $planId = $request->input('plan_id');
 
         $plan = $this->planRepository->find($planId);
 
-        DB::beginTransaction();
-        try {
-            $this->subscription->updatePlanMethod($plan, $method);
+        $methods = $plan->paymentMethods()->get();
 
-            DB::commit();
-        } catch (PaymentMethodException $e) {
-            DB::rollBack();
-            report($e);
-            return $this->error($e->getMessage());
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
+        foreach ($methods as $method) {
+            try {
+                DB::transaction(fn() => $this->subscription->updatePlanMethod($plan, $method));
+            } catch (PaymentMethodException $e) {
+                report($e);
+                return $this->error($e->getMessage());
+            }
         }
 
-        return $this->success(trans('subscription::content.created_plan_success'));
+        return $this->success(trans('subscription::content.updated_plan_success'));
     }
 
     public function callAction($method, $parameters): Response|View

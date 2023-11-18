@@ -19,6 +19,7 @@ interface Subscription
      * @return PlanPaymentMethod The Payment Method model
      *
      * @throws PaymentMethodException If the plan is already exists
+     * @see \Juzaweb\Subscription\Support\Subscription::createPlanMethod
      */
     public function createPlanMethod(Plan $plan, int|PaymentMethod $method): PlanPaymentMethod;
 
@@ -29,6 +30,7 @@ interface Subscription
      * @param  int|PaymentMethod  $method  The payment method ID
      * @return Plan The updated plan.
      * @throws PaymentMethodException If the plan payment method does not exist in the database.
+     * @see \Juzaweb\Subscription\Support\Subscription::updatePlanMethod
      */
     public function updatePlanMethod(Plan $plan, int|PaymentMethod $method): Plan;
 

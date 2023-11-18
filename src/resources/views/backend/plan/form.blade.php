@@ -20,12 +20,6 @@
                 {{ Field::select($model, 'status', ['options' => \Juzaweb\Subscription\Models\Plan::getAllstatus()]) }}
 
                 {{ Field::checkbox($model, 'is_free', ['label' => trans('subscription::content.is_free'), 'checked' => $model->is_free == 1]) }}
-
-                {{ Field::checkbox($model, 'enable_trial', ['label' => trans('subscription::content.enable_trial'), 'checked' => $model->enable_trial == 1]) }}
-
-                <div class="@if(isset($model->enable_trial) && $model->enable_trial != 1) box-hidden @endif" id="free-trial-days-box">
-                    {{ Field::text($model, 'free_trial_days', ['label' => trans('subscription::content.free_trial_days')]) }}
-                </div>
             </div>
         </div>
 
