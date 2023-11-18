@@ -51,22 +51,24 @@ class PaymentController extends FrontendController
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
 
-        if (empty($planMethod)) {
-            $planMethod = $this->subscription->createPlanMethod($plan, $method);
-        }
-
-        $helper = $this->paymentMethodManager->find($method);
-
         try {
-            $helper->subscribe($plan, $planMethod, $request);
+            $result = DB::transaction(
+                function () use ($method, $plan, $planMethod, $request) {
+                    if (empty($planMethod)) {
+                        $planMethod = $this->subscription->createPlanMethod($plan, $method);
+                    }
+
+                    return $this->paymentMethodManager->find($method)->subscribe($plan, $planMethod, $request);
+                }
+            );
         } catch (PaymentException $e) {
             return $this->error($e->getMessage());
         }
 
-        if ($helper->isRedirect()) {
+        if ($result->isRedirect()) {
             return $this->success(
                 [
-                    'redirect' => $helper->getRedirectUrl(),
+                    'redirect' => $result->getRedirectUrl(),
                 ]
             );
         }

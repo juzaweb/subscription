@@ -14,9 +14,6 @@ use Juzaweb\Subscription\Support\PaymentReturn;
  */
 abstract class PaymentMethodAbstract
 {
-    protected ?string $redirectUrl = null;
-    protected bool $isRedirect = true;
-
     public function __construct(protected PaymentMethod $paymentMethod)
     {
     }
@@ -33,11 +30,6 @@ abstract class PaymentMethodAbstract
 
     abstract public function getConfigs(): array;
 
-    public function isRedirect(): bool
-    {
-        return $this->isRedirect;
-    }
-
     public function return(PlanModel $plan, array $data): ?PaymentReturnResult
     {
         return null;
@@ -46,16 +38,6 @@ abstract class PaymentMethodAbstract
     public function cancel(): bool
     {
         return true;
-    }
-
-    public function getRedirectUrl(): ?string
-    {
-        return $this->redirectUrl;
-    }
-
-    public function setRedirectUrl(string $redirectUrl): void
-    {
-        $this->redirectUrl = $redirectUrl;
     }
 
     protected function getReturnUrl(Plan $plan): string

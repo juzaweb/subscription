@@ -6,7 +6,12 @@ use Illuminate\Http\Request;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
+use Juzaweb\Subscription\Support\Entities\CreatedPlanResult;
+use Juzaweb\Subscription\Support\Entities\SubscribeResult;
 
+/**
+ * @see \Juzaweb\Subscription\Support\PaymentMethods\Paypal
+ */
 interface PaymentMethod
 {
     /**
@@ -24,15 +29,9 @@ interface PaymentMethod
      */
     public function getConfigs(): array;
 
-    public function isRedirect(): bool;
-
-    public function getRedirectUrl(): ?string;
-
-    public function subscribe(PlanModel $plan, PlanPaymentMethod $planPaymentMethod, Request $request): bool;
+    public function subscribe(PlanModel $plan, PlanPaymentMethod $planPaymentMethod, Request $request): SubscribeResult;
 
     public function cancel(): bool;
-
-    public function setRedirectUrl(string $redirectUrl): void;
 
     public function webhook(Request $request): bool|PaymentReturnResult;
 
@@ -41,7 +40,7 @@ interface PaymentMethod
      *
      * @return string - identity plan id
      */
-    public function createPlan(Plan $plan): string;
+    public function createPlan(Plan $plan): CreatedPlanResult;
 
     public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string;
 

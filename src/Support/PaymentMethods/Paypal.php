@@ -20,6 +20,8 @@ use Juzaweb\Subscription\Contrasts\PaymentReturnResult;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
+use Juzaweb\Subscription\Support\Entities\CreatedPlanResult;
+use Juzaweb\Subscription\Support\Entities\SubscribeResult;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
@@ -28,7 +30,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 {
     protected string $name = 'paypal';
 
-    public function subscribe(PlanModel $plan, PlanPaymentMethod $planPaymentMethod, Request $request): bool
+    public function subscribe(PlanModel $plan, PlanPaymentMethod $planPaymentMethod, Request $request): SubscribeResult
     {
         /** @var User $user */
         $user = $request->user();
@@ -40,9 +42,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
         $approveLink = Arr::get($response, 'links.0.href');
 
-        $this->setRedirectUrl($approveLink);
-
-        return true;
+        return SubscribeResult::make(Arr::get($response, 'id'))->setRedirectUrl($approveLink);
     }
 
     public function webhook(Request $request): bool|PaymentReturnResult
@@ -98,7 +98,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    public function createPlan(PlanModel $plan): string
+    public function createPlan(PlanModel $plan): CreatedPlanResult
     {
         // Create product for plan
         $provider = $this->getProvider();
@@ -123,8 +123,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
                         'interval_count' => 1,
                     ],
                     'tenure_type' => 'REGULAR',
-                    'sequence' => 3,
-                    'total_cycles' => 12,
+                    'sequence' => 1,
                     'pricing_scheme' => [
                         'fixed_price' => [
                             'value' => $plan->price,
@@ -142,7 +141,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
         $response = $provider->createPlan($planParams);
 
-        return Arr::get($response, 'id');
+        return CreatedPlanResult::make(Arr::get($response, 'id'))->setMeta(['product_id' => $product['id']]);
     }
 
     public function updatePlan(PlanModel $plan, PlanPaymentMethod $planPaymentMethod): string
