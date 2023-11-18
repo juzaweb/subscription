@@ -17,6 +17,7 @@ use Juzaweb\CMS\Models\User;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
 use Juzaweb\Subscription\Contrasts\PaymentResult;
+use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Models\UserSubscription;
@@ -164,22 +165,26 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             ]
         );
 
-        $provider->updatePlanPricing(
+        $response =$provider->updatePlanPricing(
             $planPaymentMethod->payment_plan_id,
             [
-                'pricing_schemes' => [
-                    [
-                        'billing_cycle_sequence' => 1,
-                        'pricing_scheme' => [
-                            'fixed_price' => [
-                                'value' => $plan->price,
-                                'currency_code' => 'USD',
-                            ],
+                [
+                    'billing_cycle_sequence' => 1,
+                    'pricing_scheme' => [
+                        'fixed_price' => [
+                            'value' => $plan->price,
+                            'currency_code' => 'USD',
                         ],
                     ],
                 ],
             ]
         );
+
+        if ($error = Arr::get($response, 'error')) {
+            $message = json_decode($error, true, 512, JSON_THROW_ON_ERROR)['message'];
+
+            throw new PaymentMethodException($message);
+        }
 
         return $planPaymentMethod->payment_plan_id;
     }
