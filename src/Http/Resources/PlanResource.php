@@ -23,8 +23,6 @@ class PlanResource extends JsonResource
             'description' => $this->resource->description,
             'price' => $this->resource->price,
             'is_free' => $this->resource->is_free,
-            'status' => $this->resource->status,
-            'module' => $this->resource->module,
             'created_at' => jw_date_format($this->resource->created_at),
             'updated_at' => jw_date_format($this->resource->updated_at),
         ];

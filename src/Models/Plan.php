@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Juzaweb\CMS\Models\Model;
+use Juzaweb\CMS\Traits\QueryCache\QueryCacheable;
 use Juzaweb\CMS\Traits\ResourceModel;
 use Juzaweb\CMS\Traits\UseUUIDColumn;
 
@@ -47,9 +48,10 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  */
 class Plan extends Model
 {
-    public const STATUS_ACTIVE = 'active';
+    use ResourceModel, UseUUIDColumn, QueryCacheable;
 
-    use ResourceModel, UseUUIDColumn;
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_INACTIVE = 'inactive';
 
     protected $table = 'subscription_plans';
 
@@ -72,8 +74,8 @@ class Plan extends Model
     public static function getAllstatus(): array
     {
         return [
-            'active' => trans('cms::app.active'),
-            'draft' => trans('cms::app.draft'),
+            static::STATUS_ACTIVE => trans('cms::app.active'),
+            static::STATUS_INACTIVE => trans('cms::app.inactive'),
         ];
     }
 

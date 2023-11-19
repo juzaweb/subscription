@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Models\User;
+use Juzaweb\CMS\Traits\QueryCache\QueryCacheable;
 use Juzaweb\CMS\Traits\ResourceModel;
 use Juzaweb\CMS\Traits\UseUUIDColumn;
 
@@ -49,7 +50,7 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  */
 class UserSubscription extends Model
 {
-    use UseUUIDColumn, ResourceModel;
+    use UseUUIDColumn, ResourceModel, QueryCacheable;
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_SUSPEND = 'suspend';
@@ -87,9 +88,19 @@ class UserSubscription extends Model
         return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
     }
 
+    public function scopeInEffect(Builder $query): Builder
+    {
+        return $query->isActive()->where('end_date', '>=', now());
+    }
+
     public function scopeIsActive(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeIsFree(Builder $query): Builder
+    {
+        return $query->where('is_free', true);
     }
 
     public function scopeIsCancel(Builder $query): Builder
@@ -104,7 +115,7 @@ class UserSubscription extends Model
 
     public function expired(): bool
     {
-        return $this->end_date->lt(now());
+        return empty($this->end_date) || $this->end_date->lt(now());
     }
 
     public function unexpired(): bool
