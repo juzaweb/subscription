@@ -23,6 +23,7 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  * @property bool $is_free
  * @property string $status
  * @property string $module
+ * @property array|null $features
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection|PaymentMethod[] $paymentMethods

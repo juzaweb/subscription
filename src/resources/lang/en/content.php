@@ -13,7 +13,7 @@ return [
     'enable_trial' => 'Trial Functionality',
     'free_trial_days' => 'Trial Period Number of days',
     'payment_url' => 'Payment URL',
-    'payment_success' => 'Payment Success',
+    'payment_success' => 'Payment success. Thank you for your payment!',
     'subscriptions' => 'Subscriptions',
     'payment_histories' => 'Payment histories',
     'agreement_id' => 'Agreement id',

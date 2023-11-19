@@ -11,7 +11,11 @@
 namespace Juzaweb\Subscription\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Juzaweb\Subscription\Models\Plan;
 
+/**
+ * @property-read Plan $resource
+ */
 class PlanResource extends JsonResource
 {
     public function toArray($request): array
@@ -25,6 +29,7 @@ class PlanResource extends JsonResource
             'is_free' => $this->resource->is_free,
             'created_at' => jw_date_format($this->resource->created_at),
             'updated_at' => jw_date_format($this->resource->updated_at),
+            'features' => $this->resource->features ?? [],
         ];
     }
 }

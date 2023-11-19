@@ -136,7 +136,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             'payment_preferences' => [
                 'auto_bill_outstanding' => true,
                 'setup_fee_failure_action' => 'CONTINUE',
-                'payment_failure_threshold' => 3,
+                'payment_failure_threshold' => 10,
             ]
         ];
 
@@ -234,7 +234,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return $amount;
     }
 
-    protected function verifyWebhook2($provider, Request $request): bool|int
+    protected function verifyWebhook($provider, Request $request): bool|int
     {
         $payload = $request->getContent();
         $headers = $request->headers;
@@ -272,7 +272,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         );
     }
 
-    protected function verifyWebhook(PayPalClient $provider, Request $request): bool
+    protected function verifyWebhook2(PayPalClient $provider, Request $request): bool
     {
         $verifyResponse = $provider->setWebHookID($this->getConfigByMod('webhook_id'))->verifyIPN($request);
 
