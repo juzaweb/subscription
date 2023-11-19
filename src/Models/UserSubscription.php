@@ -44,6 +44,7 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  * @method static Builder|UserSubscription whereUpdatedAt($value)
  * @method static Builder|UserSubscription whereUserId($value)
  * @method static Builder|UserSubscription whereUuid($value)
+ * @method static Builder|UserSubscription isActive()
  * @mixin \Eloquent
  */
 class UserSubscription extends Model
@@ -84,5 +85,30 @@ class UserSubscription extends Model
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
+    }
+
+    public function scopeIsActive(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeIsCancel(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_CANCEL);
+    }
+
+    public function scopeIsSuspend(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_SUSPEND);
+    }
+
+    public function expired(): bool
+    {
+        return $this->end_date->lt(now());
+    }
+
+    public function unexpired(): bool
+    {
+        return !$this->expired();
     }
 }

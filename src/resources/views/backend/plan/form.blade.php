@@ -49,7 +49,7 @@
                             ]
                         ]
                      ],
-                     $model->features
+                     $model->features ?? []
                  ) }}
 
                 <div class="mb-3"></div>
