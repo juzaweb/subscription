@@ -23,6 +23,6 @@ class MethodDefaultAction extends Action
     {
         $this->paymentMethodManager->register('paypal', Paypal::class);
 
-        $this->paymentMethodManager->register('stripe', Stripe::class);
+        //$this->paymentMethodManager->register('stripe', Stripe::class);
     }
 }
