@@ -3,6 +3,7 @@
 namespace Juzaweb\Subscription\Http\Controllers\Backend;
 
 use Illuminate\Support\Collection;
+use Juzaweb\CMS\Abstracts\DataTable;
 use Juzaweb\CMS\Facades\HookAction;
 use Juzaweb\CMS\Traits\ResourceController;
 use Illuminate\Support\Facades\Validator;
@@ -22,7 +23,7 @@ class PaymentHistoryController extends BackendController
     {
     }
 
-    protected function getDataTable(...$params): \Juzaweb\CMS\Abstracts\DataTable
+    protected function getDataTable(...$params): DataTable
     {
         $datatable = app()->make(PaymentHistoryDatatable::class);
         $datatable->mount($this->resourceKey, null);

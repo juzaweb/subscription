@@ -39,7 +39,7 @@ class UserSubscriptionController extends BackendController
         );
     }
 
-    protected function getBreadcrumbPrefix(...$params)
+    protected function getBreadcrumbPrefix(...$params): void
     {
         $this->addBreadcrumb(
             [
