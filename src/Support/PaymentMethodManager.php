@@ -3,6 +3,7 @@
 namespace Juzaweb\Subscription\Support;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Juzaweb\CMS\Contracts\GlobalDataContract;
 use Juzaweb\CMS\Contracts\HookActionContract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
@@ -30,20 +31,12 @@ class PaymentMethodManager implements PaymentMethodManagerContrast
         return $this->all()->where('key', $method)->first();
     }
 
-    /**
-     * @throws Throwable
-     */
-    public function register(string|PaymentMethod $method): void
+    public function register(string $method, string $concrete, array $configs = []): void
     {
-        if (!$method instanceof PaymentMethod) {
-            $method = app($method);
-        }
-
         $args = [
-            'key' => $method->getName(),
-            'label' => $method->getLabel(),
-            'class' => get_class($method),
-            'configs' => $method->getConfigs(),
+            'key' => $method,
+            'label' => $configs['label'] ?? Str::ucfirst($method),
+            'class' => $concrete,
         ];
 
         $this->globalData->set("subscription_methods.{$args['key']}", new Collection($args));

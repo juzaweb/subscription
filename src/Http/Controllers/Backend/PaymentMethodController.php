@@ -96,8 +96,11 @@ class PaymentMethodController extends BackendController
     protected function getConfigFields(?string $method, ?Model $model = null): array
     {
         $config = PaymentMethod::all()->get($method, new Collection());
+        if ($config->isEmpty()) {
+            return [];
+        }
 
-        return collect($config->get('configs', []))->map(
+        return collect(app()->make($config['class'])->getConfigs())->map(
             function ($item, $key) use ($model) {
                 $item['name'] = "configs[{$key}]";
                 if ($model?->configs) {

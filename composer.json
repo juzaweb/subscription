@@ -33,7 +33,8 @@
     "require": {
         "ext-openssl": "*",
         "juzaweb/paypal-rest-api-sdk-php": "^1.0",
-        "srmklive/paypal": "~3.0"
+        "srmklive/paypal": "~3.0",
+        "stripe/stripe-php": "^13.4"
     },
     "require-dev": {
         "juzaweb/modules": "^1.0",

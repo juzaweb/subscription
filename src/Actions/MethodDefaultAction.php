@@ -5,6 +5,7 @@ namespace Juzaweb\Subscription\Actions;
 use Juzaweb\CMS\Abstracts\Action;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Support\PaymentMethods\Paypal;
+use Juzaweb\Subscription\Support\PaymentMethods\Stripe;
 
 class MethodDefaultAction extends Action
 {
@@ -20,6 +21,8 @@ class MethodDefaultAction extends Action
 
     public function initActions(): void
     {
-        $this->paymentMethodManager->register(Paypal::class);
+        $this->paymentMethodManager->register('paypal', Paypal::class);
+
+        $this->paymentMethodManager->register('stripe', Stripe::class);
     }
 }

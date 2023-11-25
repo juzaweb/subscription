@@ -4,6 +4,7 @@ namespace Juzaweb\Subscription\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Arr;
 use Juzaweb\CMS\Models\Model;
 
 /**
@@ -53,5 +54,17 @@ class PlanPaymentMethod extends Model
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
+    }
+
+    public function getMeta(string $key = null, mixed $default = null)
+    {
+        return Arr::get($this->metas, $key, $default);
+    }
+
+    public function setMeta(array $metas): static
+    {
+        $this->metas = $metas;
+
+        return $this;
     }
 }
