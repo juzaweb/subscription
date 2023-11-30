@@ -10,6 +10,7 @@ use Juzaweb\CMS\Models\User;
 use Juzaweb\CMS\Traits\QueryCache\QueryCacheable;
 use Juzaweb\CMS\Traits\ResourceModel;
 use Juzaweb\CMS\Traits\UseUUIDColumn;
+use Juzaweb\Network\Traits\Networkable;
 
 /**
  * Juzaweb\Subscription\Models\UserSubscription
@@ -50,7 +51,7 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  */
 class UserSubscription extends Model
 {
-    use UseUUIDColumn, ResourceModel, QueryCacheable;
+    use UseUUIDColumn, ResourceModel, QueryCacheable, Networkable;
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_SUSPEND = 'suspend';

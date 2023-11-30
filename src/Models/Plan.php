@@ -11,6 +11,7 @@ use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Traits\QueryCache\QueryCacheable;
 use Juzaweb\CMS\Traits\ResourceModel;
 use Juzaweb\CMS\Traits\UseUUIDColumn;
+use Juzaweb\Network\Traits\Networkable;
 
 /**
  * Juzaweb\Subscription\Models\Plan
@@ -49,7 +50,7 @@ use Juzaweb\CMS\Traits\UseUUIDColumn;
  */
 class Plan extends Model
 {
-    use ResourceModel, UseUUIDColumn, QueryCacheable;
+    use ResourceModel, UseUUIDColumn, QueryCacheable, Networkable;
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';

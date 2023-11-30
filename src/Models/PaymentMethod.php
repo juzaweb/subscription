@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Traits\ResourceModel;
+use Juzaweb\Network\Traits\Networkable;
 
 /**
  * Juzaweb\Subscription\Models\PaymentMethod
@@ -35,7 +36,7 @@ use Juzaweb\CMS\Traits\ResourceModel;
  */
 class PaymentMethod extends Model
 {
-    use ResourceModel;
+    use ResourceModel, Networkable;
 
     protected $table = 'subscription_payment_methods';
 

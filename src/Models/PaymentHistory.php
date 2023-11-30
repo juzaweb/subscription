@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Models\User;
+use Juzaweb\Network\Traits\Networkable;
 
 /**
  * Juzaweb\Subscription\Models\PaymentHistory
@@ -50,6 +51,8 @@ use Juzaweb\CMS\Models\User;
  */
 class PaymentHistory extends Model
 {
+    use Networkable;
+
     public const TYPE_WEBHOOK = 'webhook';
     public const TYPE_RETURN = 'return';
 
