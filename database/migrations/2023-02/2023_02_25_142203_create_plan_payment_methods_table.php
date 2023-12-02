@@ -12,9 +12,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        $prefix = DB::getTablePrefix();
+
         Schema::create(
             'subscription_plan_payment_methods',
-            function (Blueprint $table) {
+            function (Blueprint $table) use ($prefix) {
                 $table->bigIncrements('id');
                 $table->string('payment_plan_id', 150)->unique()
                     ->comment('Plan id of payment service');
@@ -32,7 +34,7 @@ return new class extends Migration {
                     ->on('subscription_payment_methods')
                     ->onDelete('cascade');
 
-                $table->unique(['method_id', 'plan_id'], 'sppm_method_id_plan_id_unique');
+                $table->unique(['method_id', 'plan_id'], "{$prefix}_sppm_method_id_plan_id_unique");
             }
         );
     }

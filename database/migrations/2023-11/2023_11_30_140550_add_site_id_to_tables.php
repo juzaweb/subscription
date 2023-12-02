@@ -12,6 +12,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        $prefix = DB::getTablePrefix();
+
         Schema::table(
             'subscription_payment_histories',
             function (Blueprint $table) {
@@ -29,16 +31,16 @@ return new class extends Migration {
 
         Schema::table(
             'subscription_user_subscriptions',
-            function (Blueprint $table) {
+            function (Blueprint $table) use ($prefix) {
                 $table->unsignedBigInteger('site_id')->index()->nullable();
-                $table->dropUnique('user_subscriptions_module_user_unique');
-                $table->dropForeign('user_subscription_plan_foreign');
-                $table->dropUnique('user_subscriptions_plan_user_unique');
+                $table->dropUnique("{$prefix}_user_subscriptions_module_user_unique");
+                $table->dropForeign("{$prefix}_user_subscription_plan_foreign");
+                $table->dropUnique("{$prefix}_user_subscriptions_plan_user_unique");
 
-                $table->unique(['module', 'user_id', 'site_id'], 'user_subscriptions_module_user_unique');
-                $table->unique(['plan_id', 'user_id', 'site_id'], 'user_subscriptions_plan_user_unique');
+                $table->unique(['module', 'user_id', 'site_id'], "{$prefix}_user_subscriptions_module_user_unique");
+                $table->unique(['plan_id', 'user_id', 'site_id'], "{$prefix}_user_subscriptions_plan_user_unique");
 
-                $table->foreign('plan_id', 'user_subscription_plan_foreign')
+                $table->foreign('plan_id', "{$prefix}_user_subscription_plan_foreign")
                     ->references('id')
                     ->on('subscription_plans');
             }

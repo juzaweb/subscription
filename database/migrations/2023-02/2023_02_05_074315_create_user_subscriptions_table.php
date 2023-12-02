@@ -12,9 +12,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        $prefix = DB::getTablePrefix();
+
         Schema::create(
             'subscription_user_subscriptions',
-            function (Blueprint $table) {
+            function (Blueprint $table) use ($prefix) {
                 $table->bigIncrements('id');
                 $table->uuid()->unique();
                 $table->string('agreement_id', 100)->unique()
@@ -28,14 +30,14 @@ return new class extends Migration {
                 $table->unsignedBigInteger('user_id')->index();
                 $table->timestamps();
 
-                $table->unique(['module', 'user_id'], 'user_subscriptions_module_user_unique');
+                $table->unique(['module', 'user_id'], "{$prefix}_user_subscriptions_module_user_unique");
 
-                $table->unique(['plan_id', 'user_id'], 'user_subscriptions_plan_user_unique');
+                $table->unique(['plan_id', 'user_id'], "{$prefix}_user_subscriptions_plan_user_unique");
 
-                $table->foreign('method_id', 'user_subscription_payment_methods_foreign')
+                $table->foreign('method_id', "{$prefix}_user_subscription_payment_methods_foreign")
                     ->references('id')
                     ->on('subscription_payment_methods');
-                $table->foreign('plan_id', 'user_subscription_plan_foreign')
+                $table->foreign('plan_id', "{$prefix}_user_subscription_plan_foreign")
                     ->references('id')
                     ->on('subscription_plans');
             }
@@ -43,14 +45,14 @@ return new class extends Migration {
 
         Schema::create(
             'subscription_user_subscription_metas',
-            function (Blueprint $table) {
+            function (Blueprint $table) use ($prefix) {
                 $table->bigIncrements('id');
                 $table->unsignedBigInteger('user_subscription_id');
                 $table->string('meta_key', 50)->index();
                 $table->text('meta_value')->nullable();
-                $table->unique(['user_subscription_id', 'meta_key'], 'user_subscription_meta_key_unique');
+                $table->unique(['user_subscription_id', 'meta_key'], "{$prefix}_user_subscription_meta_key_unique");
 
-                $table->foreign('user_subscription_id', 'subscription_user_metas_foreign')
+                $table->foreign('user_subscription_id', "{$prefix}_subscription_user_metas_foreign")
                     ->references('id')
                     ->on('subscription_user_subscriptions')
                     ->onDelete('cascade');
