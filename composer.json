@@ -16,7 +16,8 @@
             "domain": "subscription",
             "providers": [
                 "Juzaweb\\Subscription\\Providers\\SubscriptionServiceProvider"
-            ]
+            ],
+            "networkable": true
         },
         "laravel": {
             "providers": [

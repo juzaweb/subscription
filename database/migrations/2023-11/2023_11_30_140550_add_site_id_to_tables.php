@@ -17,14 +17,14 @@ return new class extends Migration {
         Schema::table(
             'subscription_payment_histories',
             function (Blueprint $table) {
-                $table->unsignedBigInteger('site_id')->index()->nullable();
+                $table->unsignedBigInteger('site_id')->index()->default(0);
             }
         );
 
         Schema::table(
             'subscription_payment_methods',
             function (Blueprint $table) {
-                $table->unsignedBigInteger('site_id')->index()->nullable();
+                $table->unsignedBigInteger('site_id')->index()->default(0);
                 $table->unique(['site_id', 'method', 'module']);
             }
         );
@@ -32,7 +32,7 @@ return new class extends Migration {
         Schema::table(
             'subscription_user_subscriptions',
             function (Blueprint $table) use ($prefix) {
-                $table->unsignedBigInteger('site_id')->index()->nullable();
+                $table->unsignedBigInteger('site_id')->index()->default(0);
                 $table->dropUnique("{$prefix}_user_subscriptions_module_user_unique");
                 $table->dropForeign("{$prefix}_user_subscription_plan_foreign");
                 $table->dropUnique("{$prefix}_user_subscriptions_plan_user_unique");
@@ -49,7 +49,7 @@ return new class extends Migration {
         Schema::table(
             'subscription_plans',
             function (Blueprint $table) {
-                $table->unsignedBigInteger('site_id')->index()->nullable();
+                $table->unsignedBigInteger('site_id')->index()->default(0);
             }
         );
     }
