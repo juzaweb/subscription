@@ -28,18 +28,6 @@ class AutoloadServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(
-            PaymentMethodManagerContrast::class,
-            fn ($app) => new PaymentMethodManager(
-                $app[HookActionContract::class],
-                $app[GlobalDataContract::class],
-                $app[PaymentMethodRepository::class]
-            )
-        );
-
-        $this->app->singleton(
-            SubscriptionContrast::class,
-            Subscription::class
-        );
+        //
     }
 }

@@ -29,7 +29,11 @@
                                         'type' => 'col',
                                         'col' => 6,
                                         'fields' => [
-                                            'name' => [
+                                            'id' => [
+                                                'type' => 'hidden',
+                                                'label' => 'ID',
+                                            ],
+                                            'title' => [
                                                 'type' => 'text',
                                                 'label' => trans('subscription::content.feature.label'),
                                             ],
@@ -49,7 +53,13 @@
                             ]
                         ]
                      ],
-                     $model->features ?? []
+                     $model->features->map(
+                         fn ($item) => [
+                             'id' => $item->id,
+                             'title' => $item->title,
+                             'value' => $item->value,
+                        ]
+                     )->toArray()
                  ) }}
 
                 <div class="mb-3"></div>

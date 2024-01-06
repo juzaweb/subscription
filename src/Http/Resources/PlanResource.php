@@ -29,7 +29,8 @@ class PlanResource extends JsonResource
             'is_free' => $this->resource->is_free,
             'created_at' => jw_date_format($this->resource->created_at),
             'updated_at' => jw_date_format($this->resource->updated_at),
-            'features' => $this->resource->features ?? [],
+            'features' => PlanFeatureResource::collection($this->resource->features)
+                ->toResponse($request)->getData(true)['data'],
         ];
     }
 }

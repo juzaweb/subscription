@@ -4,6 +4,7 @@ namespace Juzaweb\Subscription\Contrasts;
 
 use Illuminate\Support\Collection;
 use Juzaweb\Subscription\Exceptions\PaymentMethodException;
+use Juzaweb\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
@@ -35,12 +36,44 @@ interface Subscription
     public function updatePlanMethod(Plan $plan, int|PaymentMethod $method): Plan;
 
     /**
-     * @param  string  $key
-     * @param  array  $args
+     * Registers a module with the given key and arguments.
+     *
+     * @param string $key The key of the module.
+     * @param array $args The arguments for the module.
+     *   - label (string, required): The label for the module.
+     *   - allow_plans (bool, optional): Whether to allow plans for the module. Defaults to true.
+     *   - allow_payment_methods (bool, optional): Whether to allow payment methods for the module. Defaults to true.
+     *   - allow_user_subscriptions (bool, optional): Whether to allow user subscriptions for the module.
+     * Defaults to true.
+     *   - allow_payment_histories (bool, optional): Whether to allow payment histories for the module.
+     * Defaults to true.
+     *   - allow_setting_page (bool, optional): Whether to allow a setting page for the module. Defaults to true.
+     * @throws SubscriptionException If the option label is empty.
      * @return void
-     * @see \Juzaweb\Subscription\Support\Subscription::registerModule
      */
     public function registerModule(string $key, array $args = []): void;
+
+    /**
+     * Registers a plan feature.
+     *
+     * @param string $key The key of the plan feature.
+     * @param array $args An optional array of arguments.
+     *                    - label: The label of the option (required).
+     *                    - module: The module of the plan feature.
+     *                    - key: The key of the plan feature.
+     * @throws SubscriptionException If the option label is empty.
+     * @return void
+     */
+    public function registerPlanFeature(string $key, array $args = []): void;
+
+    /**
+     * Retrieves the plan features for a specific module or all modules.
+     *
+     * @param string|null $module The module name to filter the features by.
+     *                            If null, all features will be returned.
+     * @return Collection The collection of plan features.
+     */
+    public function getPlanFeatures(string $module = null): Collection;
 
     public function getModule(string $key = null): Collection;
 }

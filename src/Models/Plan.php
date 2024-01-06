@@ -24,13 +24,13 @@ use Juzaweb\Network\Traits\Networkable;
  * @property bool $is_free
  * @property string $status
  * @property string $module
- * @property array|null $features
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection|PaymentMethod[] $paymentMethods
  * @property-read int|null $payment_methods_count
  * @property-read Collection|PlanPaymentMethod[] $planPaymentMethods
  * @property-read int|null $plan_payment_methods_count
+ * @property Collection|PlanFeature[] $features
  * @method static Builder|Plan newModelQuery()
  * @method static Builder|Plan newQuery()
  * @method static Builder|Plan query()
@@ -64,13 +64,11 @@ class Plan extends Model
         'is_free',
         'status',
         'module',
-        'features',
     ];
 
     protected $casts = [
         'price' => 'float',
         'is_free' => 'boolean',
-        'features' => 'array',
     ];
 
     public static function getAllstatus(): array
@@ -96,6 +94,11 @@ class Plan extends Model
     public function planPaymentMethods(): HasMany
     {
         return $this->hasMany(PlanPaymentMethod::class, 'plan_id', 'id');
+    }
+
+    public function features(): HasMany
+    {
+        return $this->hasMany(PlanFeature::class, 'plan_id', 'id');
     }
 
     public function scopeWhereIsActive(Builder $builder): Builder

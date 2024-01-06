@@ -89,6 +89,20 @@ class PlanController extends BackendController
         }
     }
 
+    protected function afterSave(array $data, Model $model, ...$params): void
+    {
+        $features = Arr::get($data, 'features', []);
+
+        foreach ($features as $feature) {
+            $model->features()->updateOrCreate(
+                [
+                    'id' => Arr::get($feature, 'id'),
+                ],
+                Arr::only($feature, ['title', 'description', 'value'])
+            );
+        }
+    }
+
     protected function getBreadcrumbPrefix(...$params): void
     {
         $this->addBreadcrumb(
@@ -122,8 +136,6 @@ class PlanController extends BackendController
         $data = $this->DataForSave($attributes, ...$params);
         $data['price'] = parse_price_format(Arr::get($attributes, 'price', 0));
         $data['is_free'] = Arr::get($attributes, 'is_free', 0);
-        $data['enable_trial'] = Arr::get($attributes, 'enable_trial', 0);
-        $data['free_trial_days'] = (int) Arr::get($attributes, 'free_trial_days', 0);
 
         if ($data['is_free']) {
             $data['price'] = 0;

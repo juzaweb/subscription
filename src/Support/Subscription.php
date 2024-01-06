@@ -126,6 +126,33 @@ class Subscription implements SubscriptionContrasts
         $this->globalData->set("subscription_modules.{$key}", new Collection($args));
     }
 
+    public function registerPlanFeature(string $key, array $args = []): void
+    {
+        throw_if(empty($args['label']), new SubscriptionException("Option label is required"));
+
+        $defaults = [
+            'module' => null,
+            'key' => $key,
+        ];
+
+        $args = array_merge($defaults, $args);
+
+        $this->globalData->set("subscription_plan_features.{$key}", new Collection($args));
+    }
+
+    public function getPlanFeatures(string $module = null): Collection
+    {
+        $features = collect($this->globalData->get('subscription_plan_features'));
+
+        if ($module) {
+            return $features->filter(function ($feature) use ($module) {
+                return $feature['module'] === $module;
+            });
+        }
+
+        return $features;
+    }
+
     public function registerSettingPage(string $key, array $args = []): void
     {
         $this->hookAction->registerSettingPage(
