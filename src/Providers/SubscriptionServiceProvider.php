@@ -8,6 +8,7 @@ use Juzaweb\CMS\Facades\ActionRegister;
 use Juzaweb\CMS\Support\ServiceProvider;
 use Juzaweb\Subscription\Actions\AjaxAction;
 use Juzaweb\Subscription\Actions\MethodDefaultAction;
+use Juzaweb\Subscription\Actions\PageDataAction;
 use Juzaweb\Subscription\Actions\ResourceAction;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager as PaymentMethodManagerContrast;
 use Juzaweb\Subscription\Contrasts\Subscription as SubscriptionContrast;
@@ -33,7 +34,14 @@ class SubscriptionServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        ActionRegister::register([MethodDefaultAction::class, ResourceAction::class, AjaxAction::class]);
+        ActionRegister::register(
+            [
+                MethodDefaultAction::class,
+                ResourceAction::class,
+                AjaxAction::class,
+                PageDataAction::class,
+            ]
+        );
     }
 
     /**

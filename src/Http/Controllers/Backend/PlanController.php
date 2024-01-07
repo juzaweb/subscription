@@ -75,6 +75,16 @@ class PlanController extends BackendController
         return parent::callAction($method, $parameters);
     }
 
+    protected function updateSuccessResponse($model, $request, ...$params) : JsonResponse|RedirectResponse
+    {
+        return $this->success(
+            [
+                'message' => trans('cms::app.updated_successfully'),
+                'redirect' => action([static::class, 'index'], $params),
+            ]
+        );
+    }
+
     protected function getDataForForm(Model $model, ...$params): array
     {
         $data = $this->DataForForm($model, ...$params);
@@ -89,18 +99,30 @@ class PlanController extends BackendController
         }
     }
 
+    /**
+     * @param  array  $data
+     * @param  Model|Plan  $model
+     * @param ...$params
+     * @return void
+     */
     protected function afterSave(array $data, Model $model, ...$params): void
     {
-        $features = Arr::get($data, 'features', []);
+        $features = collect(Arr::get($data, 'features', []))
+            ->filter(fn ($item) => $item['title'])
+            ->values()
+            ->toArray();
+        $ids = [];
 
         foreach ($features as $feature) {
-            $model->features()->updateOrCreate(
+            $ids[] = $model->features()->updateOrCreate(
                 [
                     'id' => Arr::get($feature, 'id'),
                 ],
                 Arr::only($feature, ['title', 'description', 'value'])
-            );
+            )->id;
         }
+
+        $model->features()->whereNotIn('id', $ids)->delete();
     }
 
     protected function getBreadcrumbPrefix(...$params): void
@@ -153,6 +175,7 @@ class PlanController extends BackendController
             'enable_trial' => ['nullable', 'numeric', 'in:1'],
             'free_trial_days' => ['nullable', 'numeric', 'min:0'],
             'module' => ['required'],
+            'features' => ['nullable', 'array'],
         ];
     }
 

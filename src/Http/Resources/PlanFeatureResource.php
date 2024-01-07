@@ -24,6 +24,7 @@ class PlanFeatureResource extends JsonResource
             'id' => $this->resource->id,
             'title' => $this->resource->title,
             'description' => $this->resource->description,
+            'value' => $this->resource->value,
             'feature_key' => $this->resource->feature_key,
         ];
     }
