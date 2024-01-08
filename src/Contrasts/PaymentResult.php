@@ -10,7 +10,10 @@
 
 namespace Juzaweb\Subscription\Contrasts;
 
-use Juzaweb\Subscription\Models\UserSubscription;
+use Juzaweb\Membership\Models\UserSubscription;
+use Juzaweb\Subscription\Models\PaymentHistory;
+use Juzaweb\Subscription\Models\PaymentMethod;
+use Juzaweb\Subscription\Models\Plan;
 
 /**
  * @see \Juzaweb\Subscription\Support\PaymentResult
@@ -23,6 +26,12 @@ interface PaymentResult
         string $token,
         string $status = UserSubscription::STATUS_ACTIVE
     );
+
+    public function withPlan(Plan $plan): static;
+
+    public function withMethod(PaymentMethod $method): static;
+
+    public function withPaymentHistory(PaymentHistory $paymentHistory): static;
 
     public function setMessage(string $message): static;
 

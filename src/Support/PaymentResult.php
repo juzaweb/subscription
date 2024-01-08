@@ -10,12 +10,21 @@
 
 namespace Juzaweb\Subscription\Support;
 
+use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Contrasts\PaymentResult as PaymentResultContract;
-use Juzaweb\Subscription\Models\UserSubscription;
+use Juzaweb\Subscription\Models\PaymentHistory;
+use Juzaweb\Subscription\Models\PaymentMethod;
+use Juzaweb\Subscription\Models\Plan;
 
 class PaymentResult implements PaymentResultContract
 {
     protected ?string $message = null;
+
+    protected ?Plan $plan = null;
+
+    protected ?PaymentMethod $method = null;
+
+    protected ?PaymentHistory $paymentHistory = null;
 
     public function __construct(
         protected string $agreementId,
@@ -23,6 +32,27 @@ class PaymentResult implements PaymentResultContract
         protected string $token,
         protected string $status = UserSubscription::STATUS_ACTIVE
     ) {
+    }
+
+    public function withPlan(Plan $plan): static
+    {
+        $this->plan = $plan;
+
+        return $this;
+    }
+
+    public function withMethod(PaymentMethod $method): static
+    {
+        $this->method = $method;
+
+        return $this;
+    }
+
+    public function withPaymentHistory(PaymentHistory $paymentHistory): static
+    {
+        $this->paymentHistory = $paymentHistory;
+
+        return $this;
     }
 
     public function setMessage(string $message): static

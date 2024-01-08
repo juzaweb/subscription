@@ -7,6 +7,7 @@ use Juzaweb\CMS\Repositories\BaseRepositoryEloquent;
 use Juzaweb\CMS\Traits\Criterias\UseSearchCriteria;
 use Juzaweb\CMS\Traits\Criterias\UseSortableCriteria;
 use Juzaweb\CMS\Traits\ResourceRepositoryEloquent;
+use Juzaweb\Membership\Repositories\UserSubscriptionRepository;
 use Juzaweb\Subscription\Models\PaymentHistory;
 
 class PaymentHistoryRepositoryEloquent extends BaseRepositoryEloquent implements UserSubscriptionRepository

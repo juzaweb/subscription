@@ -11,12 +11,12 @@
 namespace Juzaweb\Subscription\Support\PaymentMethods;
 
 use Illuminate\Http\Request;
+use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
 use Juzaweb\Subscription\Contrasts\PaymentResult;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
-use Juzaweb\Subscription\Models\UserSubscription;
 use Juzaweb\Subscription\Support\Entities\CreatedPlanResult;
 use Juzaweb\Subscription\Support\Entities\SubscribeResult;
 use Stripe\Checkout\Session;

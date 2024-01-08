@@ -39,7 +39,7 @@ class Subscription implements SubscriptionContrasts
             $method = $this->paymentMethodRepository->findByMethod($method, $plan->module);
         }
 
-        if ($plan->planPaymentMethods()->where(['method_id' => $method])->exists()) {
+        if ($plan->planPaymentMethods()->where(['method_id' => $method->id])->exists()) {
             throw new PaymentMethodException("Plan already exist.");
         }
 

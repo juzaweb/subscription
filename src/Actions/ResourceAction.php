@@ -11,6 +11,7 @@
 namespace Juzaweb\Subscription\Actions;
 
 use Juzaweb\CMS\Abstracts\Action;
+use Juzaweb\Membership\Repositories\UserSubscriptionRepository;
 use Juzaweb\Subscription\Http\Datatables\PaymentHistoryDatatable;
 use Juzaweb\Subscription\Http\Datatables\PaymentMethodDatatable;
 use Juzaweb\Subscription\Http\Datatables\PlanDatatable;
@@ -18,7 +19,6 @@ use Juzaweb\Subscription\Http\Datatables\UserSubscriptionDatatable;
 use Juzaweb\Subscription\Repositories\PaymentHistoryRepository;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
-use Juzaweb\Subscription\Repositories\UserSubscriptionRepository;
 
 class ResourceAction extends Action
 {

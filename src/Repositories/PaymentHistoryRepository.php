@@ -8,7 +8,7 @@ use Juzaweb\CMS\Repositories\BaseRepository;
 /**
  * Interface UserSubscriptionRepository.
  *
- * @method \Juzaweb\Subscription\Models\UserSubscription find($id, $columns = ['*']);
+ * @method \Juzaweb\Membership\Models\UserSubscription find($id, $columns = ['*']);
  */
 interface PaymentHistoryRepository extends BaseRepository
 {

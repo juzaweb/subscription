@@ -18,8 +18,6 @@ use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepositoryEloquent;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 use Juzaweb\Subscription\Repositories\PlanRepositoryEloquent;
-use Juzaweb\Subscription\Repositories\UserSubscriptionRepository;
-use Juzaweb\Subscription\Repositories\UserSubscriptionRepositoryEloquent;
 use Juzaweb\Subscription\Support\PaymentMethodManager;
 use Juzaweb\Subscription\Support\Subscription;
 
@@ -28,7 +26,6 @@ class SubscriptionServiceProvider extends ServiceProvider
     public array $bindings = [
         PlanRepository::class => PlanRepositoryEloquent::class,
         PaymentMethodRepository::class => PaymentMethodRepositoryEloquent::class,
-        UserSubscriptionRepository::class => UserSubscriptionRepositoryEloquent::class,
         PaymentHistoryRepository::class => PaymentHistoryRepositoryEloquent::class,
     ];
 

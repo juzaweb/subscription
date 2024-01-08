@@ -2,11 +2,11 @@
 
 namespace Juzaweb\Subscription\Abstracts;
 
+use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Contrasts\PaymentResult as PaymentResultContract;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
-use Juzaweb\Subscription\Models\UserSubscription;
 use Juzaweb\Subscription\Support\PaymentResult;
 
 /**
