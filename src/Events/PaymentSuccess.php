@@ -18,7 +18,6 @@ class PaymentSuccess
 {
     public function __construct(
         protected PaymentResult $paymentReturnResult,
-        UserSubscription $userSubscription,
         PaymentHistory $paymentHistory
     ) {
     }

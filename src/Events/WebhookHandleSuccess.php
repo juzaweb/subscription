@@ -20,7 +20,6 @@ class WebhookHandleSuccess
     public function __construct(
         protected PaymentResult $agreement,
         protected PaymentMethod $method,
-        protected UserSubscription $subscriber,
         protected ?PaymentHistory $paymentHistory
     ) {
         //

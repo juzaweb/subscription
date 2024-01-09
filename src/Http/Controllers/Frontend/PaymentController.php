@@ -114,6 +114,8 @@ class PaymentController extends FrontendController
                 ->withMethod($method)
                 ->withPaymentHistory($paymentHistory);
 
+
+
             DB::commit();
         } catch (PaymentException $e) {
             DB::rollBack();
@@ -131,7 +133,7 @@ class PaymentController extends FrontendController
             throw $e;
         }
 
-        event(new PaymentReturn($result, $subscriber, $paymentHistory));
+        event(new PaymentReturn($result, $paymentHistory));
 
         return $this->success(
             [
@@ -182,11 +184,11 @@ class PaymentController extends FrontendController
 
             throw_unless($agreement, new WebhookPaymentSkipException('Webhook: There is no handling.'));
 
-            $paymentHistory = $this->webhookHandle($agreement, $method, $subscriber);
+            $paymentHistory = $this->webhookHandle($agreement, $method);
 
             // handler
 
-            event(new WebhookHandleSuccess($agreement, $method, $subscriber, $paymentHistory));
+            event(new WebhookHandleSuccess($agreement, $method, $paymentHistory));
 
             DB::commit();
         } catch (PaymentException|WebhookPaymentSkipException $e) {
@@ -200,7 +202,7 @@ class PaymentController extends FrontendController
         }
 
         if ($agreement->isActive()) {
-            event(new PaymentSuccess($agreement, $subscriber, $paymentHistory));
+            event(new PaymentSuccess($agreement, $paymentHistory));
         }
 
         return response('Webhook Handled', 200);
@@ -222,6 +224,20 @@ class PaymentController extends FrontendController
 
         throw_if($historyExists, new WebhookPaymentSkipException('Webhook: Already handled.'));
 
+        $returnPaymentHistory = PaymentHistory::where(
+            [
+                'method' => $method->method,
+                'module' => $method->module,
+                'type' => PaymentHistory::TYPE_RETURN,
+                'agreement_id' => $agreement->getAgreementId(),
+            ]
+        )->first();
+
+        throw_if(
+            $returnPaymentHistory === null,
+            new WebhookPaymentSkipException('Cannot find return payment history.')
+        );
+
         return PaymentHistory::create(
             [
                 'token' => $agreement->getToken(),
@@ -230,9 +246,9 @@ class PaymentController extends FrontendController
                 'type' => PaymentHistory::TYPE_WEBHOOK,
                 'amount' => $agreement->getAmount(),
                 'method_id' => $method->id,
-                'plan_id' => $subscriber->plan_id,
+                'plan_id' => $returnPaymentHistory->plan_id,
                 //'user_subscription_id' => $subscriber->id,
-                'user_id' => $subscriber->user_id,
+                'user_id' => $returnPaymentHistory->user_id,
                 'agreement_id' => $agreement->getAgreementId(),
                 //'end_date' => $expirationDate,
             ]
