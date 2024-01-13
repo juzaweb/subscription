@@ -26,6 +26,8 @@ class PaymentResult implements PaymentResultContract
 
     public ?PaymentHistory $paymentHistory = null;
 
+    public bool $canCreateSubscription = false;
+
     public function __construct(
         protected string $agreementId,
         protected ?float $amount,
@@ -51,6 +53,13 @@ class PaymentResult implements PaymentResultContract
     public function withPaymentHistory(PaymentHistory $paymentHistory): static
     {
         $this->paymentHistory = $paymentHistory;
+
+        return $this;
+    }
+
+    public function setCanCreateSubscription(bool $canCreateSubscription): static
+    {
+        $this->canCreateSubscription = $canCreateSubscription;
 
         return $this;
     }

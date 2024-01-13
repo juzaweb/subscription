@@ -38,6 +38,10 @@ class PaymentMethod extends Model
 {
     use ResourceModel, Networkable;
 
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_SUSPEND = 'suspend';
+    public const STATUS_CANCEL = 'cancel';
+
     protected $table = 'subscription_payment_methods';
 
     protected $fillable = [

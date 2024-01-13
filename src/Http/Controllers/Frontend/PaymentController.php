@@ -109,7 +109,6 @@ class PaymentController extends FrontendController
                     'amount' => $result->getAmount(),
                     'method_id' => $method->id,
                     'plan_id' => $plan->id,
-                    //'user_subscription_id' => $subscriber->id,
                     'user_id' => Auth::id(),
                     'agreement_id' => $result->getAgreementId(),
                 ]
@@ -264,10 +263,8 @@ class PaymentController extends FrontendController
                 'amount' => $agreement->getAmount(),
                 'method_id' => $method->id,
                 'plan_id' => $returnPaymentHistory->plan_id,
-                //'user_subscription_id' => $subscriber->id,
                 'user_id' => $returnPaymentHistory->user_id,
                 'agreement_id' => $agreement->getAgreementId(),
-                //'end_date' => $expirationDate,
             ]
         );
     }

@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Juzaweb\CMS\Models\User;
-use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
 use Juzaweb\Subscription\Contrasts\PaymentResult;
@@ -26,6 +25,7 @@ use Juzaweb\Subscription\Support\Entities\SubscribeResult;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
+use Juzaweb\Subscription\Models\PaymentMethod as PaymentMethodModel;
 
 class Paypal extends PaymentMethodAbstract implements PaymentMethod
 {
@@ -36,21 +36,40 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         /** @var User $user */
         $user = $request->user();
 
-        $response = $this->getProvider()->addProductById($planPaymentMethod->metas['product_id'])
+        $response = $this->getProvider()
+            ->addProductById($planPaymentMethod->metas['product_id'])
             ->addBillingPlanById($planPaymentMethod->payment_plan_id)
             ->setReturnAndCancelUrl($this->getReturnUrl($plan), $this->getCancelUrl($plan))
-            ->setupSubscription($user->name, $user->email, now()->addMinutes(2));
+            ->setupSubscription($user->name, $user->email, now()->setTimezone('UTC')->addMinutes(2));
 
         $approveLink = Arr::get($response, 'links.0.href');
 
         return SubscribeResult::make(Arr::get($response, 'id'))->setRedirectUrl($approveLink);
     }
 
+    public function return(PlanModel $plan, array $data): PaymentResult
+    {
+        $provider = $this->getProvider();
+
+        $response = $provider->showSubscriptionDetails($data['subscription_id']);
+
+        $status = Arr::get($response, 'status') == 'ACTIVE'
+            ? PaymentMethodModel::STATUS_ACTIVE
+            : PaymentMethodModel::STATUS_CANCEL;
+
+        return $this->makePaymentReturnResult(
+            Arr::get($response, 'id'),
+            Arr::get($response, 'billing_info.last_payment.amount.value'),
+            $data['token'],
+            $status
+        )
+            ->setCanCreateSubscription(true);
+    }
+
     public function webhook(Request $request): bool|PaymentResult
     {
         $resource = $request->input('resource');
         $eventType = $request->input('event_type');
-        $amount = $this->getAmountInWebhookResource($resource);
         $provider = $this->getProvider();
 
         if (!$this->verifyWebhook($provider, $request)) {
@@ -68,33 +87,17 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         }
 
         $status = match ($eventType) {
-            'PAYMENT.SALE.COMPLETED' => UserSubscription::STATUS_ACTIVE,
-            'BILLING.SUBSCRIPTION.CANCELLED' => UserSubscription::STATUS_CANCEL,
-            default => UserSubscription::STATUS_SUSPEND,
+            'PAYMENT.SALE.COMPLETED' => PaymentMethodModel::STATUS_ACTIVE,
+            'BILLING.SUBSCRIPTION.CANCELLED' => PaymentMethodModel::STATUS_CANCEL,
+            default => PaymentMethodModel::STATUS_SUSPEND,
         };
+
+        $amount = $this->getAmountInWebhookResource($resource, $status);
 
         return $this->makePaymentReturnResult(
             $this->getAgreementIdFromResource($resource),
             $amount,
             $request->input('id'),
-            $status
-        );
-    }
-
-    public function return(PlanModel $plan, array $data): PaymentResult
-    {
-        $provider = $this->getProvider();
-
-        $response = $provider->showSubscriptionDetails($data['subscription_id']);
-
-        $status = Arr::get($response, 'status') == 'ACTIVE'
-            ? UserSubscription::STATUS_ACTIVE
-            : UserSubscription::STATUS_CANCEL;
-
-        return $this->makePaymentReturnResult(
-            Arr::get($response, 'id'),
-            Arr::get($response, 'billing_info.last_payment.amount.value'),
-            $data['token'],
             $status
         );
     }
@@ -125,6 +128,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
                     ],
                     'tenure_type' => 'REGULAR',
                     'sequence' => 1,
+                    'total_cycles' => 0,
                     'pricing_scheme' => [
                         'fixed_price' => [
                             'value' => $plan->price,
@@ -232,12 +236,16 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         return Arr::get($resource, 'id');
     }
 
-    protected function getAmountInWebhookResource(array $resource)
+    protected function getAmountInWebhookResource(array $resource, string $status): float
     {
+        if ($status !== PaymentMethodModel::STATUS_ACTIVE) {
+            return 0;
+        }
+
         $amount = Arr::get($resource, 'amount.total');
 
         if (empty($amount)) {
-            return Arr::get($resource, 'agreement_details.last_payment_amount.value');
+            return 0;
         }
 
         return $amount;
