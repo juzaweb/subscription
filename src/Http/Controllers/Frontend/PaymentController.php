@@ -111,6 +111,7 @@ class PaymentController extends FrontendController
                     'plan_id' => $plan->id,
                     'user_id' => Auth::id(),
                     'agreement_id' => $result->getAgreementId(),
+                    'status' => $result->getStatus(),
                 ]
             );
 
@@ -265,6 +266,7 @@ class PaymentController extends FrontendController
                 'plan_id' => $returnPaymentHistory->plan_id,
                 'user_id' => $returnPaymentHistory->user_id,
                 'agreement_id' => $agreement->getAgreementId(),
+                'status' => $agreement->getStatus(),
             ]
         );
     }
