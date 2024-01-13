@@ -51,6 +51,7 @@ class PaymentController extends FrontendController
         $method = $request->post('method');
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
+        $moduleRegistion = $this->subscription->getModule($module);
 
         try {
             $result = DB::transaction(
@@ -60,6 +61,10 @@ class PaymentController extends FrontendController
                     return $this->paymentMethodManager->find($method)->subscribe($plan, $planMethod, $request);
                 }
             );
+
+            $handler = app()->make($moduleRegistion->get('handler'));
+
+            $handler->onPayment($result->withData($request->all()));
         } catch (PaymentException $e) {
             return $this->error($e->getMessage());
         }
@@ -111,17 +116,15 @@ class PaymentController extends FrontendController
             );
 
             // handler
-            app()->make($moduleRegistion->get('handler'))->onWebhook(
+            app()->make($moduleRegistion->get('handler'))->onReturn(
                 $result->withPlan($plan)
                     ->withMethod($method)
                     ->withPaymentHistory($paymentHistory)
             );
 
             DB::commit();
-        } catch (PaymentException $e) {
-            DB::rollBack();
-            return $this->error($e->getMessage());
-        } catch (SubscriptionExistException $e) {
+        } catch (PaymentException|SubscriptionExistException $e) {
+            report($e);
             DB::rollBack();
             return $this->error(
                 [

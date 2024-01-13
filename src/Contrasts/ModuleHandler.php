@@ -10,8 +10,12 @@
 
 namespace Juzaweb\Subscription\Contrasts;
 
+use Juzaweb\Subscription\Support\Entities\SubscribeResult;
+
 interface ModuleHandler
 {
+    public function onPayment(SubscribeResult $result): void;
+
     public function onReturn(PaymentResult $result): void;
 
     public function onWebhook(PaymentResult $result): void;

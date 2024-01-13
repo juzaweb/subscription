@@ -74,9 +74,9 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         };
 
         return $this->makePaymentReturnResult(
-            Arr::get($resource, 'billing_agreement_id'),
+            $this->getAgreementIdFromResource($resource),
             $amount,
-            Arr::get($resource, 'id'),
+            $request->input('id'),
             $status
         );
     }
@@ -221,6 +221,15 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
                 'label' => 'Live Webhook ID',
             ],
         ];
+    }
+
+    protected function getAgreementIdFromResource(array $resource): string
+    {
+        if ($agreement = Arr::get($resource, 'billing_agreement_id')) {
+            return $agreement;
+        }
+
+        return Arr::get($resource, 'id');
     }
 
     protected function getAmountInWebhookResource(array $resource)

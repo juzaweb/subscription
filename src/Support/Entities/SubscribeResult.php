@@ -18,6 +18,8 @@ class SubscribeResult extends ResultEntity
 
     protected array $metas = [];
 
+    protected array $data = [];
+
     public function __construct(
         public string $id
     ) {
@@ -33,6 +35,18 @@ class SubscribeResult extends ResultEntity
         $this->metas = $meta;
 
         return $this;
+    }
+
+    public function withData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    public function getData(): array
+    {
+        return $this->data;
     }
 
     public function isRedirect(): bool
