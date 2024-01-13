@@ -136,7 +136,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             'payment_preferences' => [
                 'auto_bill_outstanding' => true,
                 'setup_fee_failure_action' => 'CONTINUE',
-                'payment_failure_threshold' => 10,
+                //'payment_failure_threshold' => 10,
             ]
         ];
 
@@ -247,6 +247,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         // Check domain cert
         $domain = get_domain_by_url($certUrl);
         if ($domain !== 'paypal.com' && !str_contains($domain, '.paypal.com')) {
+            Log::warning('Paypal: Invalid domain cert url', ['domain' => $domain]);
             return false;
         }
 
@@ -270,17 +271,6 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             public_key: openssl_pkey_get_public(public_key: $cert),
             algorithm: 'sha256WithRSAEncryption'
         );
-    }
-
-    protected function verifyWebhook2(PayPalClient $provider, Request $request): bool
-    {
-        $verifyResponse = $provider->setWebHookID($this->getConfigByMod('webhook_id'))->verifyIPN($request);
-
-        if (isset($verifyResponse['error'])) {
-            return false;
-        }
-
-        return Arr::get($verifyResponse, 'verification_status') == 'SUCCESS';
     }
 
     protected function logger(): LoggerInterface

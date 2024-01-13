@@ -84,6 +84,7 @@ class PaymentController extends FrontendController
     {
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
         $plan = $this->planRepository->findByUUID($plan, true);
+        $moduleRegistion = $this->subscription->getModule($module);
 
         DB::beginTransaction();
         try {
@@ -110,11 +111,11 @@ class PaymentController extends FrontendController
             );
 
             // handler
-            $result->withPlan($plan)
-                ->withMethod($method)
-                ->withPaymentHistory($paymentHistory);
-
-
+            app()->make($moduleRegistion->get('handler'))->onWebhook(
+                $result->withPlan($plan)
+                    ->withMethod($method)
+                    ->withPaymentHistory($paymentHistory)
+            );
 
             DB::commit();
         } catch (PaymentException $e) {
@@ -166,7 +167,7 @@ class PaymentController extends FrontendController
         );
     }
 
-    public function webhook(Request $request, $module, $method): Response
+    public function webhook(Request $request, string $module, string $method): Response
     {
         Log::info(
             "Subscription Webhook {$module} {$method}"
@@ -174,7 +175,14 @@ class PaymentController extends FrontendController
             ."\n Headers: ".json_encode($request->headers->all(), JSON_THROW_ON_ERROR)
         );
 
-        $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
+        $method = $this->paymentMethodRepository->findByMethod($method, $module);
+
+        if ($method === null) {
+            Log::info('Webhook: Method not found', ['method' => $method, 'module' => $module]);
+            return response('Webhook Handle Failed', 200);
+        }
+
+        $moduleRegistion = $this->subscription->getModule($module);
 
         DB::beginTransaction();
         try {
@@ -186,7 +194,13 @@ class PaymentController extends FrontendController
 
             $paymentHistory = $this->webhookHandle($agreement, $method);
 
-            // handler
+            throw_if($paymentHistory === null, new WebhookPaymentSkipException('Webhook: Payment not found.'));
+
+            app()->make($moduleRegistion->get('handler'))->onWebhook(
+                $agreement->withPlan($paymentHistory->plan)
+                    ->withMethod($method)
+                    ->withPaymentHistory($paymentHistory)
+            );
 
             event(new WebhookHandleSuccess($agreement, $method, $paymentHistory));
 

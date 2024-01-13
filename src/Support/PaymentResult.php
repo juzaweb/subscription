@@ -20,11 +20,11 @@ class PaymentResult implements PaymentResultContract
 {
     protected ?string $message = null;
 
-    protected ?Plan $plan = null;
+    public ?Plan $plan = null;
 
-    protected ?PaymentMethod $method = null;
+    public ?PaymentMethod $method = null;
 
-    protected ?PaymentHistory $paymentHistory = null;
+    public ?PaymentHistory $paymentHistory = null;
 
     public function __construct(
         protected string $agreementId,
