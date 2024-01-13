@@ -136,7 +136,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             'payment_preferences' => [
                 'auto_bill_outstanding' => true,
                 'setup_fee_failure_action' => 'CONTINUE',
-                //'payment_failure_threshold' => 10,
+                'payment_failure_threshold' => 10,
             ]
         ];
 
@@ -252,6 +252,11 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
         $transmissionTime = $headers->get('PAYPAL-TRANSMISSION-TIME');
         $certUrl = $headers->get('PAYPAL-CERT-URL');
         $transmissionSig = $headers->get('PAYPAL-TRANSMISSION-SIG');
+
+        if (!is_url($certUrl)) {
+            Log::warning('Paypal: Invalid cert url', ['certUrl' => $certUrl]);
+            return false;
+        }
 
         // Check domain cert
         $domain = get_domain_by_url($certUrl);
