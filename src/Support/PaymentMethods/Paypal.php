@@ -62,8 +62,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             Arr::get($response, 'billing_info.last_payment.amount.value'),
             $data['token'],
             $status
-        )
-            ->setActiveSubscription(true);
+        );
     }
 
     public function webhook(Request $request): bool|PaymentResult

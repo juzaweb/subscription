@@ -56,6 +56,7 @@ class PaymentHistory extends Model
     public const TYPE_WEBHOOK = 'webhook';
     public const TYPE_RETURN = 'return';
 
+    public const STATUS_REGISTER = 'register';
     public const STATUS_ACTIVE = 'active';
     public const STATUS_SUSPEND = 'suspend';
     public const STATUS_CANCEL = 'cancel';
