@@ -111,10 +111,6 @@ class Subscription implements SubscriptionContrasts
             $this->registerModulePaymentMethod($key, $args);
         }
 
-        if (Arr::get($args, 'allow_user_subscriptions', true)) {
-            $this->registerModuleUserSubscription($key, $args);
-        }
-
         if (Arr::get($args, 'allow_payment_histories', true)) {
             $this->registerModulePaymentHistory($key, $args);
         }
@@ -197,18 +193,6 @@ class Subscription implements SubscriptionContrasts
                         'class' => 'is-number'
                     ]
                 ],
-            ]
-        );
-    }
-
-    public function registerModuleUserSubscription(string $key, array $args = []): void
-    {
-        $this->hookAction->addAdminMenu(
-            trans('subscription::content.user_subscriptions'),
-            "subscription.{$key}.subscriptions",
-            $args['menu'] ?? [
-                'icon' => 'fa fa-users',
-                'position' => 30,
             ]
         );
     }
