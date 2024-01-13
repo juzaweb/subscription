@@ -26,7 +26,7 @@ class PaymentResult implements PaymentResultContract
 
     public ?PaymentHistory $paymentHistory = null;
 
-    public bool $canCreateSubscription = false;
+    public bool $canActiveSubscription = false;
 
     public function __construct(
         protected string $agreementId,
@@ -57,11 +57,16 @@ class PaymentResult implements PaymentResultContract
         return $this;
     }
 
-    public function setCanCreateSubscription(bool $canCreateSubscription): static
+    public function setActiveSubscription(bool $canActiveSubscription): static
     {
-        $this->canCreateSubscription = $canCreateSubscription;
+        $this->canActiveSubscription = $canActiveSubscription;
 
         return $this;
+    }
+
+    public function canActiveSubscription(): bool
+    {
+        return $this->canActiveSubscription;
     }
 
     public function setMessage(string $message): static

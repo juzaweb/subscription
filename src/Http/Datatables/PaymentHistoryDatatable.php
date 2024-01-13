@@ -3,7 +3,6 @@
 namespace Juzaweb\Subscription\Http\Datatables;
 
 use Juzaweb\Backend\Http\Datatables\PostType\ResourceDatatable;
-use Juzaweb\Subscription\Models\PaymentHistory;
 
 class PaymentHistoryDatatable extends ResourceDatatable
 {
@@ -20,8 +19,7 @@ class PaymentHistoryDatatable extends ResourceDatatable
             ],
             'amount' => [
                 'label' => trans('subscription::content.amount'),
-                'formatter' => fn ($value, $row, $index)
-                    => $row->type == PaymentHistory::TYPE_RETURN ? "-" : "$".$value,
+                'formatter' => fn ($value, $row, $index) => "$".$value,
             ],
             'method' => [
                 'label' => trans('subscription::content.method'),

@@ -10,7 +10,6 @@
 
 namespace Juzaweb\Subscription\Contrasts;
 
-use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
@@ -24,7 +23,7 @@ interface PaymentResult
         string $agreementId,
         float $amount,
         string $token,
-        string $status = UserSubscription::STATUS_ACTIVE
+        string $status = PaymentMethod::STATUS_ACTIVE
     );
 
     public function withPlan(Plan $plan): static;
@@ -32,6 +31,10 @@ interface PaymentResult
     public function withMethod(PaymentMethod $method): static;
 
     public function withPaymentHistory(PaymentHistory $paymentHistory): static;
+
+    public function setActiveSubscription(bool $canActiveSubscription): static;
+
+    public function canActiveSubscription(): bool;
 
     public function setMessage(string $message): static;
 
