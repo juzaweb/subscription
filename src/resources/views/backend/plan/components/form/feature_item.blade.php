@@ -9,9 +9,9 @@
         <div class="repeater-item-content">
             <div class="row">
                 <div class="col-md-6">
-                    <input type="hidden" name="features[0][id]"
+                    <input type="hidden" name="features[{{ $marker }}][id]"
                            class="form-control "
-                           id="{{ $marker }}-features[0][id]"
+                           id="{{ $marker }}-features[{{ $marker }}][id]"
                            value="{{ $item->id ?? '' }}"
                            autocomplete="off"
                            placeholder=""
