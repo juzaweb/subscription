@@ -27,14 +27,9 @@ return new class extends Migration {
                 $table->dateTime('end_date')->nullable()->index();
                 $table->unsignedBigInteger('method_id');
                 $table->unsignedBigInteger('plan_id');
-                $table->unsignedBigInteger('user_subscription_id')->nullable();
                 $table->unsignedBigInteger('user_id')->index();
                 $table->timestamps();
 
-                $table->foreign('user_subscription_id')
-                    ->references('id')
-                    ->on('subscription_user_subscriptions')
-                    ->onDelete('set null');
                 $table->foreign('method_id')
                     ->references('id')
                     ->on('subscription_payment_methods');
