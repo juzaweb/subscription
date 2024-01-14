@@ -9,7 +9,9 @@ jobs:
     env:
       LOG_CHANNEL: slack
       LOG_SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-    uses: juzaweb/actions/.github/workflows/plugin-test.yml@main
-    with:
-      vendor: juzaweb
-      plugin: subscription
+    steps:
+      - name: Testing
+        uses: juzaweb/actions/.github/workflows/plugin-test.yml@main
+        with:
+          vendor: juzaweb
+          plugin: subscription
