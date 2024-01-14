@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Juzaweb\CMS\Http\Controllers\FrontendController;
-use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager;
 use Juzaweb\Subscription\Contrasts\PaymentResult;
 use Juzaweb\Subscription\Contrasts\Subscription;
@@ -23,6 +22,7 @@ use Juzaweb\Subscription\Exceptions\PaymentException;
 use Juzaweb\Subscription\Exceptions\SubscriptionExistException;
 use Juzaweb\Subscription\Exceptions\WebhookPaymentSkipException;
 use Juzaweb\Subscription\Http\Requests\Frontend\PaymentRequest;
+use Juzaweb\Subscription\Models\ModuleSubscription;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
@@ -45,10 +45,10 @@ class PaymentController extends FrontendController
         global $jw_user;
 
         Cache::set("subscription_payment_{$jw_user->id}", $request->only(['return_url', 'cancel_url']), 3600);
-
-        $plan = $this->planRepository->findByUUIDOrFail($request->post('plan'));
+        Cache::set("subscription_payment_id_{$jw_user->id}", $request->input('id'), 3600);
 
         $method = $request->post('method');
+        $plan = $this->planRepository->findByUUIDOrFail($request->post('plan'));
 
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
         $moduleRegistion = $this->subscription->getModule($module);
@@ -62,9 +62,11 @@ class PaymentController extends FrontendController
                 }
             );
 
-            $handler = app()->make($moduleRegistion->get('handler'));
+            if ($handler = $moduleRegistion->get('handler')) {
+                $handler = app()->make($handler);
 
-            $handler->onPayment($result->withData($request->all()));
+                $handler->onPayment($result->withData($request->all()));
+            }
         } catch (PaymentException $e) {
             return $this->error($e->getMessage());
         }
@@ -85,11 +87,18 @@ class PaymentController extends FrontendController
         );
     }
 
-    public function return(Request $request, $module, $plan, $method): JsonResponse|RedirectResponse
-    {
+    public function return(
+        Request $request,
+        string $module,
+        string $plan,
+        string $method
+    ): JsonResponse|RedirectResponse {
+        global $jw_user;
+
         $method = $this->paymentMethodRepository->findByMethod($method, $module, true);
         $plan = $this->planRepository->findByUUID($plan, true);
         $moduleRegistion = $this->subscription->getModule($module);
+        $paymentId = Cache::get("subscription_payment_id_{$jw_user->id}");
 
         DB::beginTransaction();
         try {
@@ -115,12 +124,33 @@ class PaymentController extends FrontendController
                 ]
             );
 
-            // handler
-            app()->make($moduleRegistion->get('handler'))->onReturn(
-                $result->withPlan($plan)
-                    ->withMethod($method)
-                    ->withPaymentHistory($paymentHistory)
+            $subscriber = ModuleSubscription::updateOrCreate(
+                [
+                    'module_id' => $paymentId,
+                    'module_type' => $module,
+                ],
+                [
+                    'plan_id' => $result->plan->id,
+                    'method_id' => $result->method->id,
+                    'agreement_id' => $result->getAgreementId(),
+                    'amount' => $result->getAmount(),
+                    'register_by' => Auth::id(),
+                    'status' => ModuleSubscription::STATUS_PENDING,
+                ]
             );
+
+            if ($result->canActiveSubscription()) {
+                $subscriber->activeSubscription();
+            }
+
+            // handler
+            if ($handler = $moduleRegistion->get('handler')) {
+                app()->make($handler)->onReturn(
+                    $result->withPlan($plan)
+                        ->withMethod($method)
+                        ->withPaymentHistory($paymentHistory)
+                );
+            }
 
             DB::commit();
         } catch (PaymentException|SubscriptionExistException $e) {
@@ -199,11 +229,13 @@ class PaymentController extends FrontendController
 
             throw_if($paymentHistory === null, new WebhookPaymentSkipException('Webhook: Payment not found.'));
 
-            app()->make($moduleRegistion->get('handler'))->onWebhook(
-                $agreement->withPlan($paymentHistory->plan)
-                    ->withMethod($method)
-                    ->withPaymentHistory($paymentHistory)
-            );
+            if ($handler = $moduleRegistion->get('handler')) {
+                app()->make($handler)->onWebhook(
+                    $agreement->withPlan($paymentHistory->plan)
+                        ->withMethod($method)
+                        ->withPaymentHistory($paymentHistory)
+                );
+            }
 
             event(new WebhookHandleSuccess($agreement, $method, $paymentHistory));
 

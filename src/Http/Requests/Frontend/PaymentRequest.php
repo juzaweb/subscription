@@ -29,7 +29,11 @@ class PaymentRequest extends FormRequest
             'method' => [
                 'required',
                 'exists:subscription_payment_methods,method',
-            ]
+            ],
+            'id' => [
+                'required',
+                'integer',
+            ],
         ];
     }
 }
