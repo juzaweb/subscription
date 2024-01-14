@@ -35,10 +35,11 @@ class PageDataAction extends Action
         $this->registerPageCustomData(
             'subscription_plans',
             fn ($request, $option) =>
-            PlanResource::collection(Plan::with(['features'])
-                ->whereIsActive()
-                ->where(['module' => $option['module'] ?? 'membership'])->get())
-                ->toArray($request)
+                PlanResource::collection(Plan::with(['features'])
+                    ->whereIsActive()
+                    ->where(['module' => $option['module'] ?? 'membership'])->get()
+                )
+                    ->toArray($request)
         );
     }
 }
