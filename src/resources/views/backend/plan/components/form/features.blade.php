@@ -16,6 +16,7 @@
 
     <script type="text/html" class="repeater-item-template">
         @component('subscription::backend.plan.components.form.feature_item', ['marker' => '{marker}'])
+
         @endcomponent
     </script>
 </div>

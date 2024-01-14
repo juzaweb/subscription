@@ -1,0 +1,7 @@
+name: Run phpunit test suite
+
+on: [push, pull_request]
+
+jobs:
+  uneditable:
+    uses: juzaweb/actions/.github/workflows/plugin-test.yml@main

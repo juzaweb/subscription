@@ -7,6 +7,7 @@ use Juzaweb\Subscription\Models\Plan;
 if (!function_exists('has_subscription')) {
     function has_subscription(User $user, string $module): ?UserSubscription
     {
+        return null;
         return UserSubscription::with(['plan' => fn($q) => $q->cacheFor(3600)])
             ->where(['module' => $module])
             ->whereUserId($user->id)
