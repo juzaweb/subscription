@@ -3,7 +3,7 @@ name: Run phpunit test suite
 on: [push, pull_request]
 
 jobs:
-  uneditable:
+  phpunit-test-suite:
     uses: juzaweb/actions/.github/workflows/plugin-test.yml@main
     with:
       plugin: juzaweb/subscription
