@@ -15,52 +15,7 @@
 
                 {{ Field::text($model, 'price', ['label' => trans('subscription::content.price'), 'class' => 'is-number number-format', 'value' => number_format($model->price), 'prefix' => '$', 'disabled' => $model->is_free == 1]) }}
 
-                <h5>{{ trans('subscription::content.features') }}</h5>
-
-                 {{ Field::repeater(
-                    [
-                        'label' => 'Feature',
-                        'name' => 'features',
-                        'fields' => [
-                            'row' => [
-                                'type' => 'row',
-                                'fields' => [
-                                    'name' => [
-                                        'type' => 'col',
-                                        'col' => 6,
-                                        'fields' => [
-                                            'id' => [
-                                                'type' => 'hidden',
-                                                'label' => 'ID',
-                                            ],
-                                            'title' => [
-                                                'type' => 'text',
-                                                'label' => trans('subscription::content.feature.label'),
-                                            ],
-                                        ],
-                                    ],
-                                    'value' => [
-                                        'type' => 'col',
-                                        'col' => 6,
-                                        'fields' => [
-                                            'value' => [
-                                                'type' => 'text',
-                                                'label' => trans('subscription::content.feature.value'),
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                     ],
-                     $model->features->map(
-                         fn ($item) => [
-                             'id' => $item->id,
-                             'title' => $item->title,
-                             'value' => $item->value,
-                        ]
-                     )->toArray()
-                 ) }}
+                @include('subscription::backend.plan.components.form.features')
 
                 <div class="mb-3"></div>
             </div>

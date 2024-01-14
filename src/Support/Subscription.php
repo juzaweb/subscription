@@ -131,6 +131,8 @@ class Subscription implements SubscriptionContrasts
         $defaults = [
             'module' => null,
             'key' => $key,
+            'require_value' => false,
+            'default_value' => null,
         ];
 
         $args = array_merge($defaults, $args);
@@ -144,7 +146,7 @@ class Subscription implements SubscriptionContrasts
 
         if ($module) {
             return $features->filter(function ($feature) use ($module) {
-                return $feature['module'] === $module;
+                return $feature['module'] === null || $feature['module'] === $module;
             });
         }
 

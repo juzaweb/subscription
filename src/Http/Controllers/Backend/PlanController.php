@@ -2,7 +2,6 @@
 
 namespace Juzaweb\Subscription\Http\Controllers\Backend;
 
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -19,7 +18,6 @@ use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Subscription\Http\Datatables\PlanDatatable;
 use Juzaweb\Subscription\Http\Requests\Plan\UpdatePlanRequest;
-use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
@@ -89,6 +87,7 @@ class PlanController extends BackendController
     {
         $data = $this->DataForForm($model, ...$params);
         $data['module'] = $this->getModuleName(...$params);
+        $data['moduleFeatures'] = $this->subscription->getPlanFeatures($data['module']);
         return $data;
     }
 
@@ -179,7 +178,7 @@ class PlanController extends BackendController
         ];
     }
 
-    protected function getModuleName(...$params)
+    protected function getModuleName(...$params): string
     {
         return $this->getSettingModule(...$params)->get('key');
     }
