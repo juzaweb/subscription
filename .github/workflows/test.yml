@@ -6,4 +6,5 @@ jobs:
   phpunit-test-suite:
     uses: juzaweb/actions/.github/workflows/plugin-test.yml@main
     with:
-      plugin: juzaweb/subscription
+      plugin: subscription
+      vendor: juzaweb
