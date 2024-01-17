@@ -20,8 +20,7 @@ class PaymentHistoryDatatable extends ResourceDatatable
             ],
             'amount' => [
                 'label' => trans('subscription::content.amount'),
-                'formatter' => fn ($value, $row, $index)
-                    => $row->type === PaymentHistory::TYPE_RETURN ? "-" : "$".$value,
+                'formatter' => fn ($value, $row, $index) => "$".$value,
             ],
             'method' => [
                 'label' => trans('subscription::content.method'),
@@ -42,7 +41,10 @@ class PaymentHistoryDatatable extends ResourceDatatable
             'status' => [
                 'label' => trans('subscription::content.user'),
                 'formatter' => function ($value, $row, $index) {
-                    return view('cms::components.datatable.status', compact('value', 'row', 'index'));
+                    return view(
+                        'cms::components.datatable.status',
+                        compact('value', 'row', 'index')
+                    );
                 }
             ],
             'created_at' => [

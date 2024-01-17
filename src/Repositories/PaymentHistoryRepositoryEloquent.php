@@ -26,8 +26,9 @@ class PaymentHistoryRepositoryEloquent extends BaseRepositoryEloquent implements
         $this->applyCriteria();
         $this->applyScope();
 
-        $results = $this->model->query()->with(['plan', 'user', 'paymentMethod'])
+        $results = $this->model->newQuery()->with(['plan', 'user', 'paymentMethod'])
             ->where(['module' => $this->app['router']->current()?->parameter('module')])
+            ->isShow()
             ->paginate($limit, $columns, 'page', $page);
         $results->appends(app('request')->query());
 

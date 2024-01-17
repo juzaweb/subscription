@@ -59,7 +59,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
 
         return $this->makePaymentReturnResult(
             Arr::get($response, 'id'),
-            Arr::get($response, 'billing_info.last_payment.amount.value'),
+            0, // Set 0 because transaction confirmation via webhook
             $data['token'],
             $status
         );

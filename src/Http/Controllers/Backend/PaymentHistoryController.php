@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Subscription\Http\Controllers\Backend;
 
+use Illuminate\Contracts\Validation\Validator as ValidatorContract;
 use Illuminate\Support\Collection;
 use Juzaweb\CMS\Abstracts\DataTable;
 use Juzaweb\CMS\Facades\HookAction;
@@ -51,7 +52,7 @@ class PaymentHistoryController extends BackendController
         return $this->moduleSetting;
     }
 
-    protected function validator(array $attributes, ...$params): \Illuminate\Contracts\Validation\Validator
+    protected function validator(array $attributes, ...$params): ValidatorContract
     {
         return Validator::make(
             $attributes,

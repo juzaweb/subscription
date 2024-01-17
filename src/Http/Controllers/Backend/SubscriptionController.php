@@ -69,7 +69,7 @@ class SubscriptionController extends BackendController
 
     protected function getTitle(...$params): string
     {
-        return trans('subscription::content.user_subscriptions');
+        return trans('subscription::content.subscriptions');
     }
 
     protected function getSetting(...$params): Collection

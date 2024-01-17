@@ -95,4 +95,9 @@ class PaymentHistory extends Model
     {
         return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
     }
+
+    public function scopeIsShow(Builder $builder): Builder
+    {
+        return $builder->where('amount', '>', 0);
+    }
 }
