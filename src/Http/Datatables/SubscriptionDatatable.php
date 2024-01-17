@@ -4,7 +4,7 @@ namespace Juzaweb\Subscription\Http\Datatables;
 
 use Juzaweb\Backend\Http\Datatables\PostType\ResourceDatatable;
 
-class UserSubscriptionDatatable extends ResourceDatatable
+class SubscriptionDatatable extends ResourceDatatable
 {
     /**
      * Columns datatable
@@ -19,11 +19,11 @@ class UserSubscriptionDatatable extends ResourceDatatable
             ],
             'amount' => [
                 'label' => trans('subscription::content.amount'),
-                'formatter' => fn($value, $row, $index) => "$".$value,
+                'formatter' => fn ($value, $row, $index) => "$".$value,
             ],
             'method_id' => [
                 'label' => trans('subscription::content.method'),
-                'formatter' => fn($value, $row, $index) => $row->paymentMethod?->name,
+                'formatter' => fn ($value, $row, $index) => $row->paymentMethod?->name,
             ],
             'plan_id' => [
                 'label' => trans('subscription::content.plan'),

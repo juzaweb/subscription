@@ -12,9 +12,11 @@ use Juzaweb\Subscription\Events\CreatePlanSuccess;
 use Juzaweb\Subscription\Events\UpdatePlanSuccess;
 use Juzaweb\Subscription\Exceptions\PaymentMethodException;
 use Juzaweb\Subscription\Exceptions\SubscriptionException;
+use Juzaweb\Subscription\Http\Datatables\SubscriptionDatatable;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
+use Juzaweb\Subscription\Repositories\ModuleSubscriptionRepository;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
 
@@ -113,6 +115,10 @@ class Subscription implements SubscriptionContrasts
             $this->registerModulePaymentHistory($key, $args);
         }
 
+        if (Arr::get($args, 'allow_user_subscriptions', true)) {
+            $this->registerModuleSubscription($key, $args);
+        }
+
         if (Arr::get($args, 'allow_setting_page', true)) {
             $this->registerSettingPage($key, $args);
         }
@@ -120,6 +126,29 @@ class Subscription implements SubscriptionContrasts
         $args = array_merge(['key' => $key], $args);
 
         $this->globalData->set("subscription_modules.{$key}", new Collection($args));
+    }
+
+    public function registerModuleSubscription(string $key, array $args = []): void
+    {
+        $this->hookAction->registerResource(
+            "module-subscriptions",
+            null,
+            [
+                'label' => trans('membership::content.user_subscriptions'),
+                'repository' => ModuleSubscriptionRepository::class,
+                'datatable' => SubscriptionDatatable::class,
+                'menu' => null,
+            ]
+        );
+
+        $this->hookAction->addAdminMenu(
+            trans('subscription::content.subscriptions'),
+            "subscription.{$key}.subscriptions",
+            $args['menu'] ?? [
+                'icon' => 'fa fa-users',
+                'position' => 30,
+            ]
+        );
     }
 
     public function registerPlanFeature(string $key, array $args = []): void

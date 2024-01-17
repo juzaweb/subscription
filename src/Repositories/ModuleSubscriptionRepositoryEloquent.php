@@ -7,9 +7,9 @@ use Juzaweb\CMS\Repositories\BaseRepositoryEloquent;
 use Juzaweb\CMS\Traits\Criterias\UseSearchCriteria;
 use Juzaweb\CMS\Traits\Criterias\UseSortableCriteria;
 use Juzaweb\CMS\Traits\ResourceRepositoryEloquent;
-use Juzaweb\Subscription\Models\PaymentHistory;
+use Juzaweb\Subscription\Models\ModuleSubscription;
 
-class PaymentHistoryRepositoryEloquent extends BaseRepositoryEloquent implements ModuleSubscriptionRepository
+class ModuleSubscriptionRepositoryEloquent extends BaseRepositoryEloquent implements ModuleSubscriptionRepository
 {
     use ResourceRepositoryEloquent, UseSearchCriteria, UseSortableCriteria;
 
@@ -18,7 +18,7 @@ class PaymentHistoryRepositoryEloquent extends BaseRepositoryEloquent implements
 
     public function model(): string
     {
-        return PaymentHistory::class;
+        return ModuleSubscription::class;
     }
 
     public function adminPaginate(int $limit, ?int $page = null, array $columns = ['*']): LengthAwarePaginator
@@ -26,8 +26,7 @@ class PaymentHistoryRepositoryEloquent extends BaseRepositoryEloquent implements
         $this->applyCriteria();
         $this->applyScope();
 
-        $results = $this->model->query()->with(['plan', 'user', 'paymentMethod'])
-            ->where(['module' => $this->app['router']->current()?->parameter('module')])
+        $results = $this->model->newQuery()->with(['plan', 'user', 'paymentMethod'])
             ->paginate($limit, $columns, 'page', $page);
         $results->appends(app('request')->query());
 

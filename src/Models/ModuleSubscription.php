@@ -2,16 +2,31 @@
 
 namespace Juzaweb\Subscription\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Models\User;
+use Juzaweb\CMS\Traits\QueryCache\QueryCacheable;
 use Juzaweb\CMS\Traits\ResourceModel;
 use Juzaweb\CMS\Traits\UseUUIDColumn;
 use Juzaweb\Network\Traits\Networkable;
 
+/**
+ * Juzaweb\Subscription\Models\ModuleSubscription
+ *
+ * @property-read PaymentMethod|null $method
+ * @property-read Plan|null $plan
+ * @property-read User|null $user
+ * @method static Builder|ModuleSubscription newModelQuery()
+ * @method static Builder|ModuleSubscription newQuery()
+ * @method static Builder|ModuleSubscription query()
+ * @method static Builder|ModuleSubscription whereFilter(array $params = [])
+ * @mixin Eloquent
+ */
 class ModuleSubscription extends Model
 {
-    use ResourceModel, UseUUIDColumn, Networkable;
+    use ResourceModel, UseUUIDColumn, Networkable, QueryCacheable;
 
     protected $table = 'subscription_module_subscriptions';
 
@@ -52,6 +67,41 @@ class ModuleSubscription extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class, 'plan_id', 'id');
+    }
+
+    public function scopeInEffect(Builder $query): Builder
+    {
+        return $query->isActive()->where('end_date', '>=', now());
+    }
+
+    public function scopeIsActive(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeIsFree(Builder $query): Builder
+    {
+        return $query->where('is_free', true);
+    }
+
+    public function scopeIsCancel(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_CANCEL);
+    }
+
+    public function scopeIsSuspend(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_SUSPEND);
+    }
+
+    public function expired(): bool
+    {
+        return empty($this->end_date) || $this->end_date->lt(now());
+    }
+
+    public function unexpired(): bool
+    {
+        return !$this->expired();
     }
 
     public function activeSubscription(): void

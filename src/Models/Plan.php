@@ -46,6 +46,9 @@ use Juzaweb\Network\Traits\Networkable;
  * @method static Builder|Plan whereStatus($value)
  * @method static Builder|Plan whereUpdatedAt($value)
  * @method static Builder|Plan whereUuid($value)
+ * @property int|null $site_id
+ * @property-read int|null $features_count
+ * @method static Builder|Plan whereSiteId($value)
  * @mixin \Eloquent
  */
 class Plan extends Model

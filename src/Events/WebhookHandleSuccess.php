@@ -10,7 +10,6 @@
 
 namespace Juzaweb\Subscription\Events;
 
-use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Contrasts\PaymentResult;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\PaymentMethod;

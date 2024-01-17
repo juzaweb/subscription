@@ -13,7 +13,9 @@
 use Juzaweb\Subscription\Http\Controllers\Backend\PaymentHistoryController;
 use Juzaweb\Subscription\Http\Controllers\Backend\PaymentMethodController;
 use Juzaweb\Subscription\Http\Controllers\Backend\PlanController;
+use Juzaweb\Subscription\Http\Controllers\Backend\SubscriptionController;
 
 Route::jwResource('subscription/{module}/plans', PlanController::class);
 Route::jwResource('subscription/{module}/payment-methods', PaymentMethodController::class);
 Route::jwResource('subscription/{module}/payment-histories', PaymentHistoryController::class);
+Route::jwResource('subscription/{module}/subscriptions', SubscriptionController::class);

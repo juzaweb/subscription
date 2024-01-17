@@ -12,6 +12,8 @@ use Juzaweb\Subscription\Actions\PageDataAction;
 use Juzaweb\Subscription\Actions\ResourceAction;
 use Juzaweb\Subscription\Contrasts\PaymentMethodManager as PaymentMethodManagerContrast;
 use Juzaweb\Subscription\Contrasts\Subscription as SubscriptionContrast;
+use Juzaweb\Subscription\Repositories\ModuleSubscriptionRepository;
+use Juzaweb\Subscription\Repositories\ModuleSubscriptionRepositoryEloquent;
 use Juzaweb\Subscription\Repositories\PaymentHistoryRepository;
 use Juzaweb\Subscription\Repositories\PaymentHistoryRepositoryEloquent;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
@@ -27,6 +29,7 @@ class SubscriptionServiceProvider extends ServiceProvider
         PlanRepository::class => PlanRepositoryEloquent::class,
         PaymentMethodRepository::class => PaymentMethodRepositoryEloquent::class,
         PaymentHistoryRepository::class => PaymentHistoryRepositoryEloquent::class,
+        ModuleSubscriptionRepository::class => ModuleSubscriptionRepositoryEloquent::class,
     ];
 
     public function boot(): void

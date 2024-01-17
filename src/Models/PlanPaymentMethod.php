@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Subscription\Models;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Arr;
@@ -26,7 +27,8 @@ use Juzaweb\CMS\Models\Model;
  * @method static Builder|PlanPaymentMethod whereMethodId($value)
  * @method static Builder|PlanPaymentMethod wherePaymentPlanId($value)
  * @method static Builder|PlanPaymentMethod wherePlanId($value)
- * @mixin \Eloquent
+ * @method static Builder|PlanPaymentMethod whereMetas($value)
+ * @mixin Eloquent
  */
 class PlanPaymentMethod extends Model
 {

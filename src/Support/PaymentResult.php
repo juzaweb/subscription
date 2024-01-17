@@ -10,8 +10,8 @@
 
 namespace Juzaweb\Subscription\Support;
 
-use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Contrasts\PaymentResult as PaymentResultContract;
+use Juzaweb\Subscription\Models\ModuleSubscription;
 use Juzaweb\Subscription\Models\PaymentHistory;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
@@ -32,7 +32,7 @@ class PaymentResult implements PaymentResultContract
         protected string $agreementId,
         protected ?float $amount,
         protected string $token,
-        protected string $status = UserSubscription::STATUS_ACTIVE
+        protected string $status = ModuleSubscription::STATUS_ACTIVE
     ) {
     }
 

@@ -1,25 +1,24 @@
 <?php
 
-use Juzaweb\CMS\Models\User;
-use Juzaweb\Membership\Models\UserSubscription;
+use Juzaweb\CMS\Models\Model;
+use Juzaweb\Subscription\Models\ModuleSubscription;
 use Juzaweb\Subscription\Models\Plan;
 
 if (!function_exists('has_subscription')) {
-    function has_subscription(User $user, string $module): ?UserSubscription
+    function has_subscription(Model $subsctiption, string $module): ?ModuleSubscription
     {
-        return null;
-        return UserSubscription::with(['plan' => fn($q) => $q->cacheFor(3600)])
-            ->where(['module' => $module])
-            ->whereUserId($user->id)
-            ->cacheFor(3600)
+        return ModuleSubscription::with(['plan' => fn ($q) => $q->cacheFor(3600)])
+            ->where(['module_id' => $subsctiption->id, 'module_type' => $module])
+            ->isActive()
             ->inEffect()
+            ->cacheFor(3600)
             ->first();
     }
 }
 
 if (!function_exists('subscripted_plan')) {
-    function subscripted_plan(User $user, string $module): ?Plan
+    function subscripted_plan(Model $subsctiption, string $module): ?Plan
     {
-        return has_subscription($user, $module)?->plan;
+        return has_subscription($subsctiption, $module)?->plan;
     }
 }

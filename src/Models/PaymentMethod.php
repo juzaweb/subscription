@@ -33,6 +33,9 @@ use Juzaweb\Network\Traits\Networkable;
  * @method static Builder|PaymentMethod whereName($value)
  * @method static Builder|PaymentMethod whereUpdatedAt($value)
  * @mixin Eloquent
+ * @property int|null $site_id
+ * @method static \Illuminate\Database\Eloquent\Builder|\Juzaweb\Subscription\Models\PaymentMethod whereSiteId($value)
+ * @mixin \Eloquent
  */
 class PaymentMethod extends Model
 {

@@ -48,6 +48,11 @@ use Juzaweb\Network\Traits\Networkable;
  * @method static Builder|PaymentHistory whereUserId($value)
  * @method static Builder|PaymentHistory whereUserSubscriptionId($value)
  * @mixin Eloquent
+ * @property int|null $site_id
+ * @property string $status
+ * @method static Builder|PaymentHistory whereSiteId($value)
+ * @method static Builder|PaymentHistory whereStatus($value)
+ * @mixin Eloquent
  */
 class PaymentHistory extends Model
 {
