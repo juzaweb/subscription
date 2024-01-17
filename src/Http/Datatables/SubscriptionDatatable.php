@@ -2,6 +2,8 @@
 
 namespace Juzaweb\Subscription\Http\Datatables;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Route;
 use Juzaweb\Backend\Http\Datatables\PostType\ResourceDatatable;
 
 class SubscriptionDatatable extends ResourceDatatable

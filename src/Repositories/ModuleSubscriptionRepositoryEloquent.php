@@ -3,6 +3,7 @@
 namespace Juzaweb\Subscription\Repositories;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Route;
 use Juzaweb\CMS\Repositories\BaseRepositoryEloquent;
 use Juzaweb\CMS\Traits\Criterias\UseSearchCriteria;
 use Juzaweb\CMS\Traits\Criterias\UseSortableCriteria;
@@ -27,6 +28,7 @@ class ModuleSubscriptionRepositoryEloquent extends BaseRepositoryEloquent implem
         $this->applyScope();
 
         $results = $this->model->newQuery()->with(['plan', 'user', 'paymentMethod'])
+            ->where(['module_type' => Route::getCurrentRoute()?->parameter('module')])
             ->paginate($limit, $columns, 'page', $page);
         $results->appends(app('request')->query());
 
