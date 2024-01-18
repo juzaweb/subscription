@@ -29,4 +29,7 @@ return [
         'label' => 'Label',
         'value' => 'Value',
     ],
+    'errors' => [
+        'not_found' => 'Subscription not found',
+    ],
 ];

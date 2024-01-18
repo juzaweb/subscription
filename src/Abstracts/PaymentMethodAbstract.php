@@ -2,8 +2,8 @@
 
 namespace Juzaweb\Subscription\Abstracts;
 
-use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Contrasts\PaymentResult as PaymentResultContract;
+use Juzaweb\Subscription\Models\ModuleSubscription;
 use Juzaweb\Subscription\Models\PaymentMethod;
 use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
@@ -51,7 +51,7 @@ abstract class PaymentMethodAbstract
         string $agreementId,
         ?float $amount,
         string $token,
-        string $status = UserSubscription::STATUS_ACTIVE
+        string $status = ModuleSubscription::STATUS_ACTIVE
     ): PaymentResultContract {
         return new PaymentResult($agreementId, $amount, $token, $status);
     }

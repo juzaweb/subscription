@@ -56,7 +56,7 @@ class ModuleSubscription extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'register_by', 'id');
     }
 
     public function method(): BelongsTo

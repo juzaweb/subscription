@@ -32,7 +32,7 @@ class PaymentRequest extends FormRequest
             ],
             'id' => [
                 'required',
-                'integer',
+                'string',
             ],
         ];
     }

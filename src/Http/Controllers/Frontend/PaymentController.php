@@ -44,6 +44,12 @@ class PaymentController extends FrontendController
     {
         global $jw_user;
 
+        $subscriptionId = $request->input('id');
+
+        if (!get_subscription_by_id($subscriptionId, $module)) {
+            return $this->error(__('subscription::content.errors.not_found'));
+        }
+
         Cache::set("subscription_payment_{$jw_user->id}", $request->only(['return_url', 'cancel_url']), 3600);
         Cache::set("subscription_payment_id_{$jw_user->id}", $request->input('id'), 3600);
 
@@ -100,6 +106,10 @@ class PaymentController extends FrontendController
         $moduleRegistion = $this->subscription->getModule($module);
         $paymentId = Cache::get("subscription_payment_id_{$jw_user->id}");
 
+        if (!($subcription = get_subscription_by_id($paymentId, $module))) {
+            return $this->error(__('subscription::content.errors.not_found'));
+        }
+
         DB::beginTransaction();
         try {
             $helper = $this->paymentMethodManager->find($method);
@@ -126,12 +136,12 @@ class PaymentController extends FrontendController
 
             $subscriber = ModuleSubscription::updateOrCreate(
                 [
-                    'module_id' => $paymentId,
+                    'module_id' => $subcription->id,
                     'module_type' => $module,
                 ],
                 [
-                    'plan_id' => $result->plan->id,
-                    'method_id' => $result->method->id,
+                    'plan_id' => $plan->id,
+                    'method_id' => $method->id,
                     'agreement_id' => $result->getAgreementId(),
                     'amount' => $result->getAmount(),
                     'register_by' => Auth::id(),
@@ -168,6 +178,8 @@ class PaymentController extends FrontendController
         }
 
         event(new PaymentReturn($result, $paymentHistory));
+
+        Cache::forget("subscription_payment_id_{$jw_user->id}");
 
         return $this->success(
             [
