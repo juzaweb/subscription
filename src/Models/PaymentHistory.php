@@ -79,6 +79,8 @@ class PaymentHistory extends Model
         'type',
         'amount',
         'status',
+        'module_id',
+        'module_subscription_id',
     ];
 
     public function user(): BelongsTo
@@ -98,7 +100,7 @@ class PaymentHistory extends Model
 
     public function moduleSubscription(): BelongsTo
     {
-        return $this->belongsTo(ModuleSubscription::class, ['module', 'module_id'], ['module_type', 'module_id']);
+        return $this->belongsTo(ModuleSubscription::class, 'module_subscription_id', 'id');
     }
 
     public function scopeIsShow(Builder $builder): Builder

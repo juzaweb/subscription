@@ -29,6 +29,7 @@ use Juzaweb\Subscription\Models\Plan;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
 use Juzaweb\Subscription\Repositories\PlanRepository;
+use Throwable;
 
 class PaymentController extends FrontendController
 {
@@ -174,7 +175,7 @@ class PaymentController extends FrontendController
                     'redirect' => $this->getReturnPageUrl($module, $plan, $method),
                 ]
             );
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             DB::rollBack();
             throw $e;
         }
@@ -241,7 +242,16 @@ class PaymentController extends FrontendController
 
             $paymentHistory = $this->webhookHandle($agreement, $method);
 
-            throw_if($paymentHistory === null, new WebhookPaymentSkipException('Webhook: Payment not found.'));
+            throw_if(
+                $paymentHistory === null,
+                new WebhookPaymentSkipException('Webhook: Payment not found.')
+            );
+
+            if ($agreement->isActive()) {
+                $paymentHistory->moduleSubscription?->activeSubscription();
+            } else {
+                $paymentHistory->moduleSubscription?->cancelSubscription($agreement->getStatus());
+            }
 
             if ($handler = $moduleRegistion->get('handler')) {
                 app()->make($handler)->onWebhook(
@@ -251,8 +261,6 @@ class PaymentController extends FrontendController
                 );
             }
 
-            $paymentHistory->moduleSubscription->activeSubscription();
-
             event(new WebhookHandleSuccess($agreement, $method, $paymentHistory));
 
             DB::commit();
@@ -260,7 +268,7 @@ class PaymentController extends FrontendController
             DB::rollBack();
             report($e);
             return response($e->getMessage(), 200);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             DB::rollBack();
             report($e);
             return response('Webhook Handle Failed', 422);

@@ -27,7 +27,7 @@ class ModuleSubscriptionRepositoryEloquent extends BaseRepositoryEloquent implem
         $this->applyCriteria();
         $this->applyScope();
 
-        $results = $this->model->newQuery()->with(['plan', 'user', 'method'])
+        $results = $this->model->newQuery()->with(['plan', 'user', 'paymentMethod'])
             ->where(['module_type' => Route::getCurrentRoute()?->parameter('module')])
             ->paginate($limit, $columns, 'page', $page);
         $results->appends(app('request')->query());

@@ -62,7 +62,7 @@ class Paypal extends PaymentMethodAbstract implements PaymentMethod
             0, // Set 0 because transaction confirmation via webhook
             $data['token'],
             $status
-        );
+        )->setActiveSubscription(true);
     }
 
     public function webhook(Request $request): bool|PaymentResult

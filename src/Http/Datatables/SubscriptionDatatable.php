@@ -52,7 +52,10 @@ class SubscriptionDatatable extends ResourceDatatable
             'status' => [
                 'label' => trans('subscription::content.status'),
                 'formatter' => function ($value, $row, $index) {
-                    return view();
+                    return view(
+                        'cms::components.datatable.status',
+                        compact('value', 'row', 'index')
+                    );
                 }
             ],
             'created_at' => [

@@ -60,7 +60,7 @@ class ModuleSubscription extends Model
         return $this->belongsTo(User::class, 'register_by', 'id');
     }
 
-    public function method(): BelongsTo
+    public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
     }
@@ -116,6 +116,13 @@ class ModuleSubscription extends Model
         $this->setAttribute('start_date', now());
         $this->setAttribute('end_date', $expirationDate);
         $this->setAttribute('status', self::STATUS_ACTIVE);
+        $this->save();
+    }
+
+    public function cancelSubscription(string $status = self::STATUS_CANCEL): void
+    {
+        $this->setAttribute('status', $status);
+        $this->setAttribute('end_date', null);
         $this->save();
     }
 }
