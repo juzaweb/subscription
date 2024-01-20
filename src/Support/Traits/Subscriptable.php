@@ -17,7 +17,6 @@ use Juzaweb\Subscription\Models\Plan;
 /**
  * @property-read ModuleSubscription|null $moduleSubscription
  * @property-read ModuleSubscription|null $moduleSubscriptionEffect
- * @property-read Plan|null $getSubscriptionPlan
  */
 trait Subscriptable
 {
