@@ -11,10 +11,10 @@
 namespace Juzaweb\Subscription\Support\PaymentMethods;
 
 use Illuminate\Http\Request;
-use Juzaweb\Membership\Models\UserSubscription;
 use Juzaweb\Subscription\Abstracts\PaymentMethodAbstract;
 use Juzaweb\Subscription\Contrasts\PaymentMethod;
 use Juzaweb\Subscription\Contrasts\PaymentResult;
+use Juzaweb\Subscription\Models\ModuleSubscription;
 use Juzaweb\Subscription\Models\Plan as PlanModel;
 use Juzaweb\Subscription\Models\PlanPaymentMethod;
 use Juzaweb\Subscription\Support\Entities\CreatedPlanResult;
@@ -104,9 +104,9 @@ class Stripe extends PaymentMethodAbstract implements PaymentMethod
         );
 
         $status = match ($event->type) {
-            'invoice.paid' => UserSubscription::STATUS_ACTIVE,
-            'invoice.payment_failed' => UserSubscription::STATUS_SUSPEND,
-            default => UserSubscription::STATUS_CANCEL,
+            'invoice.paid' => ModuleSubscription::STATUS_ACTIVE,
+            'invoice.payment_failed' => ModuleSubscription::STATUS_SUSPEND,
+            default => ModuleSubscription::STATUS_CANCEL,
         };
 
         return $this->makePaymentReturnResult(

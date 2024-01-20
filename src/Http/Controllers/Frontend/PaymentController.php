@@ -119,21 +119,6 @@ class PaymentController extends FrontendController
                 throw new SubscriptionExistException('Payment already exist.');
             }
 
-            $paymentHistory = PaymentHistory::create(
-                [
-                    'token' => $result->getToken(),
-                    'method' => $method->method,
-                    'module' => $module,
-                    'type' => PaymentHistory::TYPE_RETURN,
-                    'amount' => $result->getAmount(),
-                    'method_id' => $method->id,
-                    'plan_id' => $plan->id,
-                    'user_id' => Auth::id(),
-                    'agreement_id' => $result->getAgreementId(),
-                    'status' => PaymentHistory::STATUS_REGISTER,
-                ]
-            );
-
             $subscriber = ModuleSubscription::updateOrCreate(
                 [
                     'module_id' => $subcription->id,
@@ -143,9 +128,26 @@ class PaymentController extends FrontendController
                     'plan_id' => $plan->id,
                     'method_id' => $method->id,
                     'agreement_id' => $result->getAgreementId(),
-                    'amount' => $result->getAmount(),
+                    'amount' => $plan->price,
                     'register_by' => Auth::id(),
                     'status' => ModuleSubscription::STATUS_PENDING,
+                ]
+            );
+
+            $paymentHistory = PaymentHistory::create(
+                [
+                    'token' => $result->getToken(),
+                    'method' => $method->method,
+                    'module' => $module,
+                    'module_id' => $subcription->id,
+                    'module_subscription_id' => $subscriber->id,
+                    'type' => PaymentHistory::TYPE_RETURN,
+                    'amount' => $result->getAmount(),
+                    'method_id' => $method->id,
+                    'plan_id' => $plan->id,
+                    'user_id' => Auth::id(),
+                    'agreement_id' => $result->getAgreementId(),
+                    'status' => PaymentHistory::STATUS_REGISTER,
                 ]
             );
 
@@ -249,6 +251,8 @@ class PaymentController extends FrontendController
                 );
             }
 
+            $paymentHistory->moduleSubscription->activeSubscription();
+
             event(new WebhookHandleSuccess($agreement, $method, $paymentHistory));
 
             DB::commit();
@@ -299,20 +303,14 @@ class PaymentController extends FrontendController
             new WebhookPaymentSkipException('Cannot find return payment history.')
         );
 
-        return PaymentHistory::create(
-            [
-                'token' => $agreement->getToken(),
-                'method' => $method->method,
-                'module' => $method->module,
-                'type' => PaymentHistory::TYPE_WEBHOOK,
-                'amount' => $agreement->getAmount(),
-                'method_id' => $method->id,
-                'plan_id' => $returnPaymentHistory->plan_id,
-                'user_id' => $returnPaymentHistory->user_id,
-                'agreement_id' => $agreement->getAgreementId(),
-                'status' => $agreement->getStatus(),
-            ]
-        );
+        $newPaymentHistory = $returnPaymentHistory->replicate();
+        $newPaymentHistory->type = PaymentHistory::TYPE_WEBHOOK;
+        $newPaymentHistory->token = $agreement->getToken();
+        $newPaymentHistory->status = $agreement->getStatus();
+        $newPaymentHistory->amount = $agreement->getAmount();
+        $newPaymentHistory->agreement_id = $agreement->getAgreementId();
+        $newPaymentHistory->save();
+        return $newPaymentHistory;
     }
 
     protected function getPlanMethod(Plan $plan, PaymentMethod $method): PlanPaymentMethod

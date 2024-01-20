@@ -2,8 +2,6 @@
 
 namespace Juzaweb\Subscription\Http\Datatables;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Route;
 use Juzaweb\Backend\Http\Datatables\PostType\ResourceDatatable;
 
 class SubscriptionDatatable extends ResourceDatatable
@@ -54,7 +52,7 @@ class SubscriptionDatatable extends ResourceDatatable
             'status' => [
                 'label' => trans('subscription::content.status'),
                 'formatter' => function ($value, $row, $index) {
-                    return $row->status;
+                    return view();
                 }
             ],
             'created_at' => [

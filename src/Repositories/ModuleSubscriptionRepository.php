@@ -4,11 +4,12 @@ namespace Juzaweb\Subscription\Repositories;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Juzaweb\CMS\Repositories\BaseRepository;
+use Juzaweb\Subscription\Models\ModuleSubscription;
 
 /**
- * Interface UserSubscriptionRepository.
+ * Interface ModuleSubscriptionRepository.
  *
- * @method \Juzaweb\Membership\Models\UserSubscription find($id, $columns = ['*']);
+ * @method ModuleSubscription find($id, $columns = ['*']);
  */
 interface ModuleSubscriptionRepository extends BaseRepository
 {

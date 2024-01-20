@@ -108,6 +108,6 @@ class PaymentResult implements PaymentResultContract
 
     public function isActive(): bool
     {
-        return $this->status === UserSubscription::STATUS_ACTIVE;
+        return $this->status === ModuleSubscription::STATUS_ACTIVE;
     }
 }

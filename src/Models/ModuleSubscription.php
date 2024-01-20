@@ -5,6 +5,7 @@ namespace Juzaweb\Subscription\Models;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Juzaweb\CMS\Models\Model;
 use Juzaweb\CMS\Models\User;
 use Juzaweb\CMS\Traits\QueryCache\QueryCacheable;
@@ -67,6 +68,11 @@ class ModuleSubscription extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class, 'plan_id', 'id');
+    }
+
+    public function paymentHistories(): HasMany
+    {
+        return $this->hasMany(PaymentHistory::class, 'module_id', 'id');
     }
 
     public function scopeInEffect(Builder $query): Builder

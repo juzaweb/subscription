@@ -27,7 +27,8 @@ use Juzaweb\Network\Traits\Networkable;
  * @property int $user_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read PaymentMethod $paymentMethod
+ * @property-read PaymentMethod|null $paymentMethod
+ * @property-read ModuleSubscription|null $moduleSubscription
  * @property-read Plan $plan
  * @property-read User|null $user
  * @method static Builder|PaymentHistory newModelQuery()
@@ -46,7 +47,6 @@ use Juzaweb\Network\Traits\Networkable;
  * @method static Builder|PaymentHistory whereType($value)
  * @method static Builder|PaymentHistory whereUpdatedAt($value)
  * @method static Builder|PaymentHistory whereUserId($value)
- * @method static Builder|PaymentHistory whereUserSubscriptionId($value)
  * @mixin Eloquent
  * @property int|null $site_id
  * @property string $status
@@ -94,6 +94,11 @@ class PaymentHistory extends Model
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class, 'method_id', 'id');
+    }
+
+    public function moduleSubscription(): BelongsTo
+    {
+        return $this->belongsTo(ModuleSubscription::class, ['module', 'module_id'], ['module_type', 'module_id']);
     }
 
     public function scopeIsShow(Builder $builder): Builder
