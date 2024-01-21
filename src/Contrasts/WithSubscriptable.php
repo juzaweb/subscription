@@ -20,4 +20,6 @@ interface WithSubscriptable
     public function moduleSubscriptionEffect();
 
     public function getSubscriptionPlan(): ?Plan;
+
+    public function getSubscriptionModuleName(): string;
 }

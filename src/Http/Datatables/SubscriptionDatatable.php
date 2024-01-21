@@ -17,6 +17,9 @@ class SubscriptionDatatable extends ResourceDatatable
             'agreement_id' => [
                 'label' => trans('subscription::content.agreement_id'),
             ],
+            'module_id' => [
+                'label' => trans('subscription::content.module_id'),
+            ],
             'amount' => [
                 'label' => trans('subscription::content.amount'),
                 'formatter' => fn ($value, $row, $index) => "$".$value,

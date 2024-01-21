@@ -1,3 +1,16 @@
+### v1.0.2 
+* :+1: Subscription handle
+* :+1: Subscription management
+* :+1: Subscription payment
+* :bug: Fix subscription
+* :+1: Test schedule
+* :+1: Test example
+* :bug: Fix migration
+* :bug: Fix test
+* :bug: Fix subscription
+* :+1: Feature blade
+* :+1: Plan resource with features
+
 ### v1.0.1 
 * :+1: Subscription handler
 * :+1: Remove PayPal old version

@@ -4,6 +4,7 @@ return [
     'subscription' => 'Subscription',
     'plans' => 'Plans',
     'method' => 'Method',
+    'module_id' => 'Module ID',
     'payment_methods' => 'Payment Methods',
     'payment_method' => 'Payment Method',
     'created_plan_success' => 'Create plan success',
