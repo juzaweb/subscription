@@ -21,11 +21,9 @@ class PaymentHistoryResource extends JsonResource
             'token' => $this->resource->token,
             'method' => $this->resource->method,
             'module' => $this->resource->module,
-            'type' => $this->resource->type,
             'amount' => $this->resource->amount,
             'status' => $this->resource->status,
-            'agreement_id' => $this->resource->agreement_id,
-            'plan' => PlanResource::make($this->resource->plan)->response()->getData(true)['data'],
+            'plan' => PlanResource::make($this->resource->plan)->withFeatures(false)->response()->getData(true)['data'],
             'created_at' => jw_date_format($this->resource->created_at),
             'updated_at' => jw_date_format($this->resource->updated_at),
         ];

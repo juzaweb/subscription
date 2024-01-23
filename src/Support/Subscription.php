@@ -103,7 +103,7 @@ class Subscription implements SubscriptionContrasts
     {
         throw_if(empty($args['label']), new SubscriptionException("Option label is required"));
 
-        // throw_if(empty($args['model']), new SubscriptionException("Option model is required"));
+        throw_if(empty($args['model']), new SubscriptionException("Option model is required"));
 
         if (Arr::get($args, 'allow_plans', true)) {
             $this->registerModulePlan($key, $args);
