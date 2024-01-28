@@ -28,16 +28,20 @@ class PageDataAction extends Action
         $this->registerPageCustomData(
             'subscription_payment_methods',
             fn ($request, $option) =>
-                PaymentMethodResource::collection(PaymentMethod::where(['module' => $option['module'] ?? 'membership'])->get())
+                PaymentMethodResource::collection(
+                    PaymentMethod::where(['module' => $option['module'] ?? 'membership'])->get()
+                )
                 ->toArray(request())
         );
 
         $this->registerPageCustomData(
             'subscription_plans',
             fn ($request, $option) =>
-                PlanResource::collection(Plan::with(['features'])
-                    ->whereIsActive()
-                    ->where(['module' => $option['module'] ?? 'membership'])->get()
+                PlanResource::collection(
+                    Plan::with(['features'])
+                        ->whereIsActive()
+                        ->where(['module' => $option['module'] ?? 'membership'])
+                        ->get()
                 )
                     ->toArray($request)
         );

@@ -121,9 +121,9 @@ class Subscription implements SubscriptionContrasts
             $this->registerModuleSubscription($key, $args);
         }
 
-        if (Arr::get($args, 'allow_setting_page', true)) {
-            $this->registerSettingPage($key, $args);
-        }
+        // if (Arr::get($args, 'allow_setting_page', true)) {
+        //     $this->registerSettingPage($key, $args);
+        // }
 
         $args = array_merge(['key' => $key], $args);
 
