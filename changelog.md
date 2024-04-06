@@ -1,3 +1,8 @@
+### v1.0.3 
+* :+1: Page data support
+* :sparkles: add payment history resource
+* :+1: Show module subscription
+
 ### v1.0.2 
 * :+1: Subscription handle
 * :+1: Subscription management
