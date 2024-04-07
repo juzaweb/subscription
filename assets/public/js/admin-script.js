@@ -54,4 +54,14 @@ $(document).ready(function () {
             return false;
         });
     });
+
+    $(document).on('click', '.feature_key-checkbox', function (e) {
+        let value = $(this).is(':checked');
+
+        if (value) {
+            $(this).parents('.repeater-item-content').find('.box-label').show('slow');
+        } else {
+            $(this).parents('.repeater-item-content').find('.box-label').hide('slow');
+        }
+    });
 });

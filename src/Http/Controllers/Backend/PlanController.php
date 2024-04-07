@@ -117,7 +117,7 @@ class PlanController extends BackendController
                 [
                     'id' => Arr::get($feature, 'id'),
                 ],
-                Arr::only($feature, ['title', 'description', 'value'])
+                Arr::only($feature, ['title', 'description', 'value', 'feature_key'])
             )->id;
         }
 

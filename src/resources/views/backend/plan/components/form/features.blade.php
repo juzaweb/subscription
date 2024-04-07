@@ -2,7 +2,17 @@
 
 <div class="row form-repeater">
     <div class="col-md-12 repeater-items">
-        @foreach($model->features as $feature)
+        @foreach($moduleFeatures as $key => $feature)
+            @component('subscription::backend.plan.components.form.feature_item_with_key', [
+                'marker' => $key,
+                'model' => $model,
+                'feature' => $feature
+            ])
+
+            @endcomponent
+        @endforeach
+
+        @foreach($model->features->whereNull('feature_key') as $feature)
             @component('subscription::backend.plan.components.form.feature_item',
  ['marker' => $feature->id, 'item' => $feature])
 
