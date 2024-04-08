@@ -1,3 +1,6 @@
+### v1.0.4 
+* :+1: Add plan features
+
 ### v1.0.3 
 * :+1: Page data support
 * :sparkles: add payment history resource
