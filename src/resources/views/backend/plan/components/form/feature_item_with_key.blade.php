@@ -26,11 +26,11 @@
                            id="{{ $marker }}-features[{{ $marker }}][value]"
                            class="feature_key-checkbox"
                            value="1"
-                           {{ $item->value == 1 ? 'checked' : '' }}
+                           {{ ($item->value ?? 0) == 1 ? 'checked' : '' }}
                     /> <label for="{{ $marker }}-features[{{ $marker }}][value]">{{ $feature['label'] }}</label>
                 </div>
 
-                <div class="col-md-12 box-label {{ $item->value == 1 ? '' : 'box-hidden' }}">
+                <div class="col-md-12 box-label {{ ($item->value ?? 0) == 1 ? '' : 'box-hidden' }}">
                     {{ Field::text(
                         trans('subscription::content.feature.label'),
                          "features[{$marker}][title]",
