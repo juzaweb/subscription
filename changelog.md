@@ -1,3 +1,6 @@
+### v1.0.5 
+* :bug: Fix show feature by key
+
 ### v1.0.4 
 * :+1: Add plan features
 
