@@ -8,6 +8,21 @@
 
         <div class="repeater-item-content">
             <div class="row">
+                <div class="col-md-3">
+                    {{ Field::text(
+                        trans('subscription::content.feature.value'),
+                        "features[{$marker}][value]",
+                        [
+                             'value' => $item->value ?? '',
+                            //  'options' => [
+                            //      '&#10003;' => '✓',
+                            //      '&#10006;' => '✗',
+                            // ],
+                        ]
+                     )
+                    }}
+                </div>
+
                 <div class="col-md-6">
                     <input type="hidden" name="features[{{ $marker }}][id]"
                            class="form-control "
@@ -27,16 +42,7 @@
                     }}
                 </div>
 
-                <div class="col-md-6">
-                    {{ Field::text(
-                        trans('subscription::content.feature.value'),
-                        "features[{$marker}][value]",
-                        [
-                             'value' => $item->value ?? '',
-                        ]
-                     )
-                    }}
-                </div>
+
             </div>
         </div>
     </div>
