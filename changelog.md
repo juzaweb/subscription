@@ -1,3 +1,7 @@
+### v1.0.6 
+* :bug: Fix show feature by key
+* Update schedule-test.yml
+
 ### v1.0.5 
 * :bug: Fix show feature by key
 
