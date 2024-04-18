@@ -35,7 +35,7 @@ return new class extends Migration {
                 $table->unsignedBigInteger('site_id')->default(0)->index();
                 $table->timestamps();
 
-                $table->unique(['module_id', 'module_type']);
+                $table->unique(['module_id', 'module_type'], "{$prefix}module_subscriptions_module_id_module_type_unique");
                 $table->foreign('method_id', "{$prefix}_website_subscription_payment_methods_foreign")
                     ->references('id')
                     ->on('subscription_payment_methods');
