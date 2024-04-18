@@ -1,3 +1,7 @@
+### v1.0.7 
+* :bug: Fix upgrade request
+* :bug: Fix plugin test
+
 ### v1.0.6 
 * :bug: Fix show feature by key
 * Update schedule-test.yml
