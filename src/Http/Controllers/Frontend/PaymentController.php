@@ -45,7 +45,7 @@ class PaymentController extends FrontendController
     {
         global $jw_user;
 
-        $subscriptionId = $request->input('id');
+        $subscriptionId = $request->input('id', $jw_user->id);
 
         if (!get_subscription_by_id($subscriptionId, $module)) {
             return $this->error(__('subscription::content.errors.not_found'));

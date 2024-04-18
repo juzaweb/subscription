@@ -31,7 +31,7 @@ class PaymentRequest extends FormRequest
                 'exists:subscription_payment_methods,method',
             ],
             'id' => [
-                'required',
+                'nullable',
                 'string',
             ],
         ];
