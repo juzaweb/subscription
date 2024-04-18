@@ -1,3 +1,6 @@
+### v1.0.8 
+* :bug: Fix load features plan
+
 ### v1.0.7 
 * :bug: Fix upgrade request
 * :bug: Fix plugin test
