@@ -52,7 +52,7 @@ class PaymentController extends FrontendController
         }
 
         Cache::set("subscription_payment_{$jw_user->id}", $request->only(['return_url', 'cancel_url']), 3600);
-        Cache::set("subscription_payment_id_{$jw_user->id}", $request->input('id'), 3600);
+        Cache::set("subscription_payment_id_{$jw_user->id}", $subscriptionId, 3600);
 
         $method = $request->post('method');
         $plan = $this->planRepository->findByUUIDOrFail($request->post('plan'));
