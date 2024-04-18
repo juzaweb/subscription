@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use Juzaweb\CMS\Models\Model;
+use Juzaweb\CMS\Traits\QueryCache\QueryCacheable;
 
 /**
  * Juzaweb\Subscription\Models\PlanFeature
@@ -43,6 +44,8 @@ use Juzaweb\CMS\Models\Model;
  */
 class PlanFeature extends Model
 {
+    use QueryCacheable;
+
     protected $table = 'subscription_plan_features';
 
     protected $fillable = [

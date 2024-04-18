@@ -77,7 +77,8 @@ class ModuleSubscription extends Model
 
     public function scopeInEffect(Builder $query): Builder
     {
-        return $query->isActive()->where('end_date', '>=', now());
+        return $query->isActive()
+            ->whereDate('end_date', '>=', now());
     }
 
     public function scopeIsActive(Builder $query): Builder
