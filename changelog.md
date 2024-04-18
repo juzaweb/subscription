@@ -1,3 +1,6 @@
+### v1.0.9 
+* :bug: Fix migration
+
 ### v1.0.8 
 * :bug: Fix load features plan
 
