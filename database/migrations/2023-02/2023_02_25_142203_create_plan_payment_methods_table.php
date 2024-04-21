@@ -18,7 +18,8 @@ return new class extends Migration {
             'subscription_plan_payment_methods',
             function (Blueprint $table) use ($prefix) {
                 $table->bigIncrements('id');
-                $table->string('payment_plan_id', 150)->unique()
+                $table->string('payment_plan_id', 150)
+                    ->unique("{$prefix}plan_payment_methods_payment_plan_id_unique")
                     ->comment('Plan id of payment service');
                 $table->string('method', 50)->index();
                 $table->unsignedBigInteger('plan_id');

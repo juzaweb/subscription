@@ -23,9 +23,9 @@ return new class extends Migration {
 
         Schema::table(
             'subscription_payment_methods',
-            function (Blueprint $table) {
+            function (Blueprint $table) use ($prefix) {
                 $table->unsignedBigInteger('site_id')->index()->default(0);
-                $table->unique(['site_id', 'method', 'module']);
+                $table->unique(['site_id', 'method', 'module'], "{$prefix}_payment_methods_site_id_method_module_unique");
             }
         );
 

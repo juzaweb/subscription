@@ -12,13 +12,16 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        $prefix = DB::getTablePrefix();
+
         Schema::table(
             'subscription_payment_histories',
-            function (Blueprint $table) {
+            function (Blueprint $table) use ($prefix) {
                 $table->unsignedBigInteger('module_id')->nullable();
-                $table->foreignId('module_subscription_id')
-                    ->nullable()
-                    ->constrained('subscription_module_subscriptions')
+                $table->unsignedBigInteger('module_subscription_id');
+                $table->foreign('module_subscription_id', "{$prefix}payment_histories_module_subscription_id_foreign")
+                    ->references('id')
+                    ->on('subscription_module_subscriptions')
                     ->onDelete('set null');
             }
         );
@@ -31,10 +34,12 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        $prefix = DB::getTablePrefix();
+
         Schema::table(
             'subscription_payment_histories',
-            function (Blueprint $table) {
-                $table->dropForeign(['module_subscription_id']);
+            function (Blueprint $table) use ($prefix) {
+                $table->dropForeign("{$prefix}payment_histories_module_subscription_id_foreign");
                 $table->dropColumn(['module_subscription_id', 'module_id']);
             }
         );
