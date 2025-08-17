@@ -1,0 +1,11 @@
+{
+    "name": "Subscription",
+    "alias": "subscription",
+    "description": "Subscription payment",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Juzaweb\\Subscription\\Providers\\SubscriptionServiceProvider"
+    ],
+    "files": []
+}

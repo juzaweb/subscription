@@ -1,6 +1,6 @@
 {
     "name": "juzaweb/subscription",
-    "type": "juzaweb-plugin",
+    "type": "juzaweb-module",
     "description": "Subscription payment support",
     "license": "MIT",
     "keywords": [
@@ -9,30 +9,15 @@
         "payment",
         "plugin"
     ],
-    "extra": {
-        "juzaweb": {
-            "name": "Subscription",
-            "description": "Subscription payment support",
-            "domain": "subscription",
-            "providers": [
-                "Juzaweb\\Subscription\\Providers\\SubscriptionServiceProvider"
-            ],
-            "networkable": true
-        }
-    },
     "autoload": {
         "psr-4": {
             "Juzaweb\\Subscription\\": "src/"
         },
-        "files": ["helpers/helpers.php"]
+        "files": ["helpers.php"]
     },
     "require": {
         "ext-openssl": "*",
         "srmklive/paypal": "~3.0",
-        "stripe/stripe-php": "^13.4"
-    },
-    "require-dev": {
-        "juzaweb/modules": "^1.0",
-        "juzaweb/dev-tool": "^1.0"
+        "stripe/stripe-php": "^17.5"
     }
 }

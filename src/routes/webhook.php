@@ -1,6 +1,10 @@
 <?php
-
-use Juzaweb\Subscription\Http\Controllers\Frontend\PaymentController;
-
-Route::match(['GET', 'POST'], 'subscription/{module}/{method}', [PaymentController::class, 'webhook'])
-    ->name('subscription.module');
+/**
+ * JUZAWEB CMS - Laravel CMS for Your Project
+ *
+ * @package    juzaweb/cms
+ * @author     The Anh Dang
+ * @link       https://cms.juzaweb.com
+ * @license    GNU V2
+ */
+ 

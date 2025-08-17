@@ -1,68 +1,66 @@
 <?php
+/**
+ * JUZAWEB CMS - Laravel CMS for Your Project
+ *
+ * @package    juzaweb/cms
+ * @author     The Anh Dang
+ * @link       https://cms.juzaweb.com
+ * @license    GNU V2
+ */
 
 namespace Juzaweb\Subscription\Providers;
 
-use Juzaweb\CMS\Contracts\GlobalDataContract;
-use Juzaweb\CMS\Contracts\HookActionContract;
-use Juzaweb\CMS\Facades\ActionRegister;
-use Juzaweb\CMS\Support\ServiceProvider;
-use Juzaweb\Subscription\Actions\AjaxAction;
-use Juzaweb\Subscription\Actions\MethodDefaultAction;
-use Juzaweb\Subscription\Actions\PageDataAction;
-use Juzaweb\Subscription\Actions\ResourceAction;
-use Juzaweb\Subscription\Contrasts\PaymentMethodManager as PaymentMethodManagerContrast;
-use Juzaweb\Subscription\Contrasts\Subscription as SubscriptionContrast;
-use Juzaweb\Subscription\Repositories\ModuleSubscriptionRepository;
-use Juzaweb\Subscription\Repositories\ModuleSubscriptionRepositoryEloquent;
-use Juzaweb\Subscription\Repositories\PaymentHistoryRepository;
-use Juzaweb\Subscription\Repositories\PaymentHistoryRepositoryEloquent;
-use Juzaweb\Subscription\Repositories\PaymentMethodRepository;
-use Juzaweb\Subscription\Repositories\PaymentMethodRepositoryEloquent;
-use Juzaweb\Subscription\Repositories\PlanRepository;
-use Juzaweb\Subscription\Repositories\PlanRepositoryEloquent;
-use Juzaweb\Subscription\Support\PaymentMethodManager;
-use Juzaweb\Subscription\Support\Subscription;
+use Juzaweb\Core\Facades\Menu;
+use Juzaweb\Core\Providers\ServiceProvider;
 
 class SubscriptionServiceProvider extends ServiceProvider
 {
-    public array $bindings = [
-        PlanRepository::class => PlanRepositoryEloquent::class,
-        PaymentMethodRepository::class => PaymentMethodRepositoryEloquent::class,
-        PaymentHistoryRepository::class => PaymentHistoryRepositoryEloquent::class,
-        ModuleSubscriptionRepository::class => ModuleSubscriptionRepositoryEloquent::class,
-    ];
-
     public function boot(): void
     {
-        ActionRegister::register(
-            [
-                MethodDefaultAction::class,
-                ResourceAction::class,
-                AjaxAction::class,
-                PageDataAction::class,
-            ]
+        $this->booted(
+            function () {
+                $this->registerMenu();
+            }
         );
     }
 
+    public function register(): void
+    {
+        $this->registerTranslations();
+        $this->registerViews();
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        $this->app->register(RouteServiceProvider::class);
+    }
+
+    protected function registerMenu(): void
+    {
+        //
+    }
+
     /**
-     * Register the service provider.
+     * Register translations.
      *
      * @return void
      */
-    public function register(): void
+    protected function registerTranslations(): void
     {
-        $this->app->singleton(
-            PaymentMethodManagerContrast::class,
-            fn ($app) => new PaymentMethodManager(
-                $app[HookActionContract::class],
-                $app[GlobalDataContract::class],
-                $app[PaymentMethodRepository::class]
-            )
-        );
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'payment');
+        $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang');
+    }
 
-        $this->app->singleton(
-            SubscriptionContrast::class,
-            Subscription::class
-        );
+    /**
+     * Register views.
+     *
+     * @return void
+     */
+    protected function registerViews(): void
+    {
+        $viewPath = resource_path('views/modules/payment');
+
+        $sourcePath = __DIR__ . '/../resources/views';
+
+        $this->publishes([$sourcePath => $viewPath], ['views', 'payment-module-views']);
+
+        $this->loadViewsFrom($sourcePath, 'payment');
     }
 }
