@@ -11,7 +11,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Juzaweb\\Subscription\\": "src/"
+            "Juzaweb\\Modules\\Subscription\\": "src/"
         },
         "files": ["helpers.php"]
     },

@@ -8,10 +8,12 @@
  * @license    GNU V2
  */
 
-namespace Juzaweb\Subscription\Providers;
+namespace Juzaweb\Modules\Subscription\Providers;
 
 use Juzaweb\Core\Facades\Menu;
 use Juzaweb\Core\Providers\ServiceProvider;
+use Juzaweb\Modules\Subscription\Contracts\Subscription;
+use Juzaweb\Modules\Subscription\SubscriptionManager;
 
 class SubscriptionServiceProvider extends ServiceProvider
 {
@@ -30,11 +32,19 @@ class SubscriptionServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->singleton(
+            Subscription::class,
+            function ($app) {
+                return new SubscriptionManager($app);
+            }
+        );
     }
 
     protected function registerMenu(): void
     {
-        //
+        Menu::make('subscription-methods', __('Subscription Methods'))
+            ->parent('settings');
     }
 
     /**

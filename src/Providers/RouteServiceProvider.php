@@ -1,6 +1,6 @@
 <?php
 
-namespace Juzaweb\Subscription\Providers;
+namespace Juzaweb\Modules\Subscription\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
