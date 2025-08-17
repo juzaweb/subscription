@@ -7,4 +7,8 @@
  * @link       https://cms.juzaweb.com
  * @license    GNU V2
  */
- 
+
+use Juzaweb\Core\Facades\RouteResource;
+use Juzaweb\Modules\Subscription\Http\Controllers\SubscriptionMethodController;
+
+RouteResource::admin('subscription-methods', SubscriptionMethodController::class);

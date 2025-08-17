@@ -16,6 +16,7 @@
         "files": ["helpers.php"]
     },
     "require": {
+        "php": "^8.2",
         "ext-openssl": "*",
         "srmklive/paypal": "~3.0",
         "stripe/stripe-php": "^17.5"

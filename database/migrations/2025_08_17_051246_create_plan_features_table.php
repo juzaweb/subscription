@@ -14,28 +14,33 @@ return new class extends Migration
     public function up()
     {
         Schema::create(
-            'subscription_methods',
+            'plan_features',
             function (Blueprint $table) {
                 $table->id();
-                $table->string('driver', 50)->unique();
-                $table->json('config')->nullable();
+                $table->uuid('plan_id')->index();
+                $table->string('name', 50)->index();
+                $table->foreign('plan_id')
+                    ->references('id')
+                    ->on('plans')
+                    ->onDelete('cascade');
                 $table->timestamps();
+
+                $table->unique(['plan_id', 'name']);
             }
         );
 
         Schema::create(
-            'subscription_method_translations',
+            'plan_feature_translations',
             function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('subscription_method_id')->index();
+                $table->uuid('plan_feature_id')->index();
                 $table->string('locale', 10)->index();
-                $table->string('name');
                 $table->text('description')->nullable();
-                $table->unique(['subscription_method_id', 'locale'], 'subscription_method_translations_unique');
 
-                $table->foreign('subscription_method_id')
+                $table->unique(['plan_feature_id', 'locale'], 'plan_feature_translations_unique');
+                $table->foreign('plan_feature_id')
                     ->references('id')
-                    ->on('subscription_methods')
+                    ->on('plan_features')
                     ->onDelete('cascade');
             }
         );
@@ -48,7 +53,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('subscription_method_translations');
-        Schema::dropIfExists('subscription_methods');
+        Schema::dropIfExists('plan_feature_translations');
+        Schema::dropIfExists('plan_features');
     }
 };

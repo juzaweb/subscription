@@ -65,12 +65,12 @@ class SubscriptionServiceProvider extends ServiceProvider
      */
     protected function registerViews(): void
     {
-        $viewPath = resource_path('views/modules/payment');
+        $viewPath = resource_path('views/modules/subscription');
 
         $sourcePath = __DIR__ . '/../resources/views';
 
-        $this->publishes([$sourcePath => $viewPath], ['views', 'payment-module-views']);
+        $this->publishes([$sourcePath => $viewPath], ['views', 'subscription-module-views']);
 
-        $this->loadViewsFrom($sourcePath, 'payment');
+        $this->loadViewsFrom($sourcePath, 'subscription');
     }
 }
