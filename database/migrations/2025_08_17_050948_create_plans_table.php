@@ -13,14 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('plans', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->float('price')->index()->default(0);
-            $table->boolean('is_free')->default(false)->index();
-            $table->string('status', 50)->index()->default('draft');
-            $table->string('module', 50)->index();
-            $table->timestamps();
-        });
+        Schema::create(
+            'plans',
+            function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->decimal('price', 15, 2)->index()->default(0);
+                $table->boolean('is_free')->default(false)->index();
+                $table->string('status', 50)->index()->default('draft');
+                $table->string('module', 50)->index();
+                $table->timestamps();
+            }
+        );
 
         Schema::create('plan_translations', function (Blueprint $table) {
             $table->id();

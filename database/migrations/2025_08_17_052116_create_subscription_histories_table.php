@@ -16,12 +16,10 @@ return new class extends Migration
         Schema::create(
             'subscription_histories',
             function (Blueprint $table) {
-                $table->id();
-                $table->string('transaction_id', 100)->unique();
+                $table->uuid('id')->primary();
                 $table->string('method', 50)->index();
                 $table->string('module', 50)->index();
-                $table->string('type', 50)->index();
-                $table->float('amount')->index();
+                $table->decimal('amount', 15, 2)->index();
                 $table->string('agreement_id', 100)->index()
                     ->comment('Agreement of payment partner');
                 $table->dateTime('end_date')->nullable()->index();
@@ -35,8 +33,6 @@ return new class extends Migration
                     ->references('id')
                     ->on('subscriptions')
                     ->onDelete('cascade');
-
-                
             }
         );
     }

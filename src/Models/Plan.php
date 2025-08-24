@@ -11,5 +11,15 @@ class Plan extends Model
 
     protected $table = 'plans';
 
-    protected $fillable = [];
+    protected $fillable = [
+        'price',
+        'is_free',
+        'status',
+        'module',
+    ];
+
+    protected $casts = [
+        'price' => 'float',
+        'is_free' => 'boolean',
+    ];
 }

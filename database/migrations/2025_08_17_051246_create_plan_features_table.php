@@ -33,7 +33,7 @@ return new class extends Migration
             'plan_feature_translations',
             function (Blueprint $table) {
                 $table->id();
-                $table->uuid('plan_feature_id')->index();
+                $table->unsignedBigInteger('plan_feature_id')->index();
                 $table->string('locale', 10)->index();
                 $table->text('description')->nullable();
 

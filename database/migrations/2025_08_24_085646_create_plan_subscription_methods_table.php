@@ -14,24 +14,21 @@ return new class extends Migration
     public function up()
     {
         Schema::create(
-            'subscriptions',
+            'plan_subscription_methods',
             function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('agreement_id', 100)->unique()
-                    ->comment('Agreement of payment partner');
-                $table->decimal('amount', 15, 2)->index();
-                $table->string('module', 50)->index();
-                $table->dateTime('start_date')->index()->nullable();
-                $table->dateTime('end_date')->index()->nullable();
-                $table->unsignedBigInteger('method_id');
+                $table->id();
+                $table->string('payment_plan_id', 150)->unique()->comment('Plan id of payment service');
                 $table->uuid('plan_id');
-                $table->uuid('user_id')->index();
-                $table->timestamps();
-
+                $table->string('method', 50)->index()
+                    ->comment('Subscription method, e.g. paypal, stripe, etc.');
+                $table->json('data')->nullable();
                 $table->foreign('plan_id')
                     ->references('id')
                     ->on('plans')
                     ->onDelete('cascade');
+
+                $table->unique(['method', 'plan_id']);
+                $table->timestamps();
             }
         );
     }
@@ -43,6 +40,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('subscriptions');
+        Schema::dropIfExists('plan_subscription_methods');
     }
 };
