@@ -40,12 +40,14 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('subscription.js') }}"></script>
+
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form method="post"
                   action="{{ route('subscription.subscribe', ['test']) }}"
                   data-success="handlePaymentSuccess"
-                  id="payment-form"
+                  id="subscription-form"
             >
                 <div class="modal-content">
                     <div class="modal-header">
@@ -56,9 +58,9 @@
                     </div>
                     <div class="modal-body">
                         <div id="payment-container">
-                            {{ Field::select('Method', 'method')->dropDownList($paymentMethods) }}
+                            {{ Field::select(__('Method'), 'method_id')->dropDownList($paymentMethods) }}
 
-                            {{ Field::select('Plan', 'plan_id')->dropDownList($testPlans) }}
+                            {{ Field::select(__('Plan'), 'plan_id')->dropDownList($testPlans) }}
 
                             <div id="form-card"></div>
 
@@ -73,4 +75,8 @@
     </div>
 
     {{ $dataTable->scripts() }}
+
+    <script>
+        const subscription = new SubscriptionForm('test', '#subscription-form');
+    </script>
 @endsection

@@ -25,20 +25,23 @@ return new class extends Migration
             }
         );
 
-        Schema::create('plan_translations', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('plan_id')->index();
-            $table->string('locale', 10)->index();
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->timestamps();
+        Schema::create(
+            'plan_translations',
+            function (Blueprint $table) {
+                $table->id();
+                $table->uuid('plan_id')->index();
+                $table->string('locale', 10)->index();
+                $table->string('name');
+                $table->text('description')->nullable();
+                $table->timestamps();
 
-            $table->unique(['plan_id', 'locale'], 'plan_translations_unique');
-            $table->foreign('plan_id')
-                ->references('id')
-                ->on('plans')
-                ->onDelete('cascade');
-        });
+                $table->unique(['plan_id', 'locale'], 'plan_translations_unique');
+                $table->foreign('plan_id')
+                    ->references('id')
+                    ->on('plans')
+                    ->onDelete('cascade');
+            }
+        );
     }
 
     /**

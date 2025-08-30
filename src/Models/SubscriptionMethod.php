@@ -2,13 +2,14 @@
 
 namespace Juzaweb\Modules\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
 use Juzaweb\Core\Traits\Translatable;
 
 class SubscriptionMethod extends Model
 {
-    use HasAPI, Translatable;
+    use HasAPI, Translatable, HasUuids;
 
     protected $table = 'subscription_methods';
 
@@ -21,10 +22,6 @@ class SubscriptionMethod extends Model
         'config' => 'array',
     ];
 
-    protected $appends = [
-        'sandbox',
-    ];
-
     public $translatedAttributes = [
         'name',
         'description',
@@ -33,11 +30,6 @@ class SubscriptionMethod extends Model
     protected $hidden = [
         'config',
     ];
-
-    public function getSandboxAttribute(): bool
-    {
-        return (bool) $this->getConfig('sandbox', false);
-    }
 
     public function getConfig(?string $key = null, $default = null): null|array|string
     {

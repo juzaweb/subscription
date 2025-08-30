@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create(
             'subscription_methods',
             function (Blueprint $table) {
-                $table->id();
+                $table->uuid('id')->primary();
                 $table->string('driver', 50)->unique();
                 $table->json('config')->nullable();
                 $table->timestamps();
@@ -27,7 +27,7 @@ return new class extends Migration
             'subscription_method_translations',
             function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('subscription_method_id')->index();
+                $table->uuid('subscription_method_id')->index();
                 $table->string('locale', 10)->index();
                 $table->string('name');
                 $table->text('description')->nullable();

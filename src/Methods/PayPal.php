@@ -13,6 +13,7 @@ namespace Juzaweb\Modules\Subscription\Methods;
 use Illuminate\Http\Request;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
 use Juzaweb\Modules\Subscription\Entities\SubscriptionReturnResult;
+use Juzaweb\Modules\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\PlanSubscriptionMethod;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
@@ -36,6 +37,10 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
             'category' => 'SOFTWARE',
         ]);
 
+        if (isset($product['error']) && $product['error']) {
+            throw new SubscriptionException($product['error']['message'] ?? 'Could not create product');
+        }
+
         $servicePlan = $this->getProvider()->createPlan(
             [
                 'product_id' => $product['id'],
@@ -49,8 +54,8 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
                             'interval_count' => 1
                         ],
                         'tenure_type' => 'REGULAR',
-                        'sequence' => 3,
-                        'total_cycles' => 12,
+                        'sequence' => 1,
+                        'total_cycles' => 0,
                         'pricing_scheme' => [
                             'fixed_price' => [
                                 'value' => $plan->price,
@@ -74,6 +79,10 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
                 // ]
             ]
         );
+
+        if (isset($servicePlan['error']) && $servicePlan['error']) {
+            throw new SubscriptionException($servicePlan['error']['message'] ?? 'Could not create plan');
+        }
 
         $servicePlan['product_id'] = $product['id'];
 
@@ -143,11 +152,19 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
         ];
     }
 
+    public function sandbox(bool $sandbox = true): static
+    {
+        $this->config['sandbox'] = $sandbox;
+
+        return $this;
+    }
+
     protected function getProvider(): PayPalClient
     {
-        $provider = new PayPalClient;
+        $provider = new PayPalClient($this->getPaypalSettings());
 
-        $provider->setApiCredentials($this->getPaypalSettings());
+        $paypalToken = $provider->getAccessToken();
+        $provider->setAccessToken($paypalToken);
 
         return $provider;
     }

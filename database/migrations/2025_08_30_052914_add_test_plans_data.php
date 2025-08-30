@@ -16,23 +16,23 @@ return new class extends Migration
         $plans = [
             [
                 'en' => [
-                    'name' => 'Free Plan',
-                    'description' => 'This is a Free subscription plan.',
-                ],
-                'price' => 0,
-                'duration' => 0,
-                'is_free' => true,
-                'module' => 'test',
-                'status' => PlanStatus::ACTIVE,
-            ],
-            [
-                'en' => [
                     'name' => 'Basic Plan',
                     'description' => 'This is a basic subscription plan.',
                 ],
                 'price' => 9.99,
                 'duration' => 1,
                 'duration_unit' => 'month',
+                'module' => 'test',
+                'status' => PlanStatus::ACTIVE,
+            ],
+            [
+                'en' => [
+                    'name' => 'Free Plan',
+                    'description' => 'This is a Free subscription plan.',
+                ],
+                'price' => 0,
+                'duration' => 0,
+                'is_free' => true,
                 'module' => 'test',
                 'status' => PlanStatus::ACTIVE,
             ],

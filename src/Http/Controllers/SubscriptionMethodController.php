@@ -50,7 +50,7 @@ class SubscriptionMethodController extends AdminController
         );
     }
 
-    public function edit(int $id)
+    public function edit(string $id)
     {
         Breadcrumb::add(__('Subscription Methods'), admin_url('subscription-methods'));
 
@@ -81,7 +81,7 @@ class SubscriptionMethodController extends AdminController
         ]);
     }
 
-    public function update(SubscriptionMethodRequest $request, int $id)
+    public function update(SubscriptionMethodRequest $request, string $id)
     {
         $model = SubscriptionMethod::findOrFail($id);
 
@@ -92,7 +92,7 @@ class SubscriptionMethodController extends AdminController
         ]);
     }
 
-    public function destroy(int $id)
+    public function destroy(string $id)
     {
         $model = SubscriptionMethod::findOrFail($id);
 
