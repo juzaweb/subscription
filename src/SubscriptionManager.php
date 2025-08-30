@@ -12,13 +12,20 @@ namespace Juzaweb\Modules\Subscription;
 
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
+use Juzaweb\Core\Application;
+use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Subscription\Contracts\Subscription;
+use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
 
 class SubscriptionManager implements Subscription
 {
     protected array $drivers = [];
 
     protected array $modules = [];
+
+    public function __construct(Application $app)
+    {
+    }
 
     public function modules(): Collection
     {
@@ -38,7 +45,7 @@ class SubscriptionManager implements Subscription
         return $this->modules[$name]();
     }
 
-    public function driver(string $name)
+    public function driver(string $name): SubscriptionMethod
     {
         if (!isset($this->drivers[$name])) {
             throw new InvalidArgumentException("Payment driver [$name] is not registered.");
@@ -70,5 +77,20 @@ class SubscriptionManager implements Subscription
         }
 
         $this->modules[$name] = $resolver;
+    }
+
+    public function renderConfig(string $driver, array $config = []): string
+    {
+        $fields = $this->driver($driver)->getConfigs();
+        $hasSandbox = $this->driver($driver)->hasSandbox();
+
+        if (empty($fields)) {
+            throw new PaymentException("Subscription driver [$driver] has no configuration.");
+        }
+
+        return view(
+            'subscription::method.components.config',
+            ['fields' => $fields, 'config' => $config, 'hasSandbox' => $hasSandbox]
+        )->render();
     }
 }

@@ -10,6 +10,7 @@
 
 namespace Juzaweb\Modules\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Juzaweb\Core\Models\Model;
 
 class SubscriptionMethodTranslation extends Model
@@ -21,7 +22,7 @@ class SubscriptionMethodTranslation extends Model
         'description',
     ];
 
-    public function subscriptionMethod(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function subscriptionMethod(): BelongsTo
     {
         return $this->belongsTo(SubscriptionMethod::class, 'subscription_method_id');
     }

@@ -2,6 +2,7 @@
 
 namespace Juzaweb\Modules\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
 
@@ -22,4 +23,9 @@ class Plan extends Model
         'price' => 'float',
         'is_free' => 'boolean',
     ];
+
+    public function subscriptionMethods(): HasMany
+    {
+        return $this->hasMany(PlanSubscriptionMethod::class, 'plan_id');
+    }
 }

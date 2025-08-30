@@ -19,6 +19,13 @@ class SubscriptionServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        $this->app[Subscription::class]->registerDriver(
+            'PayPal',
+            function () {
+                return new \Juzaweb\Modules\Subscription\Methods\PayPal();
+            }
+        );
+
         $this->booted(
             function () {
                 $this->registerMenu();

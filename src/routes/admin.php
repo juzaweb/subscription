@@ -12,3 +12,5 @@ use Juzaweb\Core\Facades\RouteResource;
 use Juzaweb\Modules\Subscription\Http\Controllers\SubscriptionMethodController;
 
 RouteResource::admin('subscription-methods', SubscriptionMethodController::class);
+Route::get('subscription-methods/{driver}/get-data', [SubscriptionMethodController::class, 'getData'])
+    ->name('subscription-methods.data');

@@ -25,4 +25,6 @@ interface Subscription
     public function drivers(): Collection;
 
     public function registerModule(string $name, callable $resolver): void;
+
+    public function renderConfig(string $driver, array $config = []): string;
 }

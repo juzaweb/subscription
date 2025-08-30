@@ -10,14 +10,7 @@
 
 namespace Juzaweb\Modules\Subscription\Entities;
 
-class SubscriptionPlan
+class SubscriptionReturnResult
 {
-    public function __construct(protected string $servicePlanId, protected array $data = [])
-    {
-    }
 
-    public function getServicePlanId(): string
-    {
-        return $this->servicePlanId;
-    }
 }

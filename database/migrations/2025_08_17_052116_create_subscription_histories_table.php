@@ -26,7 +26,7 @@ return new class extends Migration
                 $table->unsignedBigInteger('method_id')->nullable();
                 $table->uuid('plan_id')->nullable();
                 $table->uuid('user_id')->index();
-                $table->unsignedBigInteger('subscription_id');
+                $table->uuid('subscription_id');
                 $table->timestamps();
 
                 $table->foreign('subscription_id')

@@ -11,11 +11,13 @@
 namespace Juzaweb\Modules\Subscription\Methods;
 
 use Illuminate\Http\Request;
+use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
+use Juzaweb\Modules\Subscription\Entities\SubscriptionReturnResult;
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\PlanSubscriptionMethod;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
-class PayPal extends SubscriptionDriver
+class PayPal extends SubscriptionDriver implements SubscriptionMethod
 {
     protected string $name = 'PayPal';
 
@@ -23,9 +25,13 @@ class PayPal extends SubscriptionDriver
 
     public function createPlan(Plan $plan, array $options = []): PlanSubscriptionMethod
     {
+        if ($exists = $plan->subscriptionMethods()->where('method', $this->name)->first()) {
+            return $exists;
+        }
+
         $product = $this->createProduct([
-            'name' => $options['product_name'] ?? $plan->name,
-            'description' => $options['product_description'] ?? $plan->description,
+            'name' => $options['service_name'] ?? $plan->name,
+            'description' => $options['service_description'] ?? $plan->description,
             'type' => 'SERVICE',
             'category' => 'SOFTWARE',
         ]);
@@ -69,6 +75,8 @@ class PayPal extends SubscriptionDriver
             ]
         );
 
+        $servicePlan['product_id'] = $product['id'];
+
         return PlanSubscriptionMethod::create(
             [
                 'payment_plan_id' => $servicePlan['id'],
@@ -79,29 +87,41 @@ class PayPal extends SubscriptionDriver
         );
     }
 
-    public function updatePlan(Plan $plan, PlanPaymentMethod $planPaymentMethod): string
+    public function updatePlan(Plan $plan): string
     {
         //
     }
 
-    public function subscribe(Plan $plan, PlanPaymentMethod $planPaymentMethod): bool
+    public function subscribe(Plan $plan, array $options = [])
     {
+        $customerName = $options['customer_name'];
+        $customerEmail = $options['customer_email'];
+        $serviceName = $options['service_name'] ?? $plan->name;
+        $serviceDescription = $options['service_description'] ?? $plan->description;
+
+        $methodPlan = $this->createPlan($plan, [
+            'service_name' => $serviceName,
+            'service_description' => $serviceDescription,
+        ]);
+
         $response = $this->getProvider()
-            ->addProductById($serviceName, $serviceDescription, 'SERVICE', 'SOFTWARE')
-            ->addBillingPlanById($plan->name, $plan->description ?? '', 100)
+            ->addProductById($methodPlan->data['product_id'])
+            ->addBillingPlanById($methodPlan->payment_plan_id)
             ->setReturnAndCancelUrl(
-                'https://example.com/paypal-success',
-                'https://example.com/paypal-cancel'
+                route('subscription.return', [$this->name]),
+                route('subscription.cancel', [$this->name])
             )
-            ->setupSubscription('John Doe', 'john@example.com', '2021-12-10');
+            ->setupSubscription($customerName, $customerEmail);
+
+        dd($response);
     }
 
-    public function complete(Plan $plan, array $data): PaymentReturnResult
+    public function complete(Plan $plan, array $data): SubscriptionReturnResult
     {
 
     }
 
-    public function webhook(Request $request): bool|PaymentReturnResult
+    public function webhook(Request $request): SubscriptionReturnResult
     {
 
     }
@@ -111,7 +131,7 @@ class PayPal extends SubscriptionDriver
         return $this->getProvider()->createProduct($data);
     }
 
-    public function config(): array
+    public function getConfigs(): array
     {
         return [
             'clientId' => __('Client ID'),
@@ -131,20 +151,20 @@ class PayPal extends SubscriptionDriver
     protected function getPaypalSettings(): array
     {
         return [
-            'mode' => $this->getConfig('sandbox') ? 'sandbox' : 'live',
+            'mode' => $this->config('sandbox') ? 'sandbox' : 'live',
             'live' => [
-                'client_id' => $this->getConfig('client_id'),
-                'client_secret' => $this->getConfig('client_secret'),
-                'app_id' => $this->getConfig('app_id'),
+                'client_id' => $this->config('client_id'),
+                'client_secret' => $this->config('client_secret'),
+                'app_id' => $this->config('app_id'),
             ],
             'sandbox' => [
-                'client_id' => $this->getConfig('client_id'),
-                'client_secret' => $this->getConfig('client_secret'),
-                'app_id' => $this->getConfig('app_id'),
+                'client_id' => $this->config('sandbox_client_id'),
+                'client_secret' => $this->config('sandbox_client_secret'),
+                'app_id' => $this->config('sandbox_app_id'),
             ],
             'payment_action' => 'Sale',
             'currency' => 'USD',
-            'notify_url' => 'https://your-app.com/paypal/notify',
+            'notify_url' => route('subscription.webhook', [$this->name]),
             'locale' => 'en_US',
             'validate_ssl' => true,
         ];

@@ -22,7 +22,7 @@ class PlanSubscriptionMethod extends Model
         'data' => 'array',
     ];
 
-    public function plan()
+    public function plan(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Plan::class, 'plan_id');
     }

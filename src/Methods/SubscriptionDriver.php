@@ -26,26 +26,40 @@ abstract class SubscriptionDriver
      */
     protected string $description;
 
-    public function __construct(protected array $config)
-    {
-    }
+    protected array $config;
+
+    protected bool $hasSandbox = true;
 
     /**
      * Get the configuration options for the subscription method.
      *
+     * @param  string  $key
      * @return array
      */
-    abstract public function config(): array;
+    public function config(string $key): string|int|null
+    {
+        return $this->config[$key] ?? null;
+    }
 
     /**
      * Get the configuration value for a specific key.
      *
      * @param string $key
-     * @return string|int|null
+     * @return array
      */
-    public function getConfig(string $key): int|string|null
+    abstract public function getConfigs(): array;
+
+    /**
+     * Set the configuration options for the subscription method.
+     *
+     * @param  array  $config
+     * @return $this
+     */
+    public function setConfigs(array $config): static
     {
-        return $this->config[$key] ?? null;
+        $this->config = $config;
+
+        return $this;
     }
 
     /**
@@ -66,5 +80,15 @@ abstract class SubscriptionDriver
     public function getDescription(): string
     {
         return $this->description;
+    }
+
+    /**
+     * Determine if the subscription method has a sandbox mode.
+     *
+     * @return bool
+     */
+    public function hasSandbox(): bool
+    {
+        return $this->hasSandbox;
     }
 }

@@ -28,6 +28,7 @@
                         {{ Field::select($model, 'driver')->dropDownList(
                             [
                                 ...['' => __('Select a driver')],
+                                ...$drivers,
                             ]
                         )->disabled($model->exists) }}
 

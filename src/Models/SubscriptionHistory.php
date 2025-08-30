@@ -11,5 +11,7 @@ class SubscriptionHistory extends Model
 
     protected $table = 'subscription_histories';
 
-    protected $fillable = [];
+    protected $fillable = [
+        //
+    ];
 }
