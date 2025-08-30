@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Juzaweb\Modules\Subscription\Enums\PlanStatus;
 use Juzaweb\Modules\Subscription\Models\Plan;
 
 return new class extends Migration
@@ -22,7 +23,7 @@ return new class extends Migration
                 'duration' => 0,
                 'is_free' => true,
                 'module' => 'test',
-                'status' => \Juzaweb\Modules\Subscription\Enums\PlanStatus::ACTIVE,
+                'status' => PlanStatus::ACTIVE,
             ],
             [
                 'en' => [
@@ -33,7 +34,7 @@ return new class extends Migration
                 'duration' => 1,
                 'duration_unit' => 'month',
                 'module' => 'test',
-                'status' => \Juzaweb\Modules\Subscription\Enums\PlanStatus::ACTIVE,
+                'status' => PlanStatus::ACTIVE,
             ],
             [
                 'en' => [
@@ -44,7 +45,7 @@ return new class extends Migration
                 'duration' => 1,
                 'duration_unit' => 'month',
                 'module' => 'test',
-                'status' => \Juzaweb\Modules\Subscription\Enums\PlanStatus::ACTIVE,
+                'status' => PlanStatus::ACTIVE,
             ],
         ];
 

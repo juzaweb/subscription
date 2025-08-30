@@ -8,6 +8,7 @@ use Juzaweb\Core\Http\Controllers\AdminController;
 use Juzaweb\Modules\Subscription\Facades\Subscription;
 use Juzaweb\Modules\Subscription\Http\DataTables\SubscriptionMethodsDataTable;
 use Juzaweb\Modules\Subscription\Http\Requests\SubscriptionMethodRequest;
+use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\SubscriptionMethod;
 
 class SubscriptionMethodController extends AdminController
@@ -16,7 +17,17 @@ class SubscriptionMethodController extends AdminController
     {
         Breadcrumb::add(__('Subscription Methods'));
 
-        return $dataTable->render('subscription::method.index');
+        $testPlans = Plan::withTranslation()
+            ->where(['module' => 'test'])
+            ->get()
+            ->mapWithKeys(fn ($plan) => [$plan->id => $plan->name . ' ($'.$plan->price . ')']);
+        $paymentMethods = SubscriptionMethod::withTranslation()->get()
+            ->mapWithKeys(fn ($method) => [$method->id => $method->name]);
+
+        return $dataTable->render(
+            'subscription::method.index',
+            compact('testPlans', 'paymentMethods')
+        );
     }
 
     public function create()
@@ -83,7 +94,11 @@ class SubscriptionMethodController extends AdminController
 
     public function destroy(int $id)
     {
-        // Logic to delete the subscription method
+        $model = SubscriptionMethod::findOrFail($id);
+
+        $model->delete();
+
+        return $this->success(['message' => __('Deleted successfully')]);
     }
 
     public function getData(string $driver): JsonResponse

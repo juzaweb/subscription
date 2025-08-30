@@ -15,7 +15,8 @@ use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
 
 /**
  * @method static \Illuminate\Support\Collection<SubscriptionMethod> drivers()
- * @see \Juzaweb\Modules\Subscription\SubscriptionManager
+ * @method static string renderConfig(string $driver, array $config = []): string
+ * @see \Juzaweb\Modules\Subscription\Services\SubscriptionManager
  */
 class Subscription extends Facade
 {

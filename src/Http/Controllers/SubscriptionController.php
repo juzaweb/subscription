@@ -7,17 +7,17 @@ use Illuminate\Routing\Controller;
 
 class SubscriptionController extends Controller
 {
-    public function subscribe()
+    public function subscribe(Request $request, string $module)
     {
         
     }
     
-    public function return(Request $request)
+    public function return(Request $request, string $module)
     {
         dd($request->all());
     }
 
-    public function cancel(Request $request)
+    public function cancel(Request $request, string $module)
     {
         dd($request->all());
     }

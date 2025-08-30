@@ -40,12 +40,10 @@
 @endsection
 
 @section('scripts')
-
-
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <form method="post"
-                  action=""
+                  action="{{ route('subscription.subscribe', ['test']) }}"
                   data-success="handlePaymentSuccess"
                   id="payment-form"
             >
@@ -58,7 +56,9 @@
                     </div>
                     <div class="modal-body">
                         <div id="payment-container">
+                            {{ Field::select('Method', 'method')->dropDownList($paymentMethods) }}
 
+                            {{ Field::select('Plan', 'plan_id')->dropDownList($testPlans) }}
 
                             <div id="form-card"></div>
 
