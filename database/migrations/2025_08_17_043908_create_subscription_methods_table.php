@@ -32,6 +32,7 @@ return new class extends Migration
                 $table->string('name');
                 $table->text('description')->nullable();
                 $table->unique(['subscription_method_id', 'locale'], 'subscription_method_translations_unique');
+                $table->timestamps();
 
                 $table->foreign('subscription_method_id')
                     ->references('id')

@@ -52,7 +52,7 @@
                     </div>
                     <div class="card-body">
                         @if($model->exists)
-                            {!! \Juzaweb\Modules\Payment\Facades\PaymentManager::renderConfig($model->driver, $model->config ?? []) !!}
+                            {!! \Juzaweb\Modules\Subscription\Facades\Subscription::renderConfig($model->driver, $model->config ?? []) !!}
                         @endif
                     </div>
                 </div>

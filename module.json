@@ -1,7 +1,7 @@
 {
     "name": "Subscription",
     "alias": "subscription",
-    "description": "Subscription payment",
+    "description": "Subscription Payment for Juzaweb CMS",
     "keywords": [],
     "priority": 0,
     "providers": [

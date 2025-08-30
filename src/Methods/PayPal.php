@@ -87,7 +87,7 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
         );
     }
 
-    public function updatePlan(Plan $plan): string
+    public function updatePlan(Plan $plan)
     {
         //
     }
@@ -99,10 +99,13 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
         $serviceName = $options['service_name'] ?? $plan->name;
         $serviceDescription = $options['service_description'] ?? $plan->description;
 
-        $methodPlan = $this->createPlan($plan, [
-            'service_name' => $serviceName,
-            'service_description' => $serviceDescription,
-        ]);
+        $methodPlan = $this->createPlan(
+            $plan,
+            [
+                'service_name' => $serviceName,
+                'service_description' => $serviceDescription,
+            ]
+        );
 
         $response = $this->getProvider()
             ->addProductById($methodPlan->data['product_id'])
@@ -126,7 +129,7 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
 
     }
 
-    public function createProduct(array $data)
+    public function createProduct(array $data): array|\Psr\Http\Message\StreamInterface|string
     {
         return $this->getProvider()->createProduct($data);
     }
@@ -134,8 +137,9 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
     public function getConfigs(): array
     {
         return [
-            'clientId' => __('Client ID'),
+            'client_id' => __('Client ID'),
             'secret' => __('Secret'),
+            'app_id' => __('App ID'),
         ];
     }
 
@@ -154,12 +158,12 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
             'mode' => $this->config('sandbox') ? 'sandbox' : 'live',
             'live' => [
                 'client_id' => $this->config('client_id'),
-                'client_secret' => $this->config('client_secret'),
+                'client_secret' => $this->config('secret'),
                 'app_id' => $this->config('app_id'),
             ],
             'sandbox' => [
                 'client_id' => $this->config('sandbox_client_id'),
-                'client_secret' => $this->config('sandbox_client_secret'),
+                'client_secret' => $this->config('sandbox_secret'),
                 'app_id' => $this->config('sandbox_app_id'),
             ],
             'payment_action' => 'Sale',

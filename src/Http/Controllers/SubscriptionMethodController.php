@@ -7,6 +7,7 @@ use Juzaweb\Core\Facades\Breadcrumb;
 use Juzaweb\Core\Http\Controllers\AdminController;
 use Juzaweb\Modules\Subscription\Facades\Subscription;
 use Juzaweb\Modules\Subscription\Http\DataTables\SubscriptionMethodsDataTable;
+use Juzaweb\Modules\Subscription\Http\Requests\SubscriptionMethodRequest;
 use Juzaweb\Modules\Subscription\Models\SubscriptionMethod;
 
 class SubscriptionMethodController extends AdminController
@@ -40,17 +41,44 @@ class SubscriptionMethodController extends AdminController
 
     public function edit(int $id)
     {
-        return view('subscription::method.form');
+        Breadcrumb::add(__('Subscription Methods'), admin_url('subscription-methods'));
+
+        Breadcrumb::add(__('Create Subscription Method'));
+
+        $locale = $this->getFormLanguage();
+        $model = SubscriptionMethod::withTranslation($locale)->findOrFail($id);
+        $model->setDefaultLocale($locale);
+        $drivers = Subscription::drivers()->map(fn ($driver) => $driver->getName());
+
+        return view(
+            'subscription::method.form',
+            [
+                'action' => action([static::class, 'update'], ['id' => $id]),
+                'locale' => $locale,
+                'drivers' => $drivers,
+                'model' => $model,
+            ]
+        );
     }
 
-    public function store()
+    public function store(SubscriptionMethodRequest $request)
     {
-        // Logic to store the subscription method
+        SubscriptionMethod::create($request->validated());
+
+        return $this->success([
+            'redirect' => admin_url('subscription-methods'),
+        ]);
     }
 
-    public function update(int $id)
+    public function update(SubscriptionMethodRequest $request, int $id)
     {
-        // Logic to update the subscription method
+        $model = SubscriptionMethod::findOrFail($id);
+
+        $model->update($request->validated());
+
+        return $this->success([
+            'redirect' => admin_url('subscription-methods'),
+        ]);
     }
 
     public function destroy(int $id)
