@@ -7,6 +7,11 @@ use Illuminate\Routing\Controller;
 
 class SubscriptionController extends Controller
 {
+    public function subscribe()
+    {
+        
+    }
+    
     public function return(Request $request)
     {
         dd($request->all());

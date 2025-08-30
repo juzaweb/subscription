@@ -8,7 +8,7 @@
  * @license    GNU V2
  */
 
-namespace Juzaweb\Modules\Subscription;
+namespace Juzaweb\Modules\Subscription\Services;
 
 use Illuminate\Support\Collection;
 use InvalidArgumentException;

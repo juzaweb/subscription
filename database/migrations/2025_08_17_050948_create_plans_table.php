@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('locale', 10)->index();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->timestamps();
 
             $table->unique(['plan_id', 'locale'], 'plan_translations_unique');
             $table->foreign('plan_id')

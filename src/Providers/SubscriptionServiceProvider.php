@@ -13,7 +13,8 @@ namespace Juzaweb\Modules\Subscription\Providers;
 use Juzaweb\Core\Facades\Menu;
 use Juzaweb\Core\Providers\ServiceProvider;
 use Juzaweb\Modules\Subscription\Contracts\Subscription;
-use Juzaweb\Modules\Subscription\SubscriptionManager;
+use Juzaweb\Modules\Subscription\Services\SubscriptionManager;
+use Juzaweb\Modules\Subscription\Services\TestSubscription;
 
 class SubscriptionServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,13 @@ class SubscriptionServiceProvider extends ServiceProvider
             'PayPal',
             function () {
                 return new \Juzaweb\Modules\Subscription\Methods\PayPal();
+            }
+        );
+
+        $this->app[Subscription::class]->registerModule(
+            'test',
+            function () {
+                return new TestSubscription();
             }
         );
 
@@ -61,7 +69,7 @@ class SubscriptionServiceProvider extends ServiceProvider
      */
     protected function registerTranslations(): void
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'payment');
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'subscription');
         $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang');
     }
 
