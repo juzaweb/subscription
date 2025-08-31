@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
 use Juzaweb\Core\Traits\Translatable;
+use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod as SubscriptionMethodContract;
 
 class SubscriptionMethod extends Model
 {
@@ -30,6 +31,12 @@ class SubscriptionMethod extends Model
     protected $hidden = [
         'config',
     ];
+
+    public function paymentDriver(): SubscriptionMethodContract
+    {
+        return \Juzaweb\Modules\Subscription\Facades\Subscription::driver($this->driver)
+            ->setConfigs($this->config);
+    }
 
     public function getConfig(?string $key = null, $default = null): null|array|string
     {

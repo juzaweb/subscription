@@ -10,7 +10,15 @@
 
 namespace Juzaweb\Modules\Subscription\Contracts;
 
+use Juzaweb\Modules\Subscription\Entities\SubscriptionResult;
+
 interface SubscriptionModule
 {
+    public function onSuccess(SubscriptionResult $result, array $params = []);
 
+    public function onCancel(SubscriptionResult $result, array $params = []);
+
+    public function getName(): string;
+
+    public function getServiceName(): string;
 }

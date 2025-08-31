@@ -3,6 +3,7 @@
 namespace Juzaweb\Modules\Subscription\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Juzaweb\Core\Http\Controllers\ThemeController;
 use Juzaweb\Modules\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Modules\Subscription\Facades\Subscription;
@@ -13,33 +14,46 @@ class SubscriptionController extends ThemeController
 {
     public function subscribe(Request $request, string $module)
     {
+        /** @var SubscriptionMethod $method */
         $method = SubscriptionMethod::withTranslation()->findOrFail($request->input('method_id'));
         $plan = Plan::withTranslation()->find($request->input('plan_id'));
-        $subscription = Subscription::driver($method->driver)
-            ->setConfigs($method->config)
-            ->sandbox();
         $user = $request->user();
 
         try {
-            $subscription->subscribe($plan,
-                [
-                    'customer_name' => $user->name,
-                    'customer_email' => $user->email,
-                ]
-            );
+            $payment = DB::transaction(fn() => Subscription::create($user, $module, $plan, $method, $request->all(), $module == 'test'));
         } catch (SubscriptionException $e) {
             return $this->error(['message' => $e->getMessage()]);
         }
 
-        return $this->success(['message' => 'Subscription created successfully']);
+        if ($payment->isRedirect()) {
+            if ($method->paymentDriver()->isReturnInEmbed()) {
+                return $this->success(
+                    [
+                        'type' => 'embed',
+                        'embed_url' => $payment->getRedirectUrl(),
+                        'payment_history_id' => $payment->getPaymentHistory()->id,
+                    ]
+                );
+            }
+
+            return $this->success(
+                [
+                    'type' => 'redirect',
+                    'redirect' => $payment->getRedirectUrl(),
+                    'message' => __('Redirecting to payment gateway...'),
+                ]
+            );
+        }
+
+        return $this->success(['message' => __('Subscription created successfully')]);
     }
     
-    public function return(Request $request, string $module)
+    public function return(Request $request, string $module, string $subscriptionHistoryId)
     {
         dd($request->all());
     }
 
-    public function cancel(Request $request, string $module)
+    public function cancel(Request $request, string $module, string $subscriptionHistoryId)
     {
         dd($request->all());
     }

@@ -10,7 +10,16 @@
 
 namespace Juzaweb\Modules\Subscription\Entities;
 
-class SubscriptionReturnResult
+class SubscriptionReturnResult extends SubscriptionResult
 {
+    public static function make(string $transactionId, array $data = []): static
+    {
+        return new self($transactionId, $data);
+    }
 
+    public function __construct(string $transactionId, array $data = [])
+    {
+        $this->transactionId = $transactionId;
+        $this->data = $data;
+    }
 }

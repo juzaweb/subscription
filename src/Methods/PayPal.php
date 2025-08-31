@@ -12,10 +12,12 @@ namespace Juzaweb\Modules\Subscription\Methods;
 
 use Illuminate\Http\Request;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
+use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
 use Juzaweb\Modules\Subscription\Entities\SubscriptionReturnResult;
 use Juzaweb\Modules\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\PlanSubscriptionMethod;
+use Juzaweb\Modules\Subscription\Models\SubscriptionHistory;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class PayPal extends SubscriptionDriver implements SubscriptionMethod
@@ -101,12 +103,14 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
         //
     }
 
-    public function subscribe(Plan $plan, array $options = [])
+    public function subscribe(Plan $plan, array $options = []): SubscribeResult
     {
         $customerName = $options['customer_name'];
         $customerEmail = $options['customer_email'];
         $serviceName = $options['service_name'] ?? $plan->name;
         $serviceDescription = $options['service_description'] ?? $plan->description;
+        $returnUrl = $options['return_url'] ?? null;
+        $cancelUrl = $options['cancel_url'] ?? null;
 
         $methodPlan = $this->createPlan(
             $plan,
@@ -119,18 +123,22 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
         $response = $this->getProvider()
             ->addProductById($methodPlan->data['product_id'])
             ->addBillingPlanById($methodPlan->payment_plan_id)
-            ->setReturnAndCancelUrl(
-                route('subscription.return', [$this->name]),
-                route('subscription.cancel', [$this->name])
-            )
+            ->setReturnAndCancelUrl($returnUrl, $cancelUrl)
             ->setupSubscription($customerName, $customerEmail);
 
-        dd($response);
+        $redirectUrl = collect($response['links'] ?? [])
+            ->firstWhere('rel', 'approve')['href'] ?? null;
+
+        return SubscribeResult::make($response['id'], $redirectUrl, $response);
     }
 
-    public function complete(Plan $plan, array $data): SubscriptionReturnResult
+    public function complete(SubscriptionHistory $history, array $data): SubscriptionReturnResult
     {
+        $provider = $this->getProvider();
 
+        $provider->activateSubscription($history->agreement_id, 'Reactivating the subscription');
+
+        return SubscriptionReturnResult::make($history->agreement_id, $data)->setSubscriptionHistory($history);
     }
 
     public function webhook(Request $request): SubscriptionReturnResult

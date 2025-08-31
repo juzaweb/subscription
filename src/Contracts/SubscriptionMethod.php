@@ -10,8 +10,13 @@
 
 namespace Juzaweb\Modules\Subscription\Contracts;
 
+use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
+use Juzaweb\Modules\Subscription\Models\Plan;
+
 interface SubscriptionMethod
 {
+    public function subscribe(Plan $plan, array $options = []): SubscribeResult;
+
     /**
      * Get the configuration value for a specific key.
      *

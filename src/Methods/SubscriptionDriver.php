@@ -30,6 +30,8 @@ abstract class SubscriptionDriver
 
     protected bool $hasSandbox = true;
 
+    protected bool $returnInEmbed = false;
+
     /**
      * Get the configuration options for the subscription method.
      *
@@ -90,5 +92,10 @@ abstract class SubscriptionDriver
     public function hasSandbox(): bool
     {
         return $this->hasSandbox;
+    }
+
+    public function isReturnInEmbed(): bool
+    {
+        return $this->returnInEmbed;
     }
 }

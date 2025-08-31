@@ -10,62 +10,23 @@
 
 namespace Juzaweb\Modules\Subscription\Entities;
 
-class SubscribeResult
+class SubscribeResult extends SubscriptionResult
 {
-    /**
-     * @var null|string
-     */
-    protected ?string $transactionId = null;
-
-    /**
-     * @var array
-     */
-    protected array $data = [];
-
-    /**
-     * @var bool
-     */
-    protected bool $isSuccessful = false;
-
     /**
      * @var string|null
      */
     protected ?string $redirectUrl = null;
 
-    public function setSuccessful(bool $isSuccessful): self
+    public static function make(?string $transactionId = null, string $redirectUrl = null, array $data = []): static
     {
-        $this->isSuccessful = $isSuccessful;
-
-        return $this;
+        return new self($transactionId, $redirectUrl, $data);
     }
 
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    public function setData(array $data): self
-    {
-        $this->data = $data;
-
-        return $this;
-    }
-
-    public function isSuccessful(): bool
-    {
-        return $this->isSuccessful;
-    }
-
-    public function setTransactionId(string $transactionId): self
+    public function __construct(?string $transactionId = null, string $redirectUrl = null, array $data = [])
     {
         $this->transactionId = $transactionId;
-
-        return $this;
-    }
-
-    public function getTransactionId(): ?string
-    {
-        return $this->transactionId;
+        $this->redirectUrl = $redirectUrl;
+        $this->data = $data;
     }
 
     public function isRedirect(): bool

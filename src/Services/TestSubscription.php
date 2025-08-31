@@ -11,18 +11,20 @@
 namespace Juzaweb\Modules\Subscription\Services;
 
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionModule;
-use Juzaweb\Modules\Subscription\Entities\SubscriptionReturnResult;
+use Juzaweb\Modules\Subscription\Entities\SubscriptionResult;
 
 class TestSubscription implements SubscriptionModule
 {
-    protected string $name = 'Membership';
+    protected string $name = 'Test';
 
-    public function onPaymentSuccess(SubscriptionReturnResult $result)
+    protected string $serviceName = 'Test Service';
+
+    public function onSuccess(SubscriptionResult $result, array $params = [])
     {
         dd('Payment success');
     }
 
-    public function onPaymentCancel(SubscriptionReturnResult $result)
+    public function onCancel(SubscriptionResult $result, array $params = [])
     {
         // Handle payment cancellation
     }
@@ -30,5 +32,10 @@ class TestSubscription implements SubscriptionModule
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getServiceName(): string
+    {
+        return $this->serviceName;
     }
 }
