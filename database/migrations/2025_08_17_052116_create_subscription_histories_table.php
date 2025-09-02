@@ -17,16 +17,16 @@ return new class extends Migration
             'subscription_histories',
             function (Blueprint $table) {
                 $table->uuid('id')->primary();
-                $table->string('method', 50)->index();
+                $table->string('driver', 50)->index();
                 $table->string('module', 50)->index();
                 $table->decimal('amount', 15, 2)->index();
-                $table->string('agreement_id', 100)->index()
+                $table->string('agreement_id', 100)->nullable()->index()
                     ->comment('Agreement of payment partner');
                 $table->dateTime('end_date')->nullable()->index();
                 $table->uuid('method_id')->nullable();
                 $table->uuid('plan_id')->nullable();
                 $table->uuid('user_id')->index();
-                $table->uuid('subscription_id');
+                $table->uuid('subscription_id')->nullable()->index();
                 $table->string('status', 50)->default('processing');
                 $table->json('data')->nullable();
                 $table->timestamps();

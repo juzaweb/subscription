@@ -14,7 +14,7 @@ class SubscriptionHistory extends Model
     protected $table = 'subscription_histories';
 
     protected $fillable = [
-        'method',
+        'driver',
         'module',
         'amount',
         'agreement_id',
@@ -33,4 +33,14 @@ class SubscriptionHistory extends Model
         'amount' => 'decimal:2',
         'status' => SubscriptionHistoryStatus::class,
     ];
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
+    }
+
+    public function method()
+    {
+        return $this->belongsTo(SubscriptionMethod::class, 'method_id');
+    }
 }

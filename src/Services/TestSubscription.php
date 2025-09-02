@@ -12,6 +12,7 @@ namespace Juzaweb\Modules\Subscription\Services;
 
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionModule;
 use Juzaweb\Modules\Subscription\Entities\SubscriptionResult;
+use Juzaweb\Modules\Subscription\Models\SubscriptionHistory;
 
 class TestSubscription implements SubscriptionModule
 {
@@ -21,10 +22,13 @@ class TestSubscription implements SubscriptionModule
 
     public function onSuccess(SubscriptionResult $result, array $params = [])
     {
-        dd('Payment success');
+        info('Payment success', [
+            'subscription_history_id' => $result->getSubscriptionHistory()->id,
+            'params' => $params,
+        ]);
     }
 
-    public function onCancel(SubscriptionResult $result, array $params = [])
+    public function onCancel(SubscriptionHistory $result, array $params = [])
     {
         // Handle payment cancellation
     }
@@ -37,5 +41,10 @@ class TestSubscription implements SubscriptionModule
     public function getServiceName(): string
     {
         return $this->serviceName;
+    }
+
+    public function getReturnUrl()
+    {
+        return admin_url('subscription-methods');
     }
 }

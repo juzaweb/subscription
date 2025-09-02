@@ -136,9 +136,11 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
     {
         $provider = $this->getProvider();
 
-        $provider->activateSubscription($history->agreement_id, 'Reactivating the subscription');
+        $subscription = $provider->showSubscriptionDetails($history->agreement_id);
 
-        return SubscriptionReturnResult::make($history->agreement_id, $data)->setSubscriptionHistory($history);
+        return SubscriptionReturnResult::make($history->agreement_id, $data)
+            ->setSubscriptionHistory($history)
+            ->setSuccessful($subscription['status'] === 'ACTIVE');
     }
 
     public function webhook(Request $request): SubscriptionReturnResult

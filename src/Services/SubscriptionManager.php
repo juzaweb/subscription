@@ -19,6 +19,7 @@ use Juzaweb\Modules\Subscription\Contracts\Subscription;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionModule;
 use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
+use Juzaweb\Modules\Subscription\Entities\SubscriptionReturnResult;
 use Juzaweb\Modules\Subscription\Enums\SubscriptionHistoryStatus;
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\SubscriptionHistory;
@@ -39,9 +40,9 @@ class SubscriptionManager implements Subscription
         string $module,
         Plan $plan,
         PaymentMethod $method,
-        array $params = [],
-        bool $sandbox = false
+        array $params = []
     ): SubscribeResult {
+        $sandbox = setting('subscription_sandbox', true);
         $subscription = $this->driver($method->driver)
             ->setConfigs($method->config)
             ->sandbox($sandbox);
@@ -50,7 +51,7 @@ class SubscriptionManager implements Subscription
 
         $history = SubscriptionHistory::create(
             [
-                'method' => $method->driver,
+                'driver' => $method->driver,
                 'module' => $module,
                 'amount' => $plan->price,
                 'method_id' => $method->id,
@@ -81,9 +82,39 @@ class SubscriptionManager implements Subscription
         return $subscribe;
     }
 
-    public function complete()
+    public function complete(SubscriptionHistory $history, array $params = []): SubscriptionReturnResult
     {
+        $sandbox = $this->sandboxMode();
 
+        $subscription = $this->driver($history->driver)
+            ->setConfigs($history->method->config)
+            ->sandbox($sandbox);
+
+        $complete = $subscription->complete($history, $params);
+
+        if ($complete->isSuccessful()) {
+            $history->update(['status' => SubscriptionHistoryStatus::SUCCESS]);
+
+            $complete->setSubscriptionHistory($history);
+
+            $handler = $this->module($history->module);
+            $handler->onSuccess($complete, $params);
+        } else {
+            $history->update(['status' => SubscriptionHistoryStatus::FAILED]);
+        }
+
+        return $complete;
+    }
+
+    public function cancel(SubscriptionHistory $history, array $params = [])
+    {
+        $history->update(['status' => SubscriptionHistoryStatus::CANCELLED]);
+
+        $handler = $this->module($history->module);
+
+        $handler->onCancel($history, $params);
+
+        return true;
     }
 
     public function modules(): Collection
@@ -151,5 +182,10 @@ class SubscriptionManager implements Subscription
             'subscription::method.components.config',
             ['fields' => $fields, 'config' => $config, 'hasSandbox' => $hasSandbox]
         )->render();
+    }
+
+    protected function sandboxMode(): bool
+    {
+        return (bool) setting('subscription_sandbox', true);
     }
 }
