@@ -43,4 +43,14 @@ class SubscriptionHistory extends Model
     {
         return $this->belongsTo(SubscriptionMethod::class, 'method_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(config('auth.providers.users.model'), 'user_id');
+    }
+
+    public function subscription()
+    {
+        return $this->belongsTo(Subscription::class, 'subscription_id');
+    }
 }

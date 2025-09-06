@@ -112,4 +112,15 @@ class SubscriptionController extends ThemeController
             'redirect' => $returnUrl,
         ]);
     }
+
+    public function webhook(Request $request, string $module, string $driver)
+    {
+        $result = Subscription::webhook($request, $module, $driver);
+
+        if ($result->isSuccessful()) {
+            return response('Webhook Handled', 200);
+        }
+
+        return response('Webhook Failed', 200);
+    }
 }

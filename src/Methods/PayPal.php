@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
 use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
 use Juzaweb\Modules\Subscription\Entities\SubscriptionReturnResult;
+use Juzaweb\Modules\Subscription\Entities\WebhookResult;
 use Juzaweb\Modules\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\PlanSubscriptionMethod;
@@ -145,7 +146,14 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
 
     public function webhook(Request $request): SubscriptionReturnResult
     {
+        $provider = $this->getProvider();
 
+        $response = $provider->verifyWebHook($request->all());
+
+        info('PayPal Webhook:', $response);
+
+        return WebhookResult::make($request->input('resource.id'), $request->all())
+            ->setSuccessful($response['verification_status'] === 'SUCCESS');
     }
 
     public function createProduct(array $data): array|\Psr\Http\Message\StreamInterface|string

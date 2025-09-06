@@ -10,6 +10,7 @@
 
 namespace Juzaweb\Modules\Subscription\Facades;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Facade;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
 
@@ -18,6 +19,7 @@ use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
  * @method static string renderConfig(string $driver, array $config = []): string
  * @method static SubscriptionMethod driver(string $name)
  * @method static \Juzaweb\Modules\Subscription\Entities\SubscribeResult create($user, string $module, ?\Juzaweb\Modules\Subscription\Models\Plan $plan, \Juzaweb\Modules\Subscription\Models\SubscriptionMethod $method, array $options = [])
+ * @method static webhook(Request $request, string $module, string $driver)
  * @see \Juzaweb\Modules\Subscription\Services\SubscriptionManager
  */
 class Subscription extends Facade

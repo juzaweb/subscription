@@ -10,6 +10,7 @@
 
 namespace Juzaweb\Modules\Subscription\Services;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Juzaweb\Core\Application;
@@ -21,9 +22,12 @@ use Juzaweb\Modules\Subscription\Contracts\SubscriptionModule;
 use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
 use Juzaweb\Modules\Subscription\Entities\SubscriptionReturnResult;
 use Juzaweb\Modules\Subscription\Enums\SubscriptionHistoryStatus;
+use Juzaweb\Modules\Subscription\Enums\SubscriptionStatus;
 use Juzaweb\Modules\Subscription\Models\Plan;
+use Juzaweb\Modules\Subscription\Models\Subscription as SubscriptionModel;
 use Juzaweb\Modules\Subscription\Models\SubscriptionHistory;
 use Juzaweb\Modules\Subscription\Models\SubscriptionMethod as PaymentMethod;
+use Juzaweb\Modules\Subscription\Models\SubscriptionMethod as SubscriptionMethodModel;
 
 class SubscriptionManager implements Subscription
 {
@@ -93,12 +97,30 @@ class SubscriptionManager implements Subscription
         $complete = $subscription->complete($history, $params);
 
         if ($complete->isSuccessful()) {
-            $history->update(['status' => SubscriptionHistoryStatus::SUCCESS]);
+            $history->update([
+                'status' => SubscriptionHistoryStatus::SUCCESS,
+                'end_date' => now()->addMonth(),
+            ]);
 
             $complete->setSubscriptionHistory($history);
 
             $handler = $this->module($history->module);
             $handler->onSuccess($complete, $params);
+
+            SubscriptionModel::create(
+                [
+                    'driver' => $history->driver,
+                    'module' => $history->module,
+                    'amount' => $history->amount,
+                    'agreement_id' => $history->agreement_id,
+                    'start_date' => now(),
+                    'end_date' => $history->end_date,
+                    'method_id' => $history->method_id,
+                    'plan_id' => $history->plan_id,
+                    'user_id' => $history->user_id,
+                    'status' => SubscriptionStatus::ACTIVE,
+                ]
+            );
         } else {
             $history->update(['status' => SubscriptionHistoryStatus::FAILED]);
         }
@@ -115,6 +137,58 @@ class SubscriptionManager implements Subscription
         $handler->onCancel($history, $params);
 
         return true;
+    }
+
+    public function webhook(Request $request, string $module, string $driver)
+    {
+        $method = SubscriptionMethodModel::where('driver', $driver)->first();
+        $subscription = $this->driver($driver)
+            ->setConfigs($method->config)
+            ->sandbox($this->sandboxMode());
+        $handler = $this->module($module);
+
+        $result = $subscription->webhook($request);
+
+        if ($result->isSuccessful()) {
+            $agreement = SubscriptionModel::where('agreement_id', $result->getTransactionId())
+                ->where('driver', $driver)
+                ->first();
+            $history = SubscriptionHistory::where('agreement_id', $result->getTransactionId())
+                ->where('driver', $driver)
+                ->first();
+
+            if ($agreement) {
+                $agreement->update([
+                    'status' => SubscriptionStatus::ACTIVE,
+                    'end_date' => now()->addMonth(),
+                ]);
+            } else {
+                $history->update([
+                    'status' => SubscriptionHistoryStatus::SUCCESS,
+                    'end_date' => now()->addMonth(),
+                ]);
+
+                SubscriptionModel::create(
+                    [
+                        'driver' => $history->driver,
+                        'module' => $history->module,
+                        'amount' => $history->amount,
+                        'agreement_id' => $history->agreement_id,
+                        'start_date' => now(),
+                        'end_date' => $history->end_date,
+                        'method_id' => $history->method_id,
+                        'plan_id' => $history->plan_id,
+                        'user_id' => $history->user_id,
+                        'status' => SubscriptionStatus::ACTIVE,
+                    ]
+                );
+            }
+
+            $result->setSubscriptionHistory($history);
+            $handler->onSuccess($result, $request->all());
+        }
+
+        return $result;
     }
 
     public function modules(): Collection

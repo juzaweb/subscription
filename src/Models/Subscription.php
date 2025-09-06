@@ -2,13 +2,14 @@
 
 namespace Juzaweb\Modules\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Juzaweb\Core\Models\Model;
 use Juzaweb\Core\Traits\HasAPI;
 use Juzaweb\Modules\Subscription\Enums\SubscriptionStatus;
 
 class Subscription extends Model
 {
-    use HasAPI;
+    use HasAPI, HasUuids;
 
     protected $table = 'subscriptions';
 
