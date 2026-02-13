@@ -26,10 +26,12 @@ return new class extends Migration
                 $table->dateTime('end_date')->index()->nullable();
                 $table->uuid('method_id')->nullable();
                 $table->uuid('plan_id');
-                $table->uuid('user_id')->index();
+                $table->uuid('billable_id')->index();
+                $table->string('billable_type', 190)->index();
                 $table->string('status', 50)->default('active')->index();
-                $table->timestamps();
+                $table->datetimes();
 
+                $table->index(['billable_id', 'billable_type']);
                 $table->foreign('plan_id')
                     ->references('id')
                     ->on('plans')
@@ -38,11 +40,6 @@ return new class extends Migration
                 $table->foreign('method_id')
                     ->references('id')
                     ->on('subscription_methods');
-
-                $table->foreign('user_id')
-                    ->references('id')
-                    ->on('users')
-                    ->onDelete('cascade');
             }
         );
     }

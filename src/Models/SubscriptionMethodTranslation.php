@@ -11,7 +11,7 @@
 namespace Juzaweb\Modules\Subscription\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Juzaweb\Core\Models\Model;
+use Juzaweb\Modules\Core\Models\Model;
 
 class SubscriptionMethodTranslation extends Model
 {

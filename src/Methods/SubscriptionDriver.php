@@ -10,6 +10,8 @@
 
 namespace Juzaweb\Modules\Subscription\Methods;
 
+use Illuminate\Support\Facades\Log;
+
 abstract class SubscriptionDriver
 {
     /**
@@ -97,5 +99,17 @@ abstract class SubscriptionDriver
     public function isReturnInEmbed(): bool
     {
         return $this->returnInEmbed;
+    }
+
+    protected function getConfigInMode(string $key): array|int|string|null
+    {
+        return $this->config('sandbox')
+            ? $this->config("sandbox_{$key}")
+            : $this->config($key);
+    }
+
+    protected function getLogger()
+    {
+        return Log::driver('subscription');
     }
 }

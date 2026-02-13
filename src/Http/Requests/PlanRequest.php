@@ -11,19 +11,22 @@ namespace Juzaweb\Modules\Subscription\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Juzaweb\Modules\Subscription\Facades\Subscription;
 
-class SubscriptionMethodRequest extends FormRequest
+class PlanRequest extends FormRequest
 {
     public function rules(): array
     {
-        $drivers = Subscription::drivers()->keys()->toArray();
-
         return [
-			'driver' => [Rule::requiredIf(! $this->route('id')), 'string', Rule::in($drivers)],
-			'config' => ['required', 'array'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-		];
+            'is_free' => ['required', 'boolean'],
+            'price' => [
+                Rule::requiredIf(!$this->input('is_free') && $this->isMethod('post')),
+                'numeric',
+                'min:0',
+            ],
+            'features' => ['nullable', 'array'],
+            'features.*' => ['required'],
+        ];
     }
 }

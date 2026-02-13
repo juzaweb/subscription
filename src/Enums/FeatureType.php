@@ -10,8 +10,10 @@
 
 namespace Juzaweb\Modules\Subscription\Enums;
 
-enum PlanStatus: string
+enum FeatureType: string
 {
-    case ACTIVE = 'active';
-    case DRAFT = 'draft';
+    case BOOLEAN = 'boolean';
+    case SIZE = 'size';
+    case NUMBER = 'number';
+    case TEXT = 'text';
 }

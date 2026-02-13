@@ -3,9 +3,9 @@
 namespace Juzaweb\Modules\Subscription\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Juzaweb\Core\Models\Model;
-use Juzaweb\Core\Traits\HasAPI;
-use Juzaweb\Core\Traits\Translatable;
+use Juzaweb\Modules\Core\Models\Model;
+use Juzaweb\Modules\Core\Traits\HasAPI;
+use Juzaweb\Modules\Core\Traits\Translatable;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod as SubscriptionMethodContract;
 
 class SubscriptionMethod extends Model
@@ -17,15 +17,18 @@ class SubscriptionMethod extends Model
     protected $fillable = [
         'driver',
         'config',
+        'active',
     ];
 
     protected $casts = [
         'config' => 'array',
+        'active' => 'boolean',
     ];
 
     public $translatedAttributes = [
         'name',
         'description',
+        'locale',
     ];
 
     protected $hidden = [

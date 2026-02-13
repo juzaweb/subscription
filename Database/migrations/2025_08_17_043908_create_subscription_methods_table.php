@@ -14,31 +14,30 @@ return new class extends Migration
     public function up()
     {
         Schema::create(
-            'plans',
+            'subscription_methods',
             function (Blueprint $table) {
                 $table->uuid('id')->primary();
-                $table->decimal('price', 15, 2)->index()->default(0);
-                $table->boolean('is_free')->default(false)->index();
-                $table->string('status', 50)->index()->default('draft');
-                $table->string('module', 50)->index();
-                $table->timestamps();
+                $table->string('driver', 50)->unique();
+                $table->json('config')->nullable();
+                $table->boolean('active')->index()->default(true);
+                $table->datetimes();
             }
         );
 
         Schema::create(
-            'plan_translations',
+            'subscription_method_translations',
             function (Blueprint $table) {
                 $table->id();
-                $table->uuid('plan_id')->index();
+                $table->uuid('subscription_method_id')->index();
                 $table->string('locale', 10)->index();
                 $table->string('name');
                 $table->text('description')->nullable();
-                $table->timestamps();
+                $table->unique(['subscription_method_id', 'locale'], 'subscription_method_translations_unique');
+                $table->datetimes();
 
-                $table->unique(['plan_id', 'locale'], 'plan_translations_unique');
-                $table->foreign('plan_id')
+                $table->foreign('subscription_method_id')
                     ->references('id')
-                    ->on('plans')
+                    ->on('subscription_methods')
                     ->onDelete('cascade');
             }
         );
@@ -51,7 +50,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('plan_translations');
-        Schema::dropIfExists('plans');
+        Schema::dropIfExists('subscription_method_translations');
+        Schema::dropIfExists('subscription_methods');
     }
 };

@@ -8,4 +8,9 @@
  * @license    GNU V2
  */
 
+namespace Juzaweb\Modules\Subscription\Contracts;
 
+interface Subscriptable
+{
+    public function subscribed(string $module): bool;
+}

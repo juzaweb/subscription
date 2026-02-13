@@ -33,6 +33,11 @@ class WebhookResult extends SubscriptionResult
         return $this->status === 'cancelled';
     }
 
+    public function isSuspended()
+    {
+        return $this->status === 'suspended';
+    }
+
     public function getStatus(): string
     {
         return $this->status;

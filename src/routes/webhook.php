@@ -8,7 +8,7 @@
  * @license    GNU V2
  */
 
-use Juzaweb\Modules\Subscription\Http\Controllers\SubscriptionController;
+use Juzaweb\Modules\Subscription\Http\Controllers\Frontend\SubscriptionController;
 
-Route::get('subscription/{method}/webhook', [SubscriptionController::class, 'webhook'])
+Route::post('subscription/{method}/webhook', [SubscriptionController::class, 'webhook'])
     ->name('subscription.webhook');

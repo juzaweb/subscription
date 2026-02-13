@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Juzaweb\Modules\Subscription\Enums\PlanStatus;
 use Juzaweb\Modules\Subscription\Models\Plan;
 
 return new class extends Migration
@@ -15,37 +14,29 @@ return new class extends Migration
     {
         $plans = [
             [
-                'en' => [
-                    'name' => 'Basic Plan',
-                    'description' => 'This is a basic subscription plan.',
-                ],
+                'name' => 'Basic Plan',
                 'price' => 9.99,
                 'duration' => 1,
                 'duration_unit' => 'month',
                 'module' => 'test',
-                'status' => PlanStatus::ACTIVE,
+                'active' => true,
             ],
             [
-                'en' => [
-                    'name' => 'Free Plan',
-                    'description' => 'This is a Free subscription plan.',
-                ],
+                'name' => 'Free Plan',
                 'price' => 0,
                 'duration' => 0,
+                'duration_unit' => 'month',
                 'is_free' => true,
                 'module' => 'test',
-                'status' => PlanStatus::ACTIVE,
+                'active' => true,
             ],
             [
-                'en' => [
-                    'name' => 'Premium Plan',
-                    'description' => 'This is a premium subscription plan with more features.',
-                ],
+                'name' => 'Premium Plan',
                 'price' => 19.99,
                 'duration' => 1,
                 'duration_unit' => 'month',
                 'module' => 'test',
-                'status' => PlanStatus::ACTIVE,
+                'active' => true,
             ],
         ];
 

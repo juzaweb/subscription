@@ -4,26 +4,24 @@ namespace Juzaweb\Modules\Subscription\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Juzaweb\Core\Models\Model;
-use Juzaweb\Core\Traits\HasAPI;
-use Juzaweb\Core\Traits\Translatable;
+use Juzaweb\Modules\Core\Models\Model;
+use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Subscription\Enums\DurationUnit;
-use Juzaweb\Modules\Subscription\Enums\PlanStatus;
-use Juzaweb\Translations\Contracts\Translatable as TranslatableContract;
 
-class Plan extends Model implements TranslatableContract
+class Plan extends Model
 {
-    use HasAPI, Translatable, HasUuids;
+    use HasAPI, HasUuids;
 
     protected $table = 'plans';
 
     protected $fillable = [
         'price',
         'is_free',
-        'status',
+        'active',
         'module',
         'duration',
         'duration_unit',
+        'name',
     ];
 
     protected $casts = [
@@ -31,16 +29,20 @@ class Plan extends Model implements TranslatableContract
         'is_free' => 'boolean',
         'duration' => 'integer',
         'duration_unit' => DurationUnit::class,
-        'status' => PlanStatus::class,
-    ];
-
-    public $translatedAttributes = [
-        'name',
-        'description',
     ];
 
     public function subscriptionMethods(): HasMany
     {
         return $this->hasMany(PlanSubscriptionMethod::class, 'plan_id');
+    }
+
+    public function features(): HasMany
+    {
+        return $this->hasMany(PlanFeature::class, 'plan_id');
+    }
+
+    public function getFeatureValue(string $name)
+    {
+        return $this->features->firstWhere('name', $name)?->value;
     }
 }

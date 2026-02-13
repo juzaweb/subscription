@@ -27,4 +27,8 @@ interface Subscription
     public function registerModule(string $name, callable $resolver): void;
 
     public function renderConfig(string $driver, array $config = []): string;
+
+    public function feature(string $key, string $module, callable $callback): void;
+
+    public function hasModule(string $name): bool;
 }

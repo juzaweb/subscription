@@ -12,13 +12,16 @@ namespace Juzaweb\Modules\Subscription\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
-use Juzaweb\Core\Application;
-use Juzaweb\Core\Models\User;
+use Juzaweb\Modules\Core\Application;
+use Juzaweb\Modules\Core\Models\Authenticatable;
 use Juzaweb\Modules\Payment\Exceptions\PaymentException;
+use Juzaweb\Modules\Subscription\Contracts\Subscriptable;
 use Juzaweb\Modules\Subscription\Contracts\Subscription;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionModule;
+use Juzaweb\Modules\Subscription\Entities\Feature;
 use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
 use Juzaweb\Modules\Subscription\Entities\SubscriptionReturnResult;
 use Juzaweb\Modules\Subscription\Enums\SubscriptionHistoryStatus;
@@ -35,12 +38,20 @@ class SubscriptionManager implements Subscription
 
     protected array $modules = [];
 
+    protected array $features = [];
+
     public function __construct(Application $app)
     {
     }
 
+    public function feature(string $key, string $module, callable $callback): void
+    {
+        $this->features[$module][$key] = $callback;
+    }
+
     public function create(
-        User $user,
+        Authenticatable $user,
+        Subscriptable $subscriptable,
         string $module,
         Plan $plan,
         PaymentMethod $method,
@@ -53,21 +64,24 @@ class SubscriptionManager implements Subscription
 
         $handler = $this->module($module);
 
-        $history = SubscriptionHistory::create(
+        $history = new SubscriptionHistory();
+        $history->billable()->associate($subscriptable);
+        $history->fill(
             [
                 'driver' => $method->driver,
                 'module' => $module,
                 'amount' => $plan->price,
                 'method_id' => $method->id,
                 'plan_id' => $plan->id,
-                'user_id' => $user->id,
             ]
         );
+        $history->save();
 
         $subscribe = $subscription->subscribe($plan, [
             'customer_name' => $user->name,
             'customer_email' => $user->email,
             'service_name' => $handler->getServiceName(),
+            'service_description' => $handler->getServiceDescription(),
             'return_url' => route('subscription.return', [$module, $history->id]),
             'cancel_url' => route('subscription.cancel', [$module, $history->id]),
         ]);
@@ -117,7 +131,8 @@ class SubscriptionManager implements Subscription
                     'end_date' => $history->end_date,
                     'method_id' => $history->method_id,
                     'plan_id' => $history->plan_id,
-                    'user_id' => $history->user_id,
+                    'billable_id' => $history->billable_id,
+                    'billable_type' => $history->billable_type,
                     'status' => SubscriptionStatus::ACTIVE,
                 ]
             );
@@ -128,7 +143,7 @@ class SubscriptionManager implements Subscription
         return $complete;
     }
 
-    public function cancel(SubscriptionHistory $history, array $params = [])
+    public function cancel(SubscriptionHistory $history, array $params = []): true
     {
         $history->update(['status' => SubscriptionHistoryStatus::CANCELLED]);
 
@@ -139,15 +154,25 @@ class SubscriptionManager implements Subscription
         return true;
     }
 
-    public function webhook(Request $request, string $module, string $driver)
+    public function webhook(Request $request, string $driver): void
     {
         $method = SubscriptionMethodModel::where('driver', $driver)->first();
         $subscription = $this->driver($driver)
             ->setConfigs($method->config)
             ->sandbox($this->sandboxMode());
-        $handler = $this->module($module);
 
         $result = $subscription->webhook($request);
+
+        if ($result === null) {
+            $this->logger()->info(
+                "Webhook for driver [$driver] return null: ",
+                [
+                    'driver' => $driver,
+                    'payload' => $request->all(),
+                ]
+            );
+            return;
+        }
 
         if ($result->isSuccessful()) {
             $agreement = SubscriptionModel::where('agreement_id', $result->getTransactionId())
@@ -160,35 +185,49 @@ class SubscriptionManager implements Subscription
             if ($agreement) {
                 $agreement->update([
                     'status' => SubscriptionStatus::ACTIVE,
-                    'end_date' => now()->addMonth(),
+                    'end_date' => now()->addMonth()->endOfDay(),
                 ]);
             } else {
-                $history->update([
-                    'status' => SubscriptionHistoryStatus::SUCCESS,
-                    'end_date' => now()->addMonth(),
-                ]);
-
-                SubscriptionModel::create(
+                $newSubscription = SubscriptionModel::create(
                     [
                         'driver' => $history->driver,
                         'module' => $history->module,
                         'amount' => $history->amount,
                         'agreement_id' => $history->agreement_id,
                         'start_date' => now(),
-                        'end_date' => $history->end_date,
+                        'end_date' => now()->addMonth()->endOfDay(),
                         'method_id' => $history->method_id,
                         'plan_id' => $history->plan_id,
-                        'user_id' => $history->user_id,
+                        'billable_id' => $history->billable_id,
+                        'billable_type' => $history->billable_type,
                         'status' => SubscriptionStatus::ACTIVE,
                     ]
                 );
+
+                $history->update([
+                    'status' => SubscriptionHistoryStatus::SUCCESS,
+                    'end_date' => now()->addMonth()->endOfDay(),
+                    'subscription_id' => $newSubscription->id,
+                ]);
             }
 
             $result->setSubscriptionHistory($history);
+            $handler = $this->module($result->getSubscriptionHistory()->module);
             $handler->onSuccess($result, $request->all());
+            return;
         }
 
-        return $result;
+        $this->logger()->info(
+            "Webhook for driver [$driver] none success: ",
+            [
+                'driver' => $driver,
+                'payload' => $request->all(),
+                'result' => [
+                    'transaction_id' => $result->getTransactionId(),
+                    'status' => $result->getStatus(),
+                ]
+            ]
+        );
     }
 
     public function modules(): Collection
@@ -209,6 +248,11 @@ class SubscriptionManager implements Subscription
         return $this->modules[$name]();
     }
 
+    public function hasModule(string $name): bool
+    {
+        return isset($this->modules[$name]);
+    }
+
     public function driver(string $name): SubscriptionMethod
     {
         if (!isset($this->drivers[$name])) {
@@ -223,6 +267,16 @@ class SubscriptionManager implements Subscription
         return collect($this->drivers)->map(function ($resolver) {
             return $resolver();
         });
+    }
+
+    public function features(string $module): Collection
+    {
+        return collect($this->features[$module] ?? [])
+            ->map(
+                function ($resolver, $key) {
+                    return new Feature($key, $resolver());
+                }
+            );
     }
 
     public function registerDriver(string $name, callable $resolver): void
@@ -256,6 +310,11 @@ class SubscriptionManager implements Subscription
             'subscription::method.components.config',
             ['fields' => $fields, 'config' => $config, 'hasSandbox' => $hasSandbox]
         )->render();
+    }
+
+    protected function logger()
+    {
+        return Log::driver('subscription');
     }
 
     protected function sandboxMode(): bool

@@ -2,9 +2,12 @@
 
 namespace Juzaweb\Modules\Subscription\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Juzaweb\Core\Models\Model;
-use Juzaweb\Core\Traits\HasAPI;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Juzaweb\Modules\Core\Models\Model;
+use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Subscription\Enums\SubscriptionStatus;
 
 class Subscription extends Model
@@ -22,7 +25,8 @@ class Subscription extends Model
         'end_date',
         'method_id',
         'plan_id',
-        'user_id',
+        'billable_id',
+        'billable_type',
         'status',
     ];
 
@@ -33,18 +37,35 @@ class Subscription extends Model
         'status' => SubscriptionStatus::class,
     ];
 
-    public function plan()
+    public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class, 'plan_id');
     }
 
-    public function method()
+    public function method(): BelongsTo
     {
         return $this->belongsTo(SubscriptionMethod::class, 'method_id');
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(config('auth.providers.users.model'), 'user_id');
+    }
+
+    public function billable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function scopeWhereIsValid(Builder $builder): Builder
+    {
+        return $builder->where('status', SubscriptionStatus::ACTIVE)
+            ->where('end_date', '>', now());
+    }
+
+    public function isValid(): bool
+    {
+        return $this->status === SubscriptionStatus::ACTIVE
+            && $this->end_date > now();
     }
 }

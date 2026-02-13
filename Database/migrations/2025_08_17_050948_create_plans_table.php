@@ -13,11 +13,18 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table(
+        Schema::create(
             'plans',
             function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->string('name');
+                $table->decimal('price', 15, 2)->index()->default(0);
                 $table->integer('duration')->nullable();
                 $table->string('duration_unit')->nullable();
+                $table->boolean('is_free')->default(false)->index();
+                $table->boolean('active')->index()->default(true);
+                $table->string('module', 50)->index();
+                $table->datetimes();
             }
         );
     }
@@ -29,12 +36,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table(
-            'plans',
-            function (Blueprint $table) {
-                $table->dropColumn('duration');
-                $table->dropColumn('duration_unit');
-            }
-        );
+        Schema::dropIfExists('plan_translations');
+        Schema::dropIfExists('plans');
     }
 };

@@ -22,4 +22,8 @@ interface SubscriptionModule
     public function getName(): string;
 
     public function getServiceName(): string;
+
+    public function getServiceDescription(): string;
+
+    public function getReturnUrl(): string;
 }

@@ -2,8 +2,8 @@
 
 namespace Juzaweb\Modules\Subscription\Models;
 
-use Juzaweb\Core\Models\Model;
-use Juzaweb\Core\Traits\HasAPI;
+use Juzaweb\Modules\Core\Models\Model;
+use Juzaweb\Modules\Core\Traits\HasAPI;
 
 class PlanFeature extends Model
 {
@@ -16,4 +16,9 @@ class PlanFeature extends Model
         'name',
         'value',
     ];
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class, 'plan_id');
+    }
 }

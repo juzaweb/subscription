@@ -3,8 +3,9 @@
 namespace Juzaweb\Modules\Subscription\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Juzaweb\Core\Facades\Breadcrumb;
-use Juzaweb\Core\Http\Controllers\AdminController;
+use Illuminate\Http\Request;
+use Juzaweb\Modules\Core\Facades\Breadcrumb;
+use Juzaweb\Modules\Core\Http\Controllers\AdminController;
 use Juzaweb\Modules\Subscription\Facades\Subscription;
 use Juzaweb\Modules\Subscription\Http\DataTables\SubscriptionMethodsDataTable;
 use Juzaweb\Modules\Subscription\Http\Requests\SubscriptionMethodRequest;
@@ -17,12 +18,11 @@ class SubscriptionMethodController extends AdminController
     {
         Breadcrumb::add(__('Subscription Methods'));
 
-        $testPlans = Plan::withTranslation()
-            ->where(['module' => 'test'])
+        $testPlans = Plan::where(['module' => 'test'])
             ->get()
-            ->mapWithKeys(fn ($plan) => [$plan->id => $plan->name . ' ($'.$plan->price . ')']);
+            ->mapWithKeys(fn($plan) => [$plan->id => $plan->name . ' ($' . $plan->price . ')']);
         $paymentMethods = SubscriptionMethod::withTranslation()->get()
-            ->mapWithKeys(fn ($method) => [$method->id => $method->name]);
+            ->mapWithKeys(fn($method) => [$method->id => $method->name]);
 
         return $dataTable->render(
             'subscription::method.index',
@@ -37,7 +37,7 @@ class SubscriptionMethodController extends AdminController
         Breadcrumb::add(__('Create Subscription Method'));
 
         $locale = $this->getFormLanguage();
-        $drivers = Subscription::drivers()->map(fn ($driver) => $driver->getName());
+        $drivers = Subscription::drivers()->map(fn($driver) => $driver->getName());
 
         return view(
             'subscription::method.form',
@@ -58,13 +58,13 @@ class SubscriptionMethodController extends AdminController
 
         $locale = $this->getFormLanguage();
         $model = SubscriptionMethod::withTranslation($locale)->findOrFail($id);
-        $model->setDefaultLocale($locale);
-        $drivers = Subscription::drivers()->map(fn ($driver) => $driver->getName());
+        $model?->setDefaultLocale($locale);
+        $drivers = Subscription::drivers()->map(fn($driver) => $driver->getName());
 
         return view(
             'subscription::method.form',
             [
-                'action' => action([static::class, 'update'], ['id' => $id]),
+                'action' => action([static::class, 'update'], [$id]),
                 'locale' => $locale,
                 'drivers' => $drivers,
                 'model' => $model,
@@ -74,37 +74,43 @@ class SubscriptionMethodController extends AdminController
 
     public function store(SubscriptionMethodRequest $request)
     {
-        SubscriptionMethod::create($request->validated());
+        $locale = $this->getFormLanguage();
+        $model = new SubscriptionMethod($request->validated());
+        $model->setDefaultLocale($locale);
+        $model->save();
 
         return $this->success([
-            'redirect' => admin_url('subscription-methods'),
+            'redirect' => action([static::class, 'index']),
         ]);
     }
 
     public function update(SubscriptionMethodRequest $request, string $id)
     {
+        $locale = $this->getFormLanguage();
         $model = SubscriptionMethod::findOrFail($id);
-
+        $model->setDefaultLocale($locale);
         $model->update($request->validated());
 
         return $this->success([
-            'redirect' => admin_url('subscription-methods'),
+            'redirect' => action([static::class, 'index']),
         ]);
-    }
-
-    public function destroy(string $id)
-    {
-        $model = SubscriptionMethod::findOrFail($id);
-
-        $model->delete();
-
-        return $this->success(['message' => __('Deleted successfully')]);
     }
 
     public function getData(string $driver): JsonResponse
     {
         return response()->json([
             'config' => Subscription::renderConfig($driver),
+        ]);
+    }
+
+    public function updateSandbox(Request $request): JsonResponse
+    {
+        $sandbox = (int) $request->post('sandbox');
+
+        setting()->set('subscription_sandbox', $sandbox);
+
+        return $this->success([
+            'message' => __('Update sandbox setting successfully.'),
         ]);
     }
 }

@@ -14,21 +14,19 @@ return new class extends Migration
     public function up()
     {
         Schema::create(
-            'plan_subscription_methods',
+            'plan_features',
             function (Blueprint $table) {
                 $table->id();
-                $table->string('payment_plan_id', 150)->unique()->comment('Plan id of payment service');
-                $table->uuid('plan_id');
-                $table->string('method', 50)->index()
-                    ->comment('Subscription method, e.g. paypal, stripe, etc.');
-                $table->json('data')->nullable();
+                $table->uuid('plan_id')->index();
+                $table->string('name', 50)->index();
+                $table->string('value', 150)->nullable();
                 $table->foreign('plan_id')
                     ->references('id')
                     ->on('plans')
                     ->onDelete('cascade');
+                $table->datetimes();
 
-                $table->unique(['method', 'plan_id']);
-                $table->timestamps();
+                $table->unique(['plan_id', 'name']);
             }
         );
     }
@@ -40,6 +38,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('plan_subscription_methods');
+        Schema::dropIfExists('plan_features');
     }
 };

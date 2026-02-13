@@ -2,8 +2,9 @@
 
 namespace Juzaweb\Modules\Subscription\Models;
 
-use Juzaweb\Core\Models\Model;
-use Juzaweb\Core\Traits\HasAPI;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Juzaweb\Modules\Core\Models\Model;
+use Juzaweb\Modules\Core\Traits\HasAPI;
 
 class PlanSubscriptionMethod extends Model
 {
@@ -22,7 +23,7 @@ class PlanSubscriptionMethod extends Model
         'data' => 'array',
     ];
 
-    public function plan(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class, 'plan_id');
     }

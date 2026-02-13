@@ -1,4 +1,5 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
@@ -10,32 +11,20 @@
 
 namespace Juzaweb\Modules\Subscription\Providers;
 
-use Juzaweb\Core\Facades\Menu;
-use Juzaweb\Core\Providers\ServiceProvider;
-use Juzaweb\Modules\Subscription\Contracts\Subscription;
-use Juzaweb\Modules\Subscription\Services\SubscriptionManager;
-use Juzaweb\Modules\Subscription\Services\TestSubscription;
+use Illuminate\Support\Facades\File;
+use Juzaweb\Modules\Core\Facades\Menu;
+use Juzaweb\Modules\Core\Providers\ServiceProvider;
 
 class SubscriptionServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->app[Subscription::class]->registerDriver(
-            'PayPal',
-            function () {
-                return new \Juzaweb\Modules\Subscription\Methods\PayPal();
-            }
-        );
-
-        $this->app[Subscription::class]->registerModule(
-            'test',
-            function () {
-                return new TestSubscription();
-            }
-        );
-
         $this->booted(
             function () {
+                if (File::missing(storage_path('app/installed'))) {
+                    return;
+                }
+
                 $this->registerMenu();
             }
         );
@@ -45,21 +34,18 @@ class SubscriptionServiceProvider extends ServiceProvider
     {
         $this->registerTranslations();
         $this->registerViews();
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/migrations');
         $this->app->register(RouteServiceProvider::class);
-
-        $this->app->singleton(
-            Subscription::class,
-            function ($app) {
-                return new SubscriptionManager($app);
-            }
-        );
     }
 
     protected function registerMenu(): void
     {
-        Menu::make('subscription-methods', __('Subscription Methods'))
-            ->parent('settings');
+        Menu::make('subscription-methods', function () {
+            return [
+                'title' => __('Subscription Methods'),
+                'parent' => 'settings',
+            ];
+        });
     }
 
     /**

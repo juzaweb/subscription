@@ -3,8 +3,9 @@
 namespace Juzaweb\Modules\Subscription\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Juzaweb\Core\Models\Model;
-use Juzaweb\Core\Traits\HasAPI;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Juzaweb\Modules\Core\Models\Model;
+use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Subscription\Enums\SubscriptionHistoryStatus;
 
 class SubscriptionHistory extends Model
@@ -21,10 +22,11 @@ class SubscriptionHistory extends Model
         'end_date',
         'method_id',
         'plan_id',
-        'user_id',
         'subscription_id',
         'status',
         'data',
+        'billable_id',
+        'billable_type',
     ];
 
     protected $casts = [
@@ -52,5 +54,10 @@ class SubscriptionHistory extends Model
     public function subscription()
     {
         return $this->belongsTo(Subscription::class, 'subscription_id');
+    }
+
+    public function billable(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

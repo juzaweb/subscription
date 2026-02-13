@@ -25,11 +25,12 @@ return new class extends Migration
                 $table->dateTime('end_date')->nullable()->index();
                 $table->uuid('method_id')->nullable();
                 $table->uuid('plan_id')->nullable();
-                $table->uuid('user_id')->index();
+                $table->uuid('billable_id')->index();
+                $table->string('billable_type', 190)->index();
                 $table->uuid('subscription_id')->nullable()->index();
                 $table->string('status', 50)->default('processing');
                 $table->json('data')->nullable();
-                $table->timestamps();
+                $table->datetimes();
 
                 $table->foreign('subscription_id')
                     ->references('id')

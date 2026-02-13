@@ -20,7 +20,7 @@ class TestSubscription implements SubscriptionModule
 
     protected string $serviceName = 'Test Service';
 
-    public function onSuccess(SubscriptionResult $result, array $params = [])
+    public function onSuccess(SubscriptionResult $result, array $params = []): void
     {
         info('Payment success', [
             'subscription_history_id' => $result->getSubscriptionHistory()->id,
@@ -43,7 +43,12 @@ class TestSubscription implements SubscriptionModule
         return $this->serviceName;
     }
 
-    public function getReturnUrl()
+    public function getServiceDescription(): string
+    {
+        return 'Test Service Subscription';
+    }
+
+    public function getReturnUrl(): string
     {
         return admin_url('subscription-methods');
     }

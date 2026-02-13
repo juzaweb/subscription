@@ -19,6 +19,7 @@ use Juzaweb\Modules\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\PlanSubscriptionMethod;
 use Juzaweb\Modules\Subscription\Models\SubscriptionHistory;
+use Psr\Http\Message\StreamInterface;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class PayPal extends SubscriptionDriver implements SubscriptionMethod
@@ -144,19 +145,66 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
             ->setSuccessful($subscription['status'] === 'ACTIVE');
     }
 
-    public function webhook(Request $request): SubscriptionReturnResult
+    public function webhook(Request $request): ?WebhookResult
     {
         $provider = $this->getProvider();
+        $webhookId = $this->getConfigInMode('webhook_id');
 
-        $response = $provider->verifyWebHook($request->all());
+        $json = [
+            'auth_algo' => $request->header('PAYPAL-AUTH-ALGO'),
+            'cert_url' => $request->header('PAYPAL-CERT-URL'),
+            'transmission_id' => $request->header('PAYPAL-TRANSMISSION-ID'),
+            'transmission_sig' => $request->header('PAYPAL-TRANSMISSION-SIG'),
+            'transmission_time' => $request->header('PAYPAL-TRANSMISSION-TIME'),
+            'webhook_id' => $webhookId,
+            'webhook_event' => json_decode($request->getContent(), true),
+        ];
 
-        info('PayPal Webhook:', $response);
+        $response = $provider->verifyWebHook($json);
 
-        return WebhookResult::make($request->input('resource.id'), $request->all())
-            ->setSuccessful($response['verification_status'] === 'SUCCESS');
+        if (!isset($response['verification_status']) || $response['verification_status'] !== 'SUCCESS') {
+            $this->getLogger()->error(
+                'Invalid webhook signature',
+                [
+                    'driver' => $this->name,
+                    'request' => $json,
+                    'response' => $response,
+                ]
+            );
+            throw new SubscriptionException('Invalid webhook signature');
+        }
+
+        $eventType = $request->input('event_type');
+
+        switch ($eventType) {
+            case 'PAYMENT.SALE.COMPLETED':
+                $state = strtolower($request->input('resource.state'));
+
+                $status = match ($state) {
+                    'completed' => 'completed',
+                    'suspended', 'expired' => 'suspended',
+                    'cancelled' => 'cancelled',
+                    default => 'pending',
+                };
+
+                $transactionId = $request->input('resource.billing_agreement_id')
+                    ?? $request->input('resource.id');
+
+                return WebhookResult::make($transactionId, $status, $request->all())
+                    ->setSuccessful($state === 'completed');
+                case 'BILLING.SUBSCRIPTION.CANCELLED':
+                case 'BILLING.SUBSCRIPTION.SUSPENDED':
+                    $status = $eventType === 'BILLING.SUBSCRIPTION.CANCELLED' ? 'cancelled' : 'suspended';
+                    $transactionId = $request->input('resource.id');
+
+                    return WebhookResult::make($transactionId, $status, $request->all())
+                        ->setSuccessful(false);
+        }
+
+        return null;
     }
 
-    public function createProduct(array $data): array|\Psr\Http\Message\StreamInterface|string
+    public function createProduct(array $data): array|StreamInterface|string
     {
         return $this->getProvider()->createProduct($data);
     }
@@ -166,7 +214,7 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
         return [
             'client_id' => __('Client ID'),
             'secret' => __('Secret'),
-            'app_id' => __('App ID'),
+            'webhook_id' => __('Webhook ID'),
         ];
     }
 
