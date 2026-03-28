@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -12,17 +14,14 @@ namespace Juzaweb\Modules\Subscription\Entities;
 
 class SubscribeResult extends SubscriptionResult
 {
-    /**
-     * @var string|null
-     */
     protected ?string $redirectUrl = null;
 
-    public static function make(?string $transactionId = null, string $redirectUrl = null, array $data = []): static
+    public static function make(?string $transactionId = null, ?string $redirectUrl = null, array $data = []): static
     {
         return new self($transactionId, $redirectUrl, $data);
     }
 
-    public function __construct(?string $transactionId = null, string $redirectUrl = null, array $data = [])
+    public function __construct(?string $transactionId = null, ?string $redirectUrl = null, array $data = [])
     {
         $this->transactionId = $transactionId;
         $this->redirectUrl = $redirectUrl;

@@ -1,9 +1,10 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
  */
 
@@ -21,7 +22,7 @@ class PlanRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'is_free' => ['required', 'boolean'],
             'price' => [
-                Rule::requiredIf(!$this->input('is_free') && $this->isMethod('post')),
+                Rule::requiredIf(! $this->input('is_free') && $this->isMethod('post')),
                 'numeric',
                 'min:0',
             ],

@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -40,9 +42,7 @@ class SubscriptionManager implements Subscription
 
     protected array $features = [];
 
-    public function __construct(Application $app)
-    {
-    }
+    public function __construct(Application $app) {}
 
     public function feature(string $key, string $module, callable $callback): void
     {
@@ -64,7 +64,7 @@ class SubscriptionManager implements Subscription
 
         $handler = $this->module($module);
 
-        $history = new SubscriptionHistory();
+        $history = new SubscriptionHistory;
         $history->billable()->associate($subscriptable);
         $history->fill(
             [
@@ -171,6 +171,7 @@ class SubscriptionManager implements Subscription
                     'payload' => $request->all(),
                 ]
             );
+
             return;
         }
 
@@ -214,6 +215,7 @@ class SubscriptionManager implements Subscription
             $result->setSubscriptionHistory($history);
             $handler = $this->module($result->getSubscriptionHistory()->module);
             $handler->onSuccess($result, $request->all());
+
             return;
         }
 
@@ -225,7 +227,7 @@ class SubscriptionManager implements Subscription
                 'result' => [
                     'transaction_id' => $result->getTransactionId(),
                     'status' => $result->getStatus(),
-                ]
+                ],
             ]
         );
     }
@@ -241,7 +243,7 @@ class SubscriptionManager implements Subscription
 
     public function module(string $name): SubscriptionModule
     {
-        if (!isset($this->modules[$name])) {
+        if (! isset($this->modules[$name])) {
             throw new InvalidArgumentException("Payment module [$name] is not registered.");
         }
 
@@ -255,7 +257,7 @@ class SubscriptionManager implements Subscription
 
     public function driver(string $name): SubscriptionMethod
     {
-        if (!isset($this->drivers[$name])) {
+        if (! isset($this->drivers[$name])) {
             throw new InvalidArgumentException("Payment driver [$name] is not registered.");
         }
 

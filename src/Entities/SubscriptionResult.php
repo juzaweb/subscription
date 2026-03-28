@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -14,19 +16,10 @@ use Juzaweb\Modules\Subscription\Models\SubscriptionHistory;
 
 abstract class SubscriptionResult
 {
-    /**
-     * @var null|string
-     */
     protected ?string $transactionId = null;
 
-    /**
-     * @var array
-     */
     protected array $data = [];
 
-    /**
-     * @var bool
-     */
     protected bool $isSuccessful = false;
 
     protected ?SubscriptionHistory $subscriptionHistory = null;

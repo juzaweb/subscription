@@ -34,7 +34,7 @@ class SubscriptionController extends ThemeController
 
         try {
             $payment = DB::transaction(
-                fn() => Subscription::create($user, $billable, $module, $plan, $method, $request->all())
+                fn () => Subscription::create($user, $billable, $module, $plan, $method, $request->all())
             );
         } catch (SubscriptionException $e) {
             return $this->error(['message' => $e->getMessage()]);
@@ -69,7 +69,7 @@ class SubscriptionController extends ThemeController
 
         try {
             $payment = DB::transaction(
-                function () use ($request, $module, $subscriptionHistoryId) {
+                function () use ($request, $subscriptionHistoryId) {
                     $history = SubscriptionHistory::lockForUpdate()->find($subscriptionHistoryId);
 
                     throw_if($history === null, SubscriptionException::class, __('Subscription not found'));
@@ -104,7 +104,7 @@ class SubscriptionController extends ThemeController
 
         try {
             $payment = DB::transaction(
-                function () use ($request, $module, $subscriptionHistoryId) {
+                function () use ($request, $subscriptionHistoryId) {
                     $history = SubscriptionHistory::lockForUpdate()->find($subscriptionHistoryId);
 
                     throw_if($history === null, SubscriptionException::class, __('Subscription not found'));

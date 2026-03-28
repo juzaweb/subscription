@@ -1,9 +1,10 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    larabizcom/larabiz
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
  */
 
@@ -28,15 +29,15 @@ class SubscriptionsDatatable extends DataTable
     {
         return [
             Column::make('agreement_id')->title(__('Bill ID')),
-			Column::make('start_date'),
+            Column::make('start_date'),
             Column::make('end_date'),
             Column::make('method_id'),
             Column::make('plan_id'),
             Column::make('amount'),
             Column::computed('billable'),
-			Column::make('status'),
-			Column::createdAt(),
-		];
+            Column::make('status'),
+            Column::createdAt(),
+        ];
     }
 
     public function renderColumns(EloquentDataTable $builder): EloquentDataTable

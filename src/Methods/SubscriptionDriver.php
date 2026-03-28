@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -16,15 +18,11 @@ abstract class SubscriptionDriver
 {
     /**
      * The name of the subscription method.
-     *
-     * @var string
      */
     protected string $name;
 
     /**
      * The description of the subscription method.
-     *
-     * @var string
      */
     protected string $description;
 
@@ -37,7 +35,6 @@ abstract class SubscriptionDriver
     /**
      * Get the configuration options for the subscription method.
      *
-     * @param  string  $key
      * @return array
      */
     public function config(string $key): string|int|null
@@ -48,15 +45,13 @@ abstract class SubscriptionDriver
     /**
      * Get the configuration value for a specific key.
      *
-     * @param string $key
-     * @return array
+     * @param  string  $key
      */
     abstract public function getConfigs(): array;
 
     /**
      * Set the configuration options for the subscription method.
      *
-     * @param  array  $config
      * @return $this
      */
     public function setConfigs(array $config): static
@@ -68,8 +63,6 @@ abstract class SubscriptionDriver
 
     /**
      * Get the name of the subscription method.
-     *
-     * @return string
      */
     public function getName(): string
     {
@@ -78,8 +71,6 @@ abstract class SubscriptionDriver
 
     /**
      * Get the description of the subscription method.
-     *
-     * @return string
      */
     public function getDescription(): string
     {
@@ -88,8 +79,6 @@ abstract class SubscriptionDriver
 
     /**
      * Determine if the subscription method has a sandbox mode.
-     *
-     * @return bool
      */
     public function hasSandbox(): bool
     {

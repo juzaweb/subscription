@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -19,7 +21,7 @@ class ModuleValid
     {
         $module = $request->route('module');
 
-        abort_if(!$module || !Subscription::hasModule($module), 404);
+        abort_if(! $module || ! Subscription::hasModule($module), 404);
 
         return $next($request);
     }
