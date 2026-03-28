@@ -22,25 +22,13 @@ The module follows a typical Laravel package/module structure:
 
 ## Getting Started / Development Server
 
-### 1. Environment Setup
-A `setup.sh` script is provided to help set up the environment, install PHP 8.2 (or another specified version), extensions, Composer, and optionally Node.js.
-
-To run the setup script:
-```bash
-# Setup with default PHP 8.2
-./setup.sh
-
-# Setup with a specific PHP version and Node.js
-./setup.sh -p 8.3 -npm
-```
-
-### 2. Dependency Installation
+### 1. Dependency Installation
 Install PHP dependencies via Composer:
 ```bash
 composer install
 ```
 
-### 3. Development Server
+### 2. Development Server
 Since this is a module, it is designed to run within a Juzaweb CMS host application. To test it in a full environment:
 1. Install a Juzaweb CMS application.
 2. Link or require this module in the host application's `composer.json`.
@@ -49,7 +37,7 @@ Since this is a module, it is designed to run within a Juzaweb CMS host applicat
    php artisan serve
    ```
 
-### 4. Running Tests
+### 3. Running Tests
 You can run the module's test suite using PHPUnit:
 ```bash
 vendor/bin/phpunit
