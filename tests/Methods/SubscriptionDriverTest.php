@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 class MockSubscriptionDriver extends SubscriptionDriver
 {
     protected string $name = 'MockDriver';
+
     protected string $description = 'Mock Driver Description';
 
     public function getConfigs(): array
@@ -26,9 +27,9 @@ class MockSubscriptionDriver extends SubscriptionDriver
 
 class SubscriptionDriverTest extends TestCase
 {
-    public function testConfig()
+    public function test_config()
     {
-        $driver = new MockSubscriptionDriver();
+        $driver = new MockSubscriptionDriver;
         $driver->setConfigs(['key1' => 'value1', 'key2' => 2]);
 
         $this->assertEquals('value1', $driver->config('key1'));
@@ -36,9 +37,9 @@ class SubscriptionDriverTest extends TestCase
         $this->assertNull($driver->config('key3'));
     }
 
-    public function testSetConfigs()
+    public function test_set_configs()
     {
-        $driver = new MockSubscriptionDriver();
+        $driver = new MockSubscriptionDriver;
         $configs = ['foo' => 'bar'];
         $result = $driver->setConfigs($configs);
 
@@ -46,33 +47,33 @@ class SubscriptionDriverTest extends TestCase
         $this->assertEquals('bar', $driver->config('foo'));
     }
 
-    public function testGetName()
+    public function test_get_name()
     {
-        $driver = new MockSubscriptionDriver();
+        $driver = new MockSubscriptionDriver;
         $this->assertEquals('MockDriver', $driver->getName());
     }
 
-    public function testGetDescription()
+    public function test_get_description()
     {
-        $driver = new MockSubscriptionDriver();
+        $driver = new MockSubscriptionDriver;
         $this->assertEquals('Mock Driver Description', $driver->getDescription());
     }
 
-    public function testHasSandbox()
+    public function test_has_sandbox()
     {
-        $driver = new MockSubscriptionDriver();
+        $driver = new MockSubscriptionDriver;
         $this->assertTrue($driver->hasSandbox());
     }
 
-    public function testIsReturnInEmbed()
+    public function test_is_return_in_embed()
     {
-        $driver = new MockSubscriptionDriver();
+        $driver = new MockSubscriptionDriver;
         $this->assertFalse($driver->isReturnInEmbed());
     }
 
-    public function testGetConfigInMode()
+    public function test_get_config_in_mode()
     {
-        $driver = new MockSubscriptionDriver();
+        $driver = new MockSubscriptionDriver;
 
         // Test live mode (default)
         $driver->setConfigs([
