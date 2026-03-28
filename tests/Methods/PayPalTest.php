@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Juzaweb\Modules\Subscription\Exceptions\SubscriptionException;
 use Juzaweb\Modules\Subscription\Methods\PayPal;
 use Juzaweb\Modules\Subscription\Models\Plan;
+use Mockery;
 use PHPUnit\Framework\TestCase;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
-use Mockery;
 
 class MockPayPal extends PayPal
 {
@@ -50,7 +50,7 @@ class PayPalTest extends TestCase
         $provider->shouldReceive('createProduct')->once()->andReturn(['id' => 'prod_123']);
         $provider->shouldReceive('createPlan')->once()->andReturn(['error' => ['message' => 'Custom PayPal plan error']]);
 
-        $driver = new MockPayPal();
+        $driver = new MockPayPal;
         $driver->setMockProvider($provider);
 
         $this->expectException(SubscriptionException::class);
@@ -76,7 +76,7 @@ class PayPalTest extends TestCase
         $provider->shouldReceive('createProduct')->once()->andReturn(['error' => ['message' => 'Custom PayPal product error']]);
         $provider->shouldNotReceive('createPlan');
 
-        $driver = new MockPayPal();
+        $driver = new MockPayPal;
         $driver->setMockProvider($provider);
 
         $this->expectException(SubscriptionException::class);
