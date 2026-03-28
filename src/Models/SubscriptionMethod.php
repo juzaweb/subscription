@@ -7,10 +7,11 @@ use Juzaweb\Modules\Core\Models\Model;
 use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Core\Traits\Translatable;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod as SubscriptionMethodContract;
+use Juzaweb\Modules\Subscription\Facades\Subscription;
 
 class SubscriptionMethod extends Model
 {
-    use HasAPI, Translatable, HasUuids;
+    use HasAPI, HasUuids, Translatable;
 
     protected $table = 'subscription_methods';
 
@@ -37,7 +38,7 @@ class SubscriptionMethod extends Model
 
     public function paymentDriver(): SubscriptionMethodContract
     {
-        return \Juzaweb\Modules\Subscription\Facades\Subscription::driver($this->driver)
+        return Subscription::driver($this->driver)
             ->setConfigs($this->config);
     }
 

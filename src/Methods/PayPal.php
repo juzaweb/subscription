@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -55,7 +57,7 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
                     [
                         'frequency' => [
                             'interval_unit' => 'MONTH',
-                            'interval_count' => 1
+                            'interval_count' => 1,
                         ],
                         'tenure_type' => 'REGULAR',
                         'sequence' => 1,
@@ -63,19 +65,19 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
                         'pricing_scheme' => [
                             'fixed_price' => [
                                 'value' => $plan->price,
-                                'currency_code' => 'USD'
-                            ]
-                        ]
-                    ]
+                                'currency_code' => 'USD',
+                            ],
+                        ],
+                    ],
                 ],
                 'payment_preferences' => [
                     'auto_bill_outstanding' => true,
                     'setup_fee' => [
                         'value' => '0',
-                        'currency_code' => 'USD'
+                        'currency_code' => 'USD',
                     ],
                     'setup_fee_failure_action' => 'CONTINUE',
-                    'payment_failure_threshold' => 3
+                    'payment_failure_threshold' => 3,
                 ],
                 // 'taxes' => [
                 //     'percentage' => '10',
@@ -162,7 +164,7 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
 
         $response = $provider->verifyWebHook($json);
 
-        if (!isset($response['verification_status']) || $response['verification_status'] !== 'SUCCESS') {
+        if (! isset($response['verification_status']) || $response['verification_status'] !== 'SUCCESS') {
             $this->getLogger()->error(
                 'Invalid webhook signature',
                 [
@@ -192,13 +194,13 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
 
                 return WebhookResult::make($transactionId, $status, $request->all())
                     ->setSuccessful($state === 'completed');
-                case 'BILLING.SUBSCRIPTION.CANCELLED':
-                case 'BILLING.SUBSCRIPTION.SUSPENDED':
-                    $status = $eventType === 'BILLING.SUBSCRIPTION.CANCELLED' ? 'cancelled' : 'suspended';
-                    $transactionId = $request->input('resource.id');
+            case 'BILLING.SUBSCRIPTION.CANCELLED':
+            case 'BILLING.SUBSCRIPTION.SUSPENDED':
+                $status = $eventType === 'BILLING.SUBSCRIPTION.CANCELLED' ? 'cancelled' : 'suspended';
+                $transactionId = $request->input('resource.id');
 
-                    return WebhookResult::make($transactionId, $status, $request->all())
-                        ->setSuccessful(false);
+                return WebhookResult::make($transactionId, $status, $request->all())
+                    ->setSuccessful(false);
         }
 
         return null;

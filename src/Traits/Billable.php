@@ -3,9 +3,10 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -29,7 +30,7 @@ trait Billable
     {
         $subscription = $this->subscription($module);
 
-        if ($subscription === null || !$subscription->isValid()) {
+        if ($subscription === null || ! $subscription->isValid()) {
             return $this->getDefaultPlan($module);
         }
 
@@ -81,9 +82,9 @@ trait Billable
     /**
      * Check if you can use feature within limit and track usage
      *
-     * @param string $module Module name
-     * @param string $featureKey Feature key name
-     * @param int $increment Number to increment usage by
+     * @param  string  $module  Module name
+     * @param  string  $featureKey  Feature key name
+     * @param  int  $increment  Number to increment usage by
      */
     public function checkFeatureLimit(string $module, string $featureKey, int $increment = 1): bool
     {

@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -19,6 +21,7 @@ use Juzaweb\Modules\Subscription\Contracts\SubscriptionModule;
 use Juzaweb\Modules\Subscription\Entities\Feature;
 use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
 use Juzaweb\Modules\Subscription\Models\Plan;
+use Juzaweb\Modules\Subscription\Services\SubscriptionManager;
 
 /**
  * @method static Collection<SubscriptionMethod> drivers()
@@ -33,14 +36,13 @@ use Juzaweb\Modules\Subscription\Models\Plan;
  * @method static boolean hasModule(string $module)
  * @method static void feature(string $key, string $module, callable $callback)
  * @method static Collection<string, Feature> features(string $module)
- * @see \Juzaweb\Modules\Subscription\Services\SubscriptionManager
+ *
+ * @see SubscriptionManager
  */
 class Subscription extends Facade
 {
     /**
      * Get the registered name of the component.
-     *
-     * @return string
      */
     protected static function getFacadeAccessor(): string
     {

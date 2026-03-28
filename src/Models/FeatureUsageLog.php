@@ -3,8 +3,6 @@
 namespace Juzaweb\Modules\Subscription\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Juzaweb\Modules\Admin\Models\Website;
 use Juzaweb\Modules\Core\Models\Model;
 
 class FeatureUsageLog extends Model

@@ -20,9 +20,9 @@ class SubscriptionMethodController extends AdminController
 
         $testPlans = Plan::where(['module' => 'test'])
             ->get()
-            ->mapWithKeys(fn($plan) => [$plan->id => $plan->name . ' ($' . $plan->price . ')']);
+            ->mapWithKeys(fn ($plan) => [$plan->id => $plan->name.' ($'.$plan->price.')']);
         $paymentMethods = SubscriptionMethod::withTranslation()->get()
-            ->mapWithKeys(fn($method) => [$method->id => $method->name]);
+            ->mapWithKeys(fn ($method) => [$method->id => $method->name]);
 
         return $dataTable->render(
             'subscription::method.index',
@@ -37,12 +37,12 @@ class SubscriptionMethodController extends AdminController
         Breadcrumb::add(__('Create Subscription Method'));
 
         $locale = $this->getFormLanguage();
-        $drivers = Subscription::drivers()->map(fn($driver) => $driver->getName());
+        $drivers = Subscription::drivers()->map(fn ($driver) => $driver->getName());
 
         return view(
             'subscription::method.form',
             [
-                'model' => new SubscriptionMethod(),
+                'model' => new SubscriptionMethod,
                 'action' => action([static::class, 'store']),
                 'locale' => $locale,
                 'drivers' => $drivers,
@@ -59,7 +59,7 @@ class SubscriptionMethodController extends AdminController
         $locale = $this->getFormLanguage();
         $model = SubscriptionMethod::withTranslation($locale)->findOrFail($id);
         $model?->setDefaultLocale($locale);
-        $drivers = Subscription::drivers()->map(fn($driver) => $driver->getName());
+        $drivers = Subscription::drivers()->map(fn ($driver) => $driver->getName());
 
         return view(
             'subscription::method.form',

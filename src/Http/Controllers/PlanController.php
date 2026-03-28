@@ -3,9 +3,10 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -47,7 +48,7 @@ class PlanController extends AdminController
         return view(
             'subscription::plan.form',
             [
-                'model' => new Plan(),
+                'model' => new Plan,
                 'action' => action([static::class, 'store'], [$module]),
                 'locale' => $locale,
                 'backUrl' => $backUrl,
@@ -94,13 +95,13 @@ class PlanController extends AdminController
                     $data['price'] = 0;
                 }
 
-                $model = new Plan();
+                $model = new Plan;
                 $model->fill($data);
                 $model->save();
 
                 $featureIds = [];
                 foreach ($features as $name => $feature) {
-                    if (!isset($inputFeatures[$name])) {
+                    if (! isset($inputFeatures[$name])) {
                         continue;
                     }
 
@@ -137,7 +138,7 @@ class PlanController extends AdminController
         $inputFeatures = $request->input('features', []);
 
         DB::transaction(
-            function () use ($request, $id, $model, $module, $features, $inputFeatures) {
+            function () use ($request, $model, $features, $inputFeatures) {
                 $data = $request->validated();
 
                 unset($data['price'], $data['is_free']);
@@ -146,7 +147,7 @@ class PlanController extends AdminController
 
                 $featureIds = [];
                 foreach ($features as $name => $feature) {
-                    if (!isset($inputFeatures[$name])) {
+                    if (! isset($inputFeatures[$name])) {
                         continue;
                     }
 

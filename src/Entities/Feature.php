@@ -1,10 +1,12 @@
 <?php
+
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -15,7 +17,9 @@ use Juzaweb\Modules\Subscription\Enums\FeatureType;
 class Feature
 {
     public string $label;
+
     public FeatureType $type;
+
     public ?string $description = null;
 
     public $formatter = null;
@@ -34,7 +38,7 @@ class Feature
             return call_user_func($this->formatter, $value);
         }
 
-        if (!$value) {
+        if (! $value) {
             return $this->label;
         }
 

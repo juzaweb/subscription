@@ -3,9 +3,10 @@
 /**
  * JUZAWEB CMS - Laravel CMS for Your Project
  *
- * @package    juzaweb/cms
  * @author     The Anh Dang
+ *
  * @link       https://cms.juzaweb.com
+ *
  * @license    GNU V2
  */
 
@@ -34,7 +35,7 @@ class SubscriptionServiceProvider extends ServiceProvider
     {
         $this->registerTranslations();
         $this->registerViews();
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../Database/migrations');
         $this->app->register(RouteServiceProvider::class);
     }
 
@@ -50,25 +51,21 @@ class SubscriptionServiceProvider extends ServiceProvider
 
     /**
      * Register translations.
-     *
-     * @return void
      */
     protected function registerTranslations(): void
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'subscription');
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'subscription');
+        $this->loadJsonTranslationsFrom(__DIR__.'/../resources/lang');
     }
 
     /**
      * Register views.
-     *
-     * @return void
      */
     protected function registerViews(): void
     {
         $viewPath = resource_path('views/modules/subscription');
 
-        $sourcePath = __DIR__ . '/../resources/views';
+        $sourcePath = __DIR__.'/../resources/views';
 
         $this->publishes([$sourcePath => $viewPath], ['views', 'subscription-module-views']);
 
