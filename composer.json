@@ -1,9 +1,15 @@
 {
     "name": "juzaweb/subscription",
     "description": "Subscription payment support",
-    "require": {},
+    "type": "juzaweb-module",
+    "homepage": "https://juzaweb.com/cms",
+    "require": {
+        "php": "^8.2"
+    },
     "require-dev": {
-        "phpunit/phpunit": "^10.0 || ^11.0"
+        "orchestra/testbench": "^8.0|^9.0",
+        "phpunit/phpunit": "^10.0",
+        "juzaweb/core": "^5.0"
     },
     "autoload": {
         "psr-4": {
