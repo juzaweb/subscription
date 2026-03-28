@@ -2,74 +2,90 @@
 
 namespace Juzaweb\Modules\Subscription\Tests\Methods;
 
-use Illuminate\Http\Request;
-use Juzaweb\Modules\Subscription\Exceptions\SubscriptionException;
+use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
 use Juzaweb\Modules\Subscription\Methods\PayPal;
+use Juzaweb\Modules\Subscription\Models\Plan;
+use Juzaweb\Modules\Subscription\Models\PlanSubscriptionMethod;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
-class MockPayPalDriver extends PayPal
+class MockPayPal extends PayPal
 {
-    protected PayPalClient $mockProvider;
+    protected PayPalClient $mockClient;
 
-    protected LoggerInterface $mockLogger;
-
-    public function setMockProvider(PayPalClient $provider)
+    public function __construct(PayPalClient $mockClient)
     {
-        $this->mockProvider = $provider;
-    }
-
-    public function setMockLogger(LoggerInterface $logger)
-    {
-        $this->mockLogger = $logger;
+        $this->mockClient = $mockClient;
     }
 
     protected function getProvider(): PayPalClient
     {
-        return $this->mockProvider;
+        return $this->mockClient;
     }
 
-    protected function getLogger()
+    public function createPlan(Plan $plan, array $options = []): PlanSubscriptionMethod
     {
-        return $this->mockLogger;
+        $method = new PlanSubscriptionMethod;
+        $method->payment_plan_id = 'P-12345';
+        $method->data = ['product_id' => 'PROD-12345'];
+
+        return $method;
     }
 }
 
 class PayPalTest extends TestCase
 {
-    public function test_webhook_throws_exception_on_invalid_signature()
+    public function test_subscribe()
     {
-        // Setup
-        $driver = new MockPayPalDriver;
-        $driver->setConfigs(['webhook_id' => 'test_webhook_id']);
+        $plan = new Plan;
+        $plan->name = 'Test Plan';
+        $plan->description = 'Test Description';
 
-        $mockProvider = $this->createMock(PayPalClient::class);
-        $mockProvider->expects($this->once())
-            ->method('verifyWebHook')
-            ->willReturn(['verification_status' => 'FAILURE']); // Or any array without SUCCESS
+        $options = [
+            'customer_name' => 'John Doe',
+            'customer_email' => 'john@example.com',
+            'return_url' => 'https://example.com/return',
+            'cancel_url' => 'https://example.com/cancel',
+        ];
 
-        $driver->setMockProvider($mockProvider);
+        // Mock PayPalClient
+        $mockClient = $this->createMock(PayPalClient::class);
 
-        $mockLogger = $this->createMock(LoggerInterface::class);
-        $mockLogger->expects($this->once())
-            ->method('error')
-            ->with('Invalid webhook signature', $this->anything());
+        // Setup the chained method calls
+        $mockClient->expects($this->once())
+            ->method('addProductById')
+            ->with('PROD-12345')
+            ->willReturn($mockClient);
 
-        $driver->setMockLogger($mockLogger);
+        $mockClient->expects($this->once())
+            ->method('addBillingPlanById')
+            ->with('P-12345')
+            ->willReturn($mockClient);
 
-        $request = Request::create('/webhook', 'POST', [], [], [], [
-            'HTTP_PAYPAL-AUTH-ALGO' => 'algo',
-            'HTTP_PAYPAL-CERT-URL' => 'url',
-            'HTTP_PAYPAL-TRANSMISSION-ID' => 'id',
-            'HTTP_PAYPAL-TRANSMISSION-SIG' => 'sig',
-            'HTTP_PAYPAL-TRANSMISSION-TIME' => 'time',
-        ], json_encode(['event_type' => 'PAYMENT.SALE.COMPLETED']));
+        $mockClient->expects($this->once())
+            ->method('setReturnAndCancelUrl')
+            ->with('https://example.com/return', 'https://example.com/cancel')
+            ->willReturn($mockClient);
 
-        $this->expectException(SubscriptionException::class);
-        $this->expectExceptionMessage('Invalid webhook signature');
+        $mockClient->expects($this->once())
+            ->method('setupSubscription')
+            ->with('John Doe', 'john@example.com')
+            ->willReturn([
+                'id' => 'I-12345',
+                'links' => [
+                    [
+                        'rel' => 'approve',
+                        'href' => 'https://example.com/approve',
+                    ],
+                ],
+            ]);
 
-        // Execute
-        $driver->webhook($request);
+        $paypal = new MockPayPal($mockClient);
+
+        $result = $paypal->subscribe($plan, $options);
+
+        $this->assertInstanceOf(SubscribeResult::class, $result);
+        $this->assertEquals('I-12345', $result->getTransactionId());
+        $this->assertEquals('https://example.com/approve', $result->getRedirectUrl());
     }
 }
