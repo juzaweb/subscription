@@ -24,11 +24,22 @@ class SubscriptionController extends ThemeController
 
         try {
             $billable = decrypt($token);
+
+            if (! is_array($billable)
+                || ! isset($billable['billable_id'], $billable['billable_type'])
+            ) {
+                throw new \Exception('Invalid bill token');
+            }
+
             $billableId = $billable['billable_id'];
             $billableType = $billable['billable_type'];
 
+            if (! class_exists($billableType)) {
+                throw new \Exception('Invalid bill token');
+            }
+
             $billable = $billableType::findOrFail($billableId);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->error(['message' => __('Invalid bill token')]);
         }
 
