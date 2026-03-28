@@ -10,7 +10,8 @@
         "orchestra/testbench": "^8.0|^9.0",
         "phpunit/phpunit": "^10.0",
         "juzaweb/core": "^5.0",
-        "laravel/pint": "^1.29"
+        "laravel/pint": "^1.29",
+        "srmklive/paypal": "^3.0"
     },
     "autoload": {
         "psr-4": {
