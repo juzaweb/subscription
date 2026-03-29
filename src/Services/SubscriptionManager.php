@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Juzaweb\Modules\Core\Application;
 use Juzaweb\Modules\Core\Models\Authenticatable;
-use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Subscription\Contracts\Subscriptable;
 use Juzaweb\Modules\Subscription\Contracts\Subscription;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
@@ -305,7 +304,7 @@ class SubscriptionManager implements Subscription
         $hasSandbox = $this->driver($driver)->hasSandbox();
 
         if (empty($fields)) {
-            throw new PaymentException("Subscription driver [$driver] has no configuration.");
+            throw new InvalidArgumentException("Subscription driver [$driver] has no configuration.");
         }
 
         return view(
