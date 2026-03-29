@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use InvalidArgumentException;
 use Juzaweb\Modules\Core\Application;
 use Juzaweb\Modules\Core\Models\Authenticatable;
+use Juzaweb\Modules\Payment\Exceptions\PaymentException;
 use Juzaweb\Modules\Subscription\Contracts\Subscriptable;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionModule;
@@ -115,11 +116,11 @@ class SubscriptionManagerTest extends TestCase
             return $driverMock;
         });
 
-        if (! class_exists(\Juzaweb\Modules\Payment\Exceptions\PaymentException::class)) {
+        if (! class_exists(PaymentException::class)) {
             $this->expectException(\Error::class);
             $this->expectExceptionMessage('Class "Juzaweb\Modules\Payment\Exceptions\PaymentException" not found');
         } else {
-            $this->expectException(\Juzaweb\Modules\Payment\Exceptions\PaymentException::class);
+            $this->expectException(PaymentException::class);
             $this->expectExceptionMessage('Subscription driver [test_driver] has no configuration.');
         }
 
