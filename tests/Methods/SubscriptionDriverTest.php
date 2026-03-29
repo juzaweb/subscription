@@ -3,7 +3,7 @@
 namespace Juzaweb\Modules\Subscription\Tests\Methods;
 
 use Juzaweb\Modules\Subscription\Methods\SubscriptionDriver;
-use PHPUnit\Framework\TestCase;
+use Juzaweb\Modules\Subscription\Tests\TestCase;
 
 class MockSubscriptionDriver extends SubscriptionDriver
 {

@@ -4,7 +4,7 @@ namespace Juzaweb\Modules\Subscription\Tests\Entities;
 
 use Juzaweb\Modules\Subscription\Entities\SubscriptionResult;
 use Juzaweb\Modules\Subscription\Models\SubscriptionHistory;
-use PHPUnit\Framework\TestCase;
+use Juzaweb\Modules\Subscription\Tests\TestCase;
 
 class MockSubscriptionResult extends SubscriptionResult {}
 

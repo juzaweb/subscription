@@ -6,7 +6,7 @@ use Juzaweb\Modules\Subscription\Entities\SubscribeResult;
 use Juzaweb\Modules\Subscription\Methods\PayPal;
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\PlanSubscriptionMethod;
-use PHPUnit\Framework\TestCase;
+use Juzaweb\Modules\Subscription\Tests\TestCase;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class MockPayPal extends PayPal

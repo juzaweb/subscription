@@ -2,7 +2,7 @@
 
 namespace Juzaweb\Modules\Subscription\Tests;
 
-use PHPUnit\Framework\TestCase;
+use Juzaweb\Modules\Subscription\Tests\TestCase;
 
 class SubscriptionSecurityTest extends TestCase
 {
