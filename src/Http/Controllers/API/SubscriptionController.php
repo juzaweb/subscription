@@ -41,7 +41,7 @@ class SubscriptionController extends APIController
             ->paginate($this->getLimitRequest());
 
         return response()->json(
-            SubscriptionResource::collection($subscriptions)->response()->getData(true)
+            Subscription::getResource()::collection($subscriptions)->response()->getData(true)
         );
     }
 }

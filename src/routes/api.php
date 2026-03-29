@@ -19,7 +19,7 @@ use Juzaweb\Modules\Subscription\Http\Controllers\API\SubscriptionMethodControll
 Route::get('subscription/methods', [SubscriptionMethodController::class, 'index']);
 Route::get('subscription/plans', [PlanController::class, 'index']);
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('subscription/subscriptions', [SubscriptionController::class, 'index']);
     Route::get('subscription/histories', [SubscriptionHistoryController::class, 'index']);
 });

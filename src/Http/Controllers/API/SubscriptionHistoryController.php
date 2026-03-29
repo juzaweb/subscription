@@ -41,7 +41,7 @@ class SubscriptionHistoryController extends APIController
             ->paginate($this->getLimitRequest());
 
         return response()->json(
-            SubscriptionHistoryResource::collection($histories)->response()->getData(true)
+            SubscriptionHistory::getResource()::collection($histories)->response()->getData(true)
         );
     }
 }

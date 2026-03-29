@@ -8,6 +8,7 @@ use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Core\Traits\Translatable;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod as SubscriptionMethodContract;
 use Juzaweb\Modules\Subscription\Facades\Subscription;
+use Juzaweb\Modules\Subscription\Http\Resources\SubscriptionMethodResource;
 
 class SubscriptionMethod extends Model
 {
@@ -35,6 +36,11 @@ class SubscriptionMethod extends Model
     protected $hidden = [
         'config',
     ];
+
+    public static function getResource(): string
+    {
+        return SubscriptionMethodResource::class;
+    }
 
     public function paymentDriver(): SubscriptionMethodContract
     {
