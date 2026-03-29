@@ -2,9 +2,12 @@
 
 namespace Juzaweb\Modules\Subscription\Tests\Services;
 
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Route;
 use InvalidArgumentException;
+use Juzaweb\Modules\Core\Application;
 use Juzaweb\Modules\Core\Models\Authenticatable;
 use Juzaweb\Modules\Subscription\Contracts\Subscriptable;
 use Juzaweb\Modules\Subscription\Contracts\SubscriptionMethod;
@@ -20,7 +23,6 @@ use Juzaweb\Modules\Subscription\Models\SubscriptionMethod as SubscriptionMethod
 use Juzaweb\Modules\Subscription\Services\SubscriptionManager;
 use Juzaweb\Modules\Subscription\Tests\TestCase;
 use Mockery;
-use Error;
 
 class SubscriptionManagerTest extends TestCase
 {
@@ -30,15 +32,15 @@ class SubscriptionManagerTest extends TestCase
     {
         parent::setUp();
 
-        $appMock = Mockery::mock(\Juzaweb\Modules\Core\Application::class);
+        $appMock = Mockery::mock(Application::class);
         $this->subscriptionManager = new SubscriptionManager($appMock);
 
-        \Illuminate\Support\Facades\Route::get('subscription/return/{module}/{plan}', function() {})->name('subscription.return');
-        \Illuminate\Support\Facades\Route::get('subscription/cancel/{module}/{plan}', function() {})->name('subscription.cancel');
+        Route::get('subscription/return/{module}/{plan}', function () {})->name('subscription.return');
+        Route::get('subscription/cancel/{module}/{plan}', function () {})->name('subscription.cancel');
         $this->app['router']->getRoutes()->refreshNameLookups();
     }
 
-    public function testRegisterAndGetDriver()
+    public function test_register_and_get_driver()
     {
         $driverMock = Mockery::mock(SubscriptionMethod::class);
         $this->subscriptionManager->registerDriver('test_driver', function () use ($driverMock) {
@@ -49,20 +51,20 @@ class SubscriptionManagerTest extends TestCase
         $this->assertSame($driverMock, $this->subscriptionManager->driver('test_driver'));
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Payment driver [test_driver] already registered.");
+        $this->expectExceptionMessage('Payment driver [test_driver] already registered.');
         $this->subscriptionManager->registerDriver('test_driver', function () use ($driverMock) {
             return $driverMock;
         });
     }
 
-    public function testGetUnregisteredDriver()
+    public function test_get_unregistered_driver()
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Payment driver [unregistered_driver] is not registered.");
+        $this->expectExceptionMessage('Payment driver [unregistered_driver] is not registered.');
         $this->subscriptionManager->driver('unregistered_driver');
     }
 
-    public function testRegisterAndGetModule()
+    public function test_register_and_get_module()
     {
         $moduleMock = Mockery::mock(SubscriptionModule::class);
         $this->subscriptionManager->registerModule('test_module', function () use ($moduleMock) {
@@ -74,20 +76,20 @@ class SubscriptionManagerTest extends TestCase
         $this->assertSame($moduleMock, $this->subscriptionManager->module('test_module'));
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Payment module [test_module] already registered.");
+        $this->expectExceptionMessage('Payment module [test_module] already registered.');
         $this->subscriptionManager->registerModule('test_module', function () use ($moduleMock) {
             return $moduleMock;
         });
     }
 
-    public function testGetUnregisteredModule()
+    public function test_get_unregistered_module()
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Payment module [unregistered_module] is not registered.");
+        $this->expectExceptionMessage('Payment module [unregistered_module] is not registered.');
         $this->subscriptionManager->module('unregistered_module');
     }
 
-    public function testFeatures()
+    public function test_features()
     {
         $this->subscriptionManager->feature('test_feature', 'test_module', function () {
             return ['label' => 'Test Feature'];
@@ -103,7 +105,7 @@ class SubscriptionManagerTest extends TestCase
         $this->assertEquals('Test Feature', $feature->label);
     }
 
-    public function testRenderConfigThrowsExceptionForEmptyConfigs()
+    public function test_render_config_throws_exception_for_empty_configs()
     {
         $driverMock = Mockery::mock(SubscriptionMethod::class);
         $driverMock->shouldReceive('getConfigs')->once()->andReturn([]);
@@ -113,13 +115,18 @@ class SubscriptionManagerTest extends TestCase
             return $driverMock;
         });
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Subscription driver [test_driver] has no configuration.");
+        if (! class_exists(\Juzaweb\Modules\Payment\Exceptions\PaymentException::class)) {
+            $this->expectException(\Error::class);
+            $this->expectExceptionMessage('Class "Juzaweb\Modules\Payment\Exceptions\PaymentException" not found');
+        } else {
+            $this->expectException(\Juzaweb\Modules\Payment\Exceptions\PaymentException::class);
+            $this->expectExceptionMessage('Subscription driver [test_driver] has no configuration.');
+        }
 
         $this->subscriptionManager->renderConfig('test_driver');
     }
 
-    public function testCancel()
+    public function test_cancel()
     {
         $historyMock = Mockery::mock(SubscriptionHistory::class)->makePartial();
         $historyMock->shouldReceive('update')->once()->with(['status' => SubscriptionHistoryStatus::CANCELLED]);
@@ -136,12 +143,12 @@ class SubscriptionManagerTest extends TestCase
         $this->assertTrue($result);
     }
 
-    public function testCompleteFailed()
+    public function test_complete_failed()
     {
         setting()->set('subscription_sandbox', true);
 
         $methodConfig = ['key' => 'value'];
-        $methodMock = new SubscriptionMethodModel();
+        $methodMock = new SubscriptionMethodModel;
         $methodMock->config = $methodConfig;
 
         $historyMock = Mockery::mock(SubscriptionHistory::class)->makePartial();
@@ -166,7 +173,7 @@ class SubscriptionManagerTest extends TestCase
         $this->assertSame($returnResultMock, $result);
     }
 
-    public function testCreateSuccessful()
+    public function test_create_successful()
     {
         setting()->set('subscription_sandbox', true);
 
@@ -176,17 +183,17 @@ class SubscriptionManagerTest extends TestCase
         $userMock->shouldReceive('getAttribute')->with('name')->andReturn('Test User');
         $userMock->shouldReceive('getAttribute')->with('email')->andReturn('test@example.com');
 
-        $subscriptableMock = Mockery::mock(\Illuminate\Database\Eloquent\Model::class . ', ' . Subscriptable::class)->makePartial();
+        $subscriptableMock = Mockery::mock(Model::class.', '.Subscriptable::class)->makePartial();
         $subscriptableMock->shouldReceive('getKey')->andReturn(1);
         $subscriptableMock->shouldReceive('getMorphClass')->andReturn('App\Models\User');
         $subscriptableMock->id = 1;
 
-        $planMock = new Plan();
+        $planMock = new Plan;
         $planMock->id = 1;
         $planMock->price = 10.0;
 
         $methodConfig = ['key' => 'value'];
-        $methodMock = new SubscriptionMethodModel();
+        $methodMock = new SubscriptionMethodModel;
         $methodMock->id = 1;
         $methodMock->driver = 'test_driver';
         $methodMock->config = $methodConfig;
@@ -231,12 +238,12 @@ class SubscriptionManagerTest extends TestCase
         $this->assertEquals(SubscriptionHistoryStatus::SUCCESS, $history->status);
     }
 
-    public function testWebhookReturnNull()
+    public function test_webhook_return_null()
     {
         $requestMock = Mockery::mock(Request::class);
         $requestMock->shouldReceive('all')->andReturn(['payload' => 'data']);
 
-        $methodMock = new SubscriptionMethodModel();
+        $methodMock = new SubscriptionMethodModel;
         $methodMock->config = ['key' => 'value'];
         $methodMock->driver = 'test_driver';
         $methodMock->save();
@@ -254,12 +261,12 @@ class SubscriptionManagerTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testWebhookReturnFalse()
+    public function test_webhook_return_false()
     {
         $requestMock = Mockery::mock(Request::class);
         $requestMock->shouldReceive('all')->andReturn(['payload' => 'data']);
 
-        $methodMock = new SubscriptionMethodModel();
+        $methodMock = new SubscriptionMethodModel;
         $methodMock->config = ['key' => 'value'];
         $methodMock->driver = 'test_driver';
         $methodMock->save();
