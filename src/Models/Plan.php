@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Juzaweb\Modules\Core\Models\Model;
 use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Subscription\Enums\DurationUnit;
+use Juzaweb\Modules\Subscription\Http\Resources\PlanResource;
 
 class Plan extends Model
 {
@@ -30,6 +31,11 @@ class Plan extends Model
         'duration' => 'integer',
         'duration_unit' => DurationUnit::class,
     ];
+
+    public static function getResource(): string
+    {
+        return PlanResource::class;
+    }
 
     public function subscriptionMethods(): HasMany
     {

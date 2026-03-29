@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Juzaweb\Modules\Core\Models\Model;
 use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Subscription\Enums\SubscriptionHistoryStatus;
+use Juzaweb\Modules\Subscription\Http\Resources\SubscriptionHistoryResource;
 
 class SubscriptionHistory extends Model
 {
@@ -35,6 +36,11 @@ class SubscriptionHistory extends Model
         'amount' => 'decimal:2',
         'status' => SubscriptionHistoryStatus::class,
     ];
+
+    public static function getResource(): string
+    {
+        return SubscriptionHistoryResource::class;
+    }
 
     public function plan()
     {

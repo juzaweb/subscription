@@ -14,9 +14,9 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->routes(function () {
-            // Route::middleware('api')
-            //     ->prefix('api/v1')
-            //     ->group(__DIR__ . '/../routes/api.php');
+            Route::middleware('api')
+                ->prefix('api/v1')
+                ->group(__DIR__.'/../routes/api.php');
 
             $adminPrefix = $this->app['config']->get('core.admin_prefix');
 

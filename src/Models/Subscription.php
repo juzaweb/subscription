@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Juzaweb\Modules\Core\Models\Model;
 use Juzaweb\Modules\Core\Traits\HasAPI;
 use Juzaweb\Modules\Subscription\Enums\SubscriptionStatus;
+use Juzaweb\Modules\Subscription\Http\Resources\SubscriptionResource;
 
 class Subscription extends Model
 {
@@ -36,6 +37,11 @@ class Subscription extends Model
         'end_date' => 'datetime',
         'status' => SubscriptionStatus::class,
     ];
+
+    public static function getResource(): string
+    {
+        return SubscriptionResource::class;
+    }
 
     public function plan(): BelongsTo
     {
