@@ -1,6 +1,6 @@
 <?php
 
-namespace Juzaweb\Modules\Subscription\Tests\Http\Controllers\API;
+namespace Juzaweb\Modules\Subscription\Tests\Feature\API;
 
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Tests\TestCase;

@@ -1,17 +1,16 @@
 <?php
 
-namespace Juzaweb\Modules\Subscription\Tests\Http\Controllers\API;
+namespace Juzaweb\Modules\Subscription\Tests\Feature\API;
 
 use Juzaweb\Modules\Core\Models\User;
 use Juzaweb\Modules\Subscription\Models\Plan;
 use Juzaweb\Modules\Subscription\Models\Subscription;
-use Juzaweb\Modules\Subscription\Models\SubscriptionHistory;
 use Juzaweb\Modules\Subscription\Models\SubscriptionMethod;
 use Juzaweb\Modules\Subscription\Tests\TestCase;
 
-class SubscriptionHistoryControllerTest extends TestCase
+class SubscriptionControllerTest extends TestCase
 {
-    public function test_index_returns_user_subscription_histories()
+    public function test_index_returns_user_subscriptions()
     {
         $user = User::factory()->create();
         $this->actingAs($user); // Remove 'api' guard
@@ -44,20 +43,7 @@ class SubscriptionHistoryControllerTest extends TestCase
             'driver' => 'paypal',
         ]);
 
-        $history = SubscriptionHistory::create([
-            'billable_id' => $user->id,
-            'billable_type' => get_class($user),
-            'plan_id' => $plan->id,
-            'method_id' => $method->id,
-            'subscription_id' => $subscription->id,
-            'status' => 'success',
-            'amount' => 10,
-            'agreement_id' => 'I-123456',
-            'module' => 'test',
-            'driver' => 'paypal',
-        ]);
-
-        $response = $this->getJson('/api/v1/subscription/histories');
+        $response = $this->getJson('/api/v1/subscription/subscriptions');
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
@@ -66,10 +52,10 @@ class SubscriptionHistoryControllerTest extends TestCase
             'data' => [
                 '*' => [
                     'id',
-                    'subscription_id',
                     'plan_id',
                     'method_id',
                     'amount',
+                    'start_date',
                     'end_date',
                     'status',
                     'plan',
@@ -80,6 +66,6 @@ class SubscriptionHistoryControllerTest extends TestCase
             'links',
         ]);
 
-        $this->assertEquals($history->id, $response->json('data.0.id'));
+        $this->assertEquals($subscription->id, $response->json('data.0.id'));
     }
 }
