@@ -34,8 +34,6 @@ class PlanController extends APIController
     {
         $plans = Plan::with(['features'])->where('active', true)->paginate($this->getLimitRequest());
 
-        return response()->json(
-            Plan::getResource()::collection($plans)->response()->getData(true)
-        );
+        return $this->restSuccess($plans);
     }
 }

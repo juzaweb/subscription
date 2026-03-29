@@ -34,8 +34,6 @@ class SubscriptionMethodController extends APIController
     {
         $methods = SubscriptionMethod::where('active', true)->paginate($this->getLimitRequest());
 
-        return response()->json(
-            SubscriptionMethod::getResource()::collection($methods)->response()->getData(true)
-        );
+        return $this->restSuccess($methods);
     }
 }

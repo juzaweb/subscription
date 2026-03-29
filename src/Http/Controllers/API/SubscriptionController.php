@@ -40,8 +40,6 @@ class SubscriptionController extends APIController
             ->where('billable_type', get_class($request->user()))
             ->paginate($this->getLimitRequest());
 
-        return response()->json(
-            Subscription::getResource()::collection($subscriptions)->response()->getData(true)
-        );
+        return $this->restSuccess($subscriptions);
     }
 }

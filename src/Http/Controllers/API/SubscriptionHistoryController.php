@@ -40,8 +40,6 @@ class SubscriptionHistoryController extends APIController
             ->where('billable_type', get_class($request->user()))
             ->paginate($this->getLimitRequest());
 
-        return response()->json(
-            SubscriptionHistory::getResource()::collection($histories)->response()->getData(true)
-        );
+        return $this->restSuccess($histories);
     }
 }
