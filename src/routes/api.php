@@ -22,4 +22,8 @@ Route::get('subscription/plans', [PlanController::class, 'index']);
 Route::middleware('auth')->group(function () {
     Route::get('subscription/subscriptions', [SubscriptionController::class, 'index']);
     Route::get('subscription/histories', [SubscriptionHistoryController::class, 'index']);
+
+    Route::post('subscription/{module}/subscribe', [SubscriptionController::class, 'subscribe']);
+    Route::get('subscription/{module}/return/{transactionId}', [SubscriptionController::class, 'return']);
+    Route::get('subscription/{module}/cancel/{transactionId}', [SubscriptionController::class, 'cancel']);
 });
