@@ -35,7 +35,7 @@ class SubscriptionServiceProvider extends ServiceProvider
     {
         $this->registerTranslations();
         $this->registerViews();
-        $this->loadMigrationsFrom(__DIR__.'/../Database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->app->register(RouteServiceProvider::class);
     }
 
