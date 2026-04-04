@@ -79,10 +79,6 @@ class PayPal extends SubscriptionDriver implements SubscriptionMethod
                     'setup_fee_failure_action' => 'CONTINUE',
                     'payment_failure_threshold' => 3,
                 ],
-                // 'taxes' => [
-                //     'percentage' => '10',
-                //     'inclusive' => false
-                // ]
             ]
         );
 
